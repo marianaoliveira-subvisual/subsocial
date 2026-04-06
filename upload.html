@@ -883,12 +883,10 @@ function mapXlsxRows(rows, platform) {
     meta.fields.forEach(function(f) {
       var aliases = METRIC_ALIASES[f.id] || [f.id];
       for (var i = 0; i < aliases.length; i++) {
-        var al = aliases[i].toLowerCase();
+        var al = aliases[i].toLowerCase().trim();
         var idx = -1;
         for (var j = 0; j < headerRow.length; j++) {
-          if (headerRow[j] === al || headerRow[j].indexOf(al) !== -1 || al.indexOf(headerRow[j]) !== -1) {
-            idx = j; break;
-          }
+          if (headerRow[j] === al) { idx = j; break; } // exact match only
         }
         if (idx !== -1 && dataRow[idx] !== null && dataRow[idx] !== undefined) {
           var v = String(dataRow[idx]).trim().replace(/,/g, '');
@@ -910,8 +908,8 @@ function mapXlsxRows(rows, platform) {
         if (result[f.id]) return;
         var aliases = METRIC_ALIASES[f.id] || [f.id];
         for (var i = 0; i < aliases.length; i++) {
-          var al = aliases[i].toLowerCase();
-          if (key.indexOf(al) !== -1 || al.indexOf(key) !== -1) {
+          var al = aliases[i].toLowerCase().trim();
+          if (key === al) { // exact match only
             var v = val;
             if (f.id === 'engrate' || f.id === 'ctr' || f.id === 'bounce') v = v.replace(/%/g, '');
             if (v) { result[f.id] = v; break; }
