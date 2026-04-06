@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>(function(){var t=localStorage.getItem('sb-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>(function(){var _u='https://bgdyahjipkxwosbbkkqd.supabase.co',_k='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnZHlhaGppcGt4d29zYmJra3FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODMyODEsImV4cCI6MjA5MDQ1OTI4MX0.rB6ePMZjZM5_g9Gq1pxIoNxaFXFKoAaIKfXxSWkigR4';window._sb=supabase.createClient(_u,_k);document.documentElement.style.visibility='hidden';window._sb.auth.getSession().then(function(r){var s=r.data.session;if(!s){window.location.replace('supabase-auth.html');}else{document.documentElement.style.visibility='';if(window._onAuthReady)window._onAuthReady(s);}});})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SubSocial · Analytics</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap');
+  :root{--blue:#045CFC;--indigo:#2421AB;--ink:#403F4C;--ink-light:#6B6A77;--ink-faint:#9E9DA8;--bg:#F4F4F8;--surface:#FFFFFF;--border:rgba(4,92,252,0.10);--border-md:rgba(4,92,252,0.18);--blue-tint:rgba(4,92,252,0.07);--green:#1B9A6A;--red:#D14040;--sidebar-w:220px;--radius:12px;--radius-sm:8px;}
+  [data-theme="dark"]{
+    --bg:#18181f;
+    --surface:#22212d;
+    --border:rgba(255,255,255,0.08);
+    --border-md:rgba(255,255,255,0.15);
+    --border-light:rgba(255,255,255,0.05);
+    --blue-tint:rgba(4,92,252,0.18);
+    --ink:#e0dff0;
+    --ink-light:#a8a7b8;
+    --ink-faint:#6b6a7c;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;overflow-x:hidden}
+  .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;padding:0 0 24px}
+  .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border);margin-bottom:8px}
+  .logo-mark{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .logo-symbol{width:32px;height:32px;background:var(--indigo);border-radius:8px;display:flex;align-items:center;justify-content:center}
+  .logo-text{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--indigo);letter-spacing:-0.2px}
+  .sidebar-section{padding:0 12px;margin-bottom:4px}
+  .sidebar-section-label{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);padding:8px 8px 6px}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius-sm);font-size:13px;font-weight:400;color:var(--ink-light);cursor:pointer;transition:background 0.15s,color 0.15s;text-decoration:none}
+  .nav-item:hover{background:var(--blue-tint);color:var(--blue)}
+  .nav-item.active{background:var(--blue-tint);color:var(--blue);font-weight:500}
+  .nav-icon{width:16px;height:16px;opacity:0.6;flex-shrink:0}
+  .nav-item.active .nav-icon{opacity:1}
+  .platform-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .sidebar-footer{margin-top:auto;padding:16px 20px 0;border-top:1px solid var(--border)}
+  .user-pill{display:flex;align-items:center;gap:10px}
+  .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:500;flex-shrink:0}
+  .user-name{font-size:13px;font-weight:500;color:var(--ink)}
+  .user-role{font-size:11px;color:var(--ink-faint)}
+  .role-badge{margin-left:auto;font-size:10px;font-weight:500;padding:2px 7px;border-radius:100px;background:rgba(4,92,252,0.1);color:var(--blue)}
+  .main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+  .page-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--indigo);letter-spacing:-0.3px}
+  .content{padding:28px;flex:1}
+  .btn-primary{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;text-decoration:none;transition:background 0.15s}
+  .btn-primary:hover{background:var(--indigo)}
+  .empty-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 40px;gap:16px;text-align:center}
+  .empty-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--indigo)}
+  .empty-sub{font-size:13px;color:var(--ink-faint);max-width:320px}
+  .loading-msg{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--ink-faint);font-size:13px}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .platform-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:22px}
+  .platform-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;position:relative;overflow:hidden;transition:border-color 0.15s,box-shadow 0.15s;text-decoration:none;display:block;animation:fadeUp 0.3s ease both}
+  .platform-card:hover{border-color:var(--border-md);box-shadow:0 2px 12px rgba(4,92,252,0.06)}
+  .platform-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--pc)}
+  .pc-label{font-size:10px;font-weight:500;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;margin-top:4px}
+  .pc-val{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--indigo);line-height:1;margin-bottom:4px}
+  .pc-sub{font-size:10px;color:var(--ink-faint)}
+  .pc-delta{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:500;padding:2px 6px;border-radius:100px;margin-top:6px}
+  .d-up{background:rgba(27,154,106,0.1);color:var(--green)}
+  .d-dn{background:rgba(209,64,64,0.1);color:var(--red)}
+  .d-flat{background:rgba(155,157,168,0.15);color:var(--ink-faint)}
+  .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;animation:fadeUp 0.4s ease both;animation-delay:0.2s}
+  .chart-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+  .chart-title{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:var(--indigo);margin-bottom:2px}
+  .chart-sub{font-size:11px;color:var(--ink-faint)}
+  .legend{display:flex;gap:10px;flex-wrap:wrap}
+  .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-light)}
+  .legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+</style>
+  
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a class="logo-mark" href="dashboard.html">
+      <div class="logo-symbol"><img src="symbol-white_8x.png" alt="SubSocial" style="width:22px;height:22px;object-fit:contain;display:block;"></div>
+      <span class="logo-text">SubSocial</span>
+    </a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Menu</div>
+    <a class="nav-item" href="dashboard.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>Overview</a>
+    <a class="nav-item active" href="analytics.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12 L5 8 L8 10 L11 5 L14 7"/><rect x="1" y="13" width="14" height="1" rx="0.5" fill="currentColor" stroke="none"/></svg>Analytics</a>
+    <a class="nav-item" href="reports.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 7h6M5 9.5h4"/></svg>Reports</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Organic</div>
+    <a class="nav-item" href="linkedin.html"><div class="platform-dot" style="background:#045CFC"></div>LinkedIn</a>
+    <a class="nav-item" href="twitter.html"><div class="platform-dot" style="background:#403F4C"></div>Twitter / X</a>
+    <a class="nav-item" href="bluesky.html"><div class="platform-dot" style="background:#9563FF"></div>Bluesky</a>
+    <a class="nav-item" href="youtube.html"><div class="platform-dot" style="background:#D14040"></div>YouTube</a>
+    <a class="nav-item" href="dribbble.html"><div class="platform-dot" style="background:#F3809C"></div>Dribbble</a>
+    <a class="nav-item" href="website.html"><div class="platform-dot" style="background:#1B9A6A"></div>Website</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Paid</div>
+    <a class="nav-item" href="linkedin-ads.html"><div class="platform-dot" style="background:#0A66C2"></div>LinkedIn Ads</a>
+    <a class="nav-item" href="twitter-ads.html"><div class="platform-dot" style="background:#1DA1F2"></div>Twitter Ads</a>
+    <a class="nav-item" href="google-ads.html"><div class="platform-dot" style="background:#FBBC04"></div>Google Ads</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Team</div>
+    <a class="nav-item" href="sharing.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2.5"/><circle cx="11" cy="5" r="2.5"/><path d="M1 13c0-2.5 2.5-4 5-4s5 1.5 5 4"/><path d="M11 9c1.5 0 4 .8 4 4" stroke-dasharray="2 1"/></svg>Members</a>
+    <a class="nav-item" href="settings.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.1 3.1l1.1 1.1M11.8 11.8l1.1 1.1M3.1 12.9l1.1-1.1M11.8 4.2l1.1-1.1"/></svg>Settings</a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar">M</div>
+      <div><div class="user-name">Mariana</div><div class="user-role">Social Media Manager</div></div>
+      <span class="role-badge">Admin</span>
+    </div>
+    <button onclick="window._sb.auth.signOut().then(function(){location.replace('supabase-auth.html')})" style="margin-top:10px;background:none;border:none;font-family:inherit;font-size:11px;color:var(--ink-faint);cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 6H1M4 3l-3 3 3 3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 1h5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5" stroke-linecap="round"/></svg>Sign out</button>
+  </div>
+</aside>
+<div class="main">
+  <header class="topbar">
+    <span class="page-title">Cross-platform Analytics</span>
+  </header>
+  <div class="content" id="main-content">
+    <div class="loading-msg">Loading platform data…</div>
+  </div>
+</div>
+<script>
+const PLATFORMS=[
+  {slug:'linkedin', label:'LinkedIn',   color:'#045CFC', reach:'impressions', rl:'Impressions', page:'linkedin.html'},
+  {slug:'twitter',  label:'Twitter / X',color:'#403F4C', reach:'impressions', rl:'Impressions', page:'twitter.html'},
+  {slug:'bluesky',  label:'Bluesky',    color:'#9563FF', reach:'impressions', rl:'Impressions', page:'bluesky.html'},
+  {slug:'youtube',  label:'YouTube',    color:'#D14040', reach:'views',       rl:'Views',       page:'youtube.html'},
+  {slug:'dribbble', label:'Dribbble',   color:'#F3809C', reach:'views',       rl:'Views',       page:'dribbble.html'},
+  {slug:'website',  label:'Website',    color:'#1B9A6A', reach:'sessions',    rl:'Sessions',    page:'website.html'},
+];
+function fmt(n){if(!n||isNaN(n))return'—';n=+n;if(n>=1e6)return(n/1e6).toFixed(1).replace(/\.0$/,'')+'M';if(n>=1e3)return(n/1e3).toFixed(1).replace(/\.0$/,'')+'K';return String(Math.round(n));}
+function fmtMon(d){return new Date(d).toLocaleDateString('en-GB',{month:'short',year:'2-digit'});}
+
+window._onAuthReady=async function(){
+  try{
+    const {data:dbP}=await window._sb.from('platforms').select('*');
+    if(!dbP){showEmpty();return;}
+    const idBySlug={};dbP.forEach(p=>idBySlug[p.slug]=p.id);
+    const results=await Promise.all(PLATFORMS.map(async p=>{
+      const pid=idBySlug[p.slug];
+      if(!pid)return{...p,reports:[]};
+      const {data:rs}=await window._sb.from('reports').select('id,period_start,period_end').eq('platform_id',pid).order('period_end',{ascending:false}).limit(5);
+      if(!rs||!rs.length)return{...p,reports:[]};
+      const {data:ms}=await window._sb.from('metrics').select('*').in('report_id',rs.map(r=>r.id));
+      const mByR={};(ms||[]).forEach(m=>{if(!mByR[m.report_id])mByR[m.report_id]={};mByR[m.report_id][m.key]=parseFloat(m.value)||0;});
+      return{...p,reports:rs.map(r=>({...r,m:mByR[r.id]||{}}))};
+    }));
+    if(!results.some(r=>r.reports.length))return showEmpty();
+    render(results);
+  }catch(e){console.error(e);showEmpty();}
+};
+
+function showEmpty(){
+  document.getElementById('main-content').innerHTML='<div class="empty-wrap"><div class="empty-title">No reports yet</div><div class="empty-sub">Upload your first analytics report to see cross-platform comparisons here.</div><a class="btn-primary" href="upload.html">Upload a report →</a></div>';
+}
+
+function render(results){
+  const cards=results.map((p,i)=>{
+    const l=p.reports[0],pv=p.reports[1];
+    const v=l?l.m[p.reach]||0:0,pval=pv?pv.m[p.reach]||0:0;
+    let dh='';
+    if(l&&pv&&pval>0){const pct=((v-pval)/pval*100).toFixed(1);const up=v>=pval;dh=`<div class="pc-delta ${up?'d-up':'d-dn'}">${up?'↑':'↓'} ${Math.abs(pct)}%</div>`;}
+    else if(l){dh='<div class="pc-delta d-flat">First period</div>';}
+    return `<a class="platform-card" href="${p.page}" style="--pc:${p.color};animation-delay:${i*0.05}s"><div class="pc-label">${p.label}</div><div class="pc-val">${l?fmt(v):'—'}</div><div class="pc-sub">${p.rl}</div>${dh}</a>`;
+  }).join('');
+
+  document.getElementById('main-content').innerHTML=`
+    <div class="platform-grid">${cards}</div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-hd"><div><div class="chart-title">Reach by platform</div><div class="chart-sub">Most recent report per platform</div></div></div>
+        <div style="position:relative;height:220px"><canvas id="bar-chart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-hd"><div><div class="chart-title">Trend over time</div><div class="chart-sub">Primary reach metric · last 5 periods</div></div><div class="legend" id="leg"></div></div>
+        <div style="position:relative;height:220px"><canvas id="line-chart"></canvas></div>
+      </div>
+    </div>`;
+
+  // Bar chart
+  new Chart(document.getElementById('bar-chart'),{type:'bar',data:{
+    labels:results.map(p=>p.label),
+    datasets:[{data:results.map(p=>p.reports[0]?p.reports[0].m[p.reach]||0:0),backgroundColor:results.map(p=>p.color+'BB'),borderColor:results.map(p=>p.color),borderWidth:1,borderRadius:5}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},scales:{y:{beginAtZero:true,ticks:{font:{size:11},callback:v=>fmt(v)},grid:{color:'rgba(4,92,252,0.06)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}});
+
+  // Line chart - collect all period labels
+  const allDates=[];
+  results.forEach(p=>p.reports.forEach(r=>{const l=fmtMon(r.period_end);if(!allDates.includes(l))allDates.push(l);}));
+  allDates.sort((a,b)=>{const p=s=>{const[mo,yr]=s.split(' ');return new Date(mo+' 20'+yr);};return p(a)-p(b);});
+  const datasets=results.filter(p=>p.reports.length).map(p=>{
+    const m={};p.reports.forEach(r=>m[fmtMon(r.period_end)]=r.m[p.reach]||null);
+    return{label:p.label,data:allDates.map(d=>m[d]??null),borderColor:p.color,backgroundColor:p.color+'22',tension:0.35,pointRadius:4,spanGaps:true};
+  });
+  document.getElementById('leg').innerHTML=datasets.map(d=>`<span class="legend-item"><span class="legend-dot" style="background:${d.borderColor}"></span>${d.label}</span>`).join('');
+  new Chart(document.getElementById('line-chart'),{type:'line',data:{labels:allDates.length?allDates:['—'],datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw)}`}}},scales:{y:{beginAtZero:true,ticks:{font:{size:11},callback:v=>fmt(v)},grid:{color:'rgba(4,92,252,0.06)'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}});
+}
+</script>
+</body>
+</html>

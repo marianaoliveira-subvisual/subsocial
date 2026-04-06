@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>(function(){var t=localStorage.getItem('sb-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>(function(){
+  var _url='https://bgdyahjipkxwosbbkkqd.supabase.co';
+  var _key='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnZHlhaGppcGt4d29zYmJra3FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODMyODEsImV4cCI6MjA5MDQ1OTI4MX0.rB6ePMZjZM5_g9Gq1pxIoNxaFXFKoAaIKfXxSWkigR4';
+  window._sb=supabase.createClient(_url,_key);
+  document.documentElement.style.visibility='hidden';
+  window._sb.auth.getSession().then(function(r){
+    var session=r.data.session;
+    if(!session){window.location.replace('supabase-auth.html');}
+    else{document.documentElement.style.visibility='';if(window._onAuthReady)window._onAuthReady(session);}
+  });
+})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subvisual · Social Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  /* ── Fonts ── */
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap');
+
+  /* ── Tokens ── */
+  :root {
+    --blue:      #045CFC;
+    --indigo:    #2421AB;
+    --violet:    #9563FF;
+    --pink:      #F3809C;
+    --ink:       #403F4C;
+    --ink-light: #6B6A77;
+    --ink-faint: #9E9DA8;
+    --bg:        #F4F4F8;
+    --surface:   #FFFFFF;
+    --border:    rgba(4,92,252,0.10);
+    --border-md: rgba(4,92,252,0.18);
+    --border-light: rgba(4,92,252,0.07);
+    --blue-tint: rgba(4,92,252,0.07);
+    --green:     #1B9A6A;
+    --red:       #D14040;
+    --sidebar-w: 220px;
+    --radius:    12px;
+    --radius-sm: 8px;
+  }
+  [data-theme="dark"]{
+    --bg:#18181f;
+    --surface:#22212d;
+    --border:rgba(255,255,255,0.08);
+    --border-md:rgba(255,255,255,0.15);
+    --border-light:rgba(255,255,255,0.05);
+    --blue-tint:rgba(4,92,252,0.18);
+    --ink:#e0dff0;
+    --ink-light:#a8a7b8;
+    --ink-faint:#6b6a7c;
+  }
+
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 100;
+    padding: 0 0 24px;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+
+  .logo-mark {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .logo-symbol {
+    width: 32px;
+    height: 32px;
+    background: var(--indigo);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -1px;
+  }
+
+  .logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--indigo);
+    letter-spacing: -0.2px;
+  }
+
+  .sidebar-section {
+    padding: 0 12px;
+    margin-bottom: 4px;
+  }
+
+  .sidebar-section-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 8px 8px 6px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-light);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    text-decoration: none;
+  }
+
+  .nav-item:hover { background: var(--blue-tint); color: var(--blue); }
+
+  .nav-item.active {
+    background: var(--blue-tint);
+    color: var(--blue);
+    font-weight: 500;
+  }
+
+  .nav-item .nav-icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.6;
+    flex-shrink: 0;
+  }
+
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  .platform-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px 20px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .user-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--indigo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .user-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .user-role { font-size: 11px; color: var(--ink-faint); }
+
+  .role-badge {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 100px;
+    background: rgba(4,92,252,0.1);
+    color: var(--blue);
+  }
+
+  /* ── Main ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Topbar ── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--indigo);
+    letter-spacing: -0.3px;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tab-group {
+    display: flex;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+    gap: 2px;
+  }
+
+  .tab-btn {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--ink-light);
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .tab-btn.active {
+    background: var(--surface);
+    color: var(--blue);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .date-picker {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-md);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    background: var(--surface);
+    transition: border-color 0.15s;
+  }
+
+  .date-picker:hover { border-color: var(--blue); }
+
+  .date-input { padding: 5px 10px; border: 1px solid var(--border-md); border-radius: var(--radius-sm); font-size: 12px; font-family: inherit; color: var(--ink); background: var(--surface); cursor: pointer; height: 32px; }
+  .date-input:focus { outline: none; border-color: var(--blue); }
+
+  .btn-primary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, transform 0.1s;
+  }
+
+  .btn-primary:hover { background: var(--indigo); }
+  .btn-primary:active { transform: scale(0.98); }
+
+  /* ── Customize button ── */
+  .btn-outline {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border-md);
+    background: transparent;
+    color: var(--ink-light);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+  .btn-outline.active { border-color: var(--blue); color: var(--blue); background: var(--blue-tint); }
+
+  /* ── Content ── */
+  .content {
+    padding: 28px;
+    flex: 1;
+  }
+
+  /* ── Widget stack ── */
+  #widget-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .widget-row { transition: opacity .2s; }
+  .widget-row.drag-over {
+    outline: 2px dashed var(--blue);
+    outline-offset: 4px;
+    border-radius: var(--radius);
+  }
+
+  /* Hidden widget */
+  [data-widget].widget-hidden { display: none !important; }
+
+  /* ── Stats grid ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    cursor: default;
+  }
+
+  .stat-card:hover {
+    border-color: var(--border-md);
+    box-shadow: 0 2px 12px rgba(4,92,252,0.06);
+  }
+
+  .stat-card.featured {
+    background: var(--indigo);
+    border-color: var(--indigo);
+  }
+
+  .stat-card.featured:hover {
+    box-shadow: 0 4px 20px rgba(36,33,171,0.25);
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--blue);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .stat-card:hover::before { opacity: 1; }
+  .stat-card.featured::before { background: var(--violet); opacity: 0.6; }
+
+  .stat-platform {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--violet);
+    margin-bottom: 6px;
+  }
+
+  .stat-card.featured .stat-platform { color: rgba(255,255,255,0.55); }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+  }
+
+  .stat-card.featured .stat-label { color: rgba(255,255,255,0.5); }
+
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--indigo);
+    line-height: 1;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .stat-card.featured .stat-value { color: #fff; }
+
+  .stat-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 100px;
+  }
+
+  .delta-up { background: rgba(27,154,106,0.1); color: var(--green); }
+  .delta-down { background: rgba(209,64,64,0.1); color: var(--red); }
+  .delta-up-white { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); }
+
+  /* ── Charts row ── */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+  }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+  }
+
+  .chart-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .chart-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--indigo);
+    margin-bottom: 2px;
+    letter-spacing: -0.2px;
+  }
+
+  .chart-subtitle {
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+
+  .chart-legend {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--ink-light);
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .chart-wrap { position: relative; height: 200px; }
+
+  /* ── Donut card ── */
+  .donut-wrap {
+    position: relative;
+    height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .donut-center {
+    position: absolute;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .donut-total {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--indigo);
+    line-height: 1;
+  }
+
+  .donut-label {
+    font-size: 10px;
+    color: var(--ink-faint);
+    margin-top: 3px;
+  }
+
+  .platform-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .breakdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .breakdown-name { flex: 1; color: var(--ink-light); }
+
+  .breakdown-bar-bg {
+    flex: 2;
+    height: 4px;
+    background: var(--bg);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .breakdown-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s cubic-bezier(0.25,1,0.5,1);
+  }
+
+  .breakdown-pct {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink);
+    min-width: 32px;
+    text-align: right;
+  }
+
+  /* ── Bottom row ── */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* ── Recent reports table ── */
+  .reports-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    grid-column: span 2;
+  }
+
+  /* When reports-card is hidden, let right col span full width */
+  .reports-card.widget-hidden ~ #bottom-right-col {
+    grid-column: 1 / -1;
+  }
+
+  .reports-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+    font-size: 12px;
+  }
+
+  .reports-table th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .reports-table td {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink);
+    vertical-align: middle;
+  }
+
+  .reports-table tr:last-child td { border-bottom: none; }
+  .reports-table tr:hover td { background: var(--blue-tint); }
+
+  .platform-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .chip-linkedin { background: rgba(4,92,252,0.08); color: var(--blue); }
+  .chip-twitter  { background: rgba(64,63,76,0.08); color: var(--ink); }
+  .chip-bluesky  { background: rgba(149,99,255,0.08); color: var(--violet); }
+  .chip-youtube  { background: rgba(209,64,64,0.08); color: var(--red); }
+  .chip-dribbble { background: rgba(243,128,156,0.12); color: #c04070; }
+  .chip-website  { background: rgba(27,154,106,0.08); color: var(--green); }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* ── Upload card ── */
+  .upload-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .upload-zone {
+    margin-top: 14px;
+    flex: 1;
+    border: 1.5px dashed var(--border-md);
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: center;
+    background: var(--bg);
+  }
+
+  .upload-zone:hover {
+    border-color: var(--blue);
+    background: rgba(4,92,252,0.03);
+  }
+
+  .upload-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(4,92,252,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .upload-text { font-size: 12px; color: var(--ink-light); }
+  .upload-link { color: var(--blue); text-decoration: underline; cursor: pointer; }
+  .upload-hint { font-size: 10px; color: var(--ink-faint); }
+
+  .manual-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--blue);
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  /* ── Sparkline ── */
+  .sparkline-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .sparkline-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    border: 1px solid transparent;
+    transition: border-color 0.15s;
+    cursor: pointer;
+  }
+
+  .sparkline-row:hover { border-color: var(--border-md); }
+
+  .sparkline-info { flex: 1; min-width: 0; }
+  .sparkline-name { font-size: 12px; font-weight: 500; color: var(--ink); }
+  .sparkline-metric { font-size: 11px; color: var(--ink-faint); }
+
+  .sparkline-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--indigo);
+    min-width: 48px;
+    text-align: right;
+  }
+
+  .mini-chart { width: 60px; height: 28px; }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .stat-card { animation: fadeUp 0.4s ease both; }
+  .stat-card:nth-child(1) { animation-delay: 0.05s; }
+  .stat-card:nth-child(2) { animation-delay: 0.10s; }
+  .stat-card:nth-child(3) { animation-delay: 0.15s; }
+  .stat-card:nth-child(4) { animation-delay: 0.20s; }
+
+  .chart-card, .reports-card, .upload-card {
+    animation: fadeUp 0.45s ease both;
+    animation-delay: 0.25s;
+  }
+
+  /* ── Customize panel ── */
+  .customize-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(64,63,76,.25);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s;
+  }
+  .customize-overlay.open { opacity: 1; pointer-events: all; }
+
+  .customize-panel {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 280px;
+    background: var(--surface);
+    border-left: 1px solid var(--border-md);
+    z-index: 201;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform .25s ease;
+    box-shadow: -8px 0 32px rgba(36,33,171,.08);
+  }
+  .customize-panel.open { transform: translateX(0); }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border-light);
+    flex-shrink: 0;
+  }
+  .panel-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    color: var(--indigo);
+  }
+  .panel-close {
+    background: none;
+    border: none;
+    font-size: 16px;
+    line-height: 1;
+    color: var(--ink-faint);
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: color .15s, background .15s;
+  }
+  .panel-close:hover { color: var(--ink); background: var(--bg); }
+
+  .panel-body { flex: 1; overflow-y: auto; padding: 8px 0; }
+
+  .panel-section {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border-light);
+    cursor: grab;
+    user-select: none;
+    transition: background .1s;
+  }
+  .panel-section:active { cursor: grabbing; }
+  .panel-section.dragging { opacity: 0.45; }
+  .panel-section.drag-over { background: rgba(4,92,252,.04); }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .drag-handle {
+    color: var(--ink-faint);
+    font-size: 14px;
+    letter-spacing: -1px;
+    flex-shrink: 0;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  .section-items {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-left: 22px;
+  }
+  .widget-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink);
+    cursor: pointer;
+    padding: 5px 0;
+    border-radius: 4px;
+    transition: color .12s;
+  }
+  .widget-toggle:hover { color: var(--blue); }
+  .widget-toggle input[type=checkbox] {
+    accent-color: var(--blue);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .panel-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border-light);
+    flex-shrink: 0;
+  }
+  .btn-ghost {
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    transition: color .15s;
+  }
+  .btn-ghost:hover { color: var(--ink-light); }
+</style>
+  
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a class="logo-mark" href="dashboard.html">
+      <div class="logo-symbol"><img src="symbol-white_8x.png" alt="Subvisual" style="width:22px;height:22px;object-fit:contain;display:block;"></div>
+      <span class="logo-text">SubSocial</span>
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Menu</div>
+    <a class="nav-item active" href="dashboard.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="1" y="1" width="6" height="6" rx="1.5"/>
+        <rect x="9" y="1" width="6" height="6" rx="1.5"/>
+        <rect x="1" y="9" width="6" height="6" rx="1.5"/>
+        <rect x="9" y="9" width="6" height="6" rx="1.5"/>
+      </svg>
+      Overview
+    </a>
+    <a class="nav-item" href="analytics.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M2 12 L5 8 L8 10 L11 5 L14 7"/>
+        <rect x="1" y="13" width="14" height="1" rx="0.5" fill="currentColor" stroke="none"/>
+      </svg>
+      Analytics
+    </a>
+    <a class="nav-item" href="reports.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="2" y="3" width="12" height="10" rx="1.5"/>
+        <path d="M5 7h6M5 9.5h4"/>
+      </svg>
+      Reports
+    </a>
+  </div>
+
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Organic</div>
+    <a class="nav-item" href="linkedin.html">
+      <div class="platform-dot" style="background:#045CFC"></div>
+      LinkedIn
+    </a>
+    <a class="nav-item" href="twitter.html">
+      <div class="platform-dot" style="background:#403F4C"></div>
+      Twitter / X
+    </a>
+    <a class="nav-item" href="bluesky.html">
+      <div class="platform-dot" style="background:#9563FF"></div>
+      Bluesky
+    </a>
+    <a class="nav-item" href="youtube.html">
+      <div class="platform-dot" style="background:#D14040"></div>
+      YouTube
+    </a>
+    <a class="nav-item" href="dribbble.html">
+      <div class="platform-dot" style="background:#F3809C"></div>
+      Dribbble
+    </a>
+    <a class="nav-item" href="website.html">
+      <div class="platform-dot" style="background:#1B9A6A"></div>
+      Website
+    </a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Paid</div>
+    <a class="nav-item" href="linkedin-ads.html"><div class="platform-dot" style="background:#0A66C2"></div>LinkedIn Ads</a>
+    <a class="nav-item" href="twitter-ads.html"><div class="platform-dot" style="background:#1DA1F2"></div>Twitter Ads</a>
+    <a class="nav-item" href="google-ads.html"><div class="platform-dot" style="background:#FBBC04"></div>Google Ads</a>
+  </div>
+
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Team</div>
+    <a class="nav-item" href="sharing.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="6" cy="5" r="2.5"/>
+        <circle cx="11" cy="5" r="2.5"/>
+        <path d="M1 13c0-2.5 2.5-4 5-4s5 1.5 5 4"/>
+        <path d="M11 9c1.5 0 4 .8 4 4" stroke-dasharray="2 1"/>
+      </svg>
+      Members
+    </a>
+    <a class="nav-item" href="settings.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="8" cy="8" r="6"/>
+        <path d="M8 5v2.5l1.5 1.5" stroke-linecap="round"/>
+      </svg>
+      Settings
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar">M</div>
+      <div>
+        <div class="user-name">Mariana</div>
+        <div class="user-role">Social Media Manager</div>
+      </div>
+      <span class="role-badge">Admin</span>
+    </div>
+    <button onclick="window._sb.auth.signOut().then(function(){location.replace('supabase-auth.html')})" style="margin-top:10px;background:none;border:none;font-family:inherit;font-size:11px;color:var(--ink-faint);cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 6H1M4 3l-3 3 3 3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 1h5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5" stroke-linecap="round"/></svg>Sign out</button>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<div class="main">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="page-title">Dashboard Overview</span>
+    </div>
+    <div class="topbar-right">
+      <div class="tab-group">
+        <button class="tab-btn" data-range="7">7D</button>
+        <button class="tab-btn active" data-range="30">30D</button>
+        <button class="tab-btn" data-range="90">90D</button>
+      </div>
+      <div id="date-display" class="date-picker">
+        <span id="date-label">—</span>
+      </div>
+      <div id="custom-inputs" style="display:flex;align-items:center;gap:6px">
+        <input type="date" id="custom-from" class="date-input">
+        <span style="color:var(--ink-faint);font-size:12px">–</span>
+        <input type="date" id="custom-to" class="date-input">
+      </div>
+      <button class="btn-primary" onclick="window.location.href='upload.html'">
+        Upload report
+      </button>
+      <button class="btn-outline" id="customize-btn" onclick="openCustomizePanel()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M1 3h10M1 6h10M1 9h10" stroke-linecap="round"/>
+          <circle cx="4" cy="3" r="1.2" fill="currentColor" stroke="none"/>
+          <circle cx="8" cy="6" r="1.2" fill="currentColor" stroke="none"/>
+          <circle cx="5" cy="9" r="1.2" fill="currentColor" stroke="none"/>
+        </svg>
+        Customize
+      </button>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Widget stack (draggable rows) -->
+    <div id="widget-stack">
+
+      <!-- Row: Stats -->
+      <div class="widget-row" data-row="stats">
+        <div class="stats-grid">
+          <div class="stat-card featured" data-widget="stat-impressions">
+            <div class="stat-platform">All channels</div>
+            <div class="stat-label">Total impressions</div>
+            <div class="stat-value">—</div>
+            <span class="stat-delta"></span>
+          </div>
+          <div class="stat-card" data-widget="stat-engrate">
+            <div class="stat-platform">Engagement</div>
+            <div class="stat-label">Avg. engagement rate</div>
+            <div class="stat-value">—</div>
+            <span class="stat-delta"></span>
+          </div>
+          <div class="stat-card" data-widget="stat-followers">
+            <div class="stat-platform">Audience</div>
+            <div class="stat-label">Total followers</div>
+            <div class="stat-value">—</div>
+            <span class="stat-delta"></span>
+          </div>
+          <div class="stat-card" data-widget="stat-clicks">
+            <div class="stat-platform">Website</div>
+            <div class="stat-label">Clicks from social</div>
+            <div class="stat-value">—</div>
+            <span class="stat-delta"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row: Charts -->
+      <div class="widget-row" data-row="charts">
+        <div class="charts-row" id="charts-row-grid">
+
+          <!-- Engagement line chart -->
+          <div class="chart-card" data-widget="engagement-chart">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Engagement over time</div>
+                <div class="chart-subtitle">Interactions across all channels · last 30 days</div>
+              </div>
+              <div class="chart-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:#045CFC"></div>LinkedIn</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#9563FF"></div>Bluesky</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#F3809C"></div>Dribbble</div>
+              </div>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="engagementChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Donut — channel split -->
+          <div class="chart-card" data-widget="channel-breakdown">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Channel split</div>
+                <div class="chart-subtitle">Share of total impressions</div>
+              </div>
+            </div>
+            <div class="donut-wrap">
+              <canvas id="donutChart" style="max-width:160px;max-height:160px;"></canvas>
+              <div class="donut-center">
+                <div class="donut-total">—</div>
+                <div class="donut-label">impressions</div>
+              </div>
+            </div>
+            <div class="platform-breakdown">
+              <div class="breakdown-item">
+                <span class="platform-dot" style="background:#045CFC"></span>
+                <span class="breakdown-name">LinkedIn</span>
+                <div class="breakdown-bar-bg"><div class="breakdown-bar" style="width:38%;background:#045CFC"></div></div>
+                <span class="breakdown-pct">38%</span>
+              </div>
+              <div class="breakdown-item">
+                <span class="platform-dot" style="background:#D14040"></span>
+                <span class="breakdown-name">YouTube</span>
+                <div class="breakdown-bar-bg"><div class="breakdown-bar" style="width:27%;background:#D14040"></div></div>
+                <span class="breakdown-pct">27%</span>
+              </div>
+              <div class="breakdown-item">
+                <span class="platform-dot" style="background:#403F4C"></span>
+                <span class="breakdown-name">Twitter / X</span>
+                <div class="breakdown-bar-bg"><div class="breakdown-bar" style="width:18%;background:#403F4C"></div></div>
+                <span class="breakdown-pct">18%</span>
+              </div>
+              <div class="breakdown-item">
+                <span class="platform-dot" style="background:#9563FF"></span>
+                <span class="breakdown-name">Bluesky</span>
+                <div class="breakdown-bar-bg"><div class="breakdown-bar" style="width:10%;background:#9563FF"></div></div>
+                <span class="breakdown-pct">10%</span>
+              </div>
+              <div class="breakdown-item">
+                <span class="platform-dot" style="background:#F3809C"></span>
+                <span class="breakdown-name">Dribbble</span>
+                <div class="breakdown-bar-bg"><div class="breakdown-bar" style="width:7%;background:#F3809C"></div></div>
+                <span class="breakdown-pct">7%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row: Bottom -->
+      <div class="widget-row" data-row="bottom">
+        <div class="bottom-row" id="bottom-row-grid">
+
+          <!-- Recent reports -->
+          <div class="reports-card" data-widget="recent-reports">
+            <div class="chart-header" style="margin-bottom:0">
+              <div>
+                <div class="chart-title">Recent reports</div>
+                <div class="chart-subtitle">Latest uploaded data</div>
+              </div>
+              <a href="reports.html" class="btn-primary" style="font-size:11px;padding:6px 12px;text-decoration:none">View all</a>
+            </div>
+            <table class="reports-table">
+              <thead>
+                <tr>
+                  <th>Channel</th>
+                  <th>Period</th>
+                  <th>Impressions</th>
+                  <th>Eng. rate</th>
+                  <th>Uploaded</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Upload + top movers (right column) -->
+          <div id="bottom-right-col" style="display:flex;flex-direction:column;gap:16px;">
+
+            <!-- Upload -->
+            <div class="upload-card" data-widget="upload-card">
+              <div class="chart-title">Add report</div>
+              <div class="upload-zone" onclick="window.location.href='upload.html'">
+                <div class="upload-icon">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#045CFC" stroke-width="1.5">
+                    <path d="M8 11V4M5 7l3-3 3 3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 13h12" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div class="upload-text"><span class="upload-link">Browse file</span> or drag & drop</div>
+                <div class="upload-hint">CSV · JSON · XLSX from any platform</div>
+              </div>
+              <a class="manual-link" href="upload.html">
+                + Enter data manually
+              </a>
+            </div>
+
+            <!-- Top movers sparklines -->
+            <div class="chart-card" style="padding:16px 18px" data-widget="top-movers">
+              <div class="chart-title" style="margin-bottom:2px">Top movers</div>
+              <div class="chart-subtitle">Biggest changes this period</div>
+              <div class="sparkline-grid">
+                <div class="sparkline-row">
+                  <span class="platform-chip chip-youtube" style="font-size:10px;padding:2px 7px">YT</span>
+                  <div class="sparkline-info">
+                    <div class="sparkline-name">Watch time</div>
+                    <div class="sparkline-metric">YouTube · hours</div>
+                  </div>
+                  <canvas class="mini-chart" id="spark1"></canvas>
+                  <div class="sparkline-value" style="color:var(--green);font-size:13px">+41%</div>
+                </div>
+                <div class="sparkline-row">
+                  <span class="platform-chip chip-linkedin" style="font-size:10px;padding:2px 7px">LI</span>
+                  <div class="sparkline-info">
+                    <div class="sparkline-name">Post reach</div>
+                    <div class="sparkline-metric">LinkedIn</div>
+                  </div>
+                  <canvas class="mini-chart" id="spark2"></canvas>
+                  <div class="sparkline-value" style="color:var(--green);font-size:13px">+22%</div>
+                </div>
+                <div class="sparkline-row">
+                  <span class="platform-chip chip-twitter" style="font-size:10px;padding:2px 7px">X</span>
+                  <div class="sparkline-info">
+                    <div class="sparkline-name">Link clicks</div>
+                    <div class="sparkline-metric">Twitter / X</div>
+                  </div>
+                  <canvas class="mini-chart" id="spark3"></canvas>
+                  <div class="sparkline-value" style="color:var(--red);font-size:13px">−8%</div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- end bottom-right-col -->
+        </div><!-- end bottom-row-grid -->
+      </div><!-- end widget-row[bottom] -->
+
+    </div><!-- end widget-stack -->
+
+  </div><!-- end content -->
+</div><!-- end main -->
+
+<!-- ── Customize panel overlay ── -->
+<div id="customize-overlay" class="customize-overlay" onclick="closeCustomizePanel()"></div>
+
+<!-- ── Customize panel ── -->
+<div id="customize-panel" class="customize-panel">
+  <div class="panel-header">
+    <span class="panel-title">Customize</span>
+    <button class="panel-close" onclick="closeCustomizePanel()" title="Close (Esc)">✕</button>
+  </div>
+  <div class="panel-body">
+
+    <!-- Stats overview section -->
+    <div class="panel-section" data-section="stats">
+      <div class="section-header">
+        <span class="drag-handle" title="Drag to reorder">⠿</span>
+        <span class="section-label">Stats overview</span>
+      </div>
+      <div class="section-items">
+        <label class="widget-toggle">
+          <input type="checkbox" data-widget="stat-impressions" checked>
+          Total impressions
+        </label>
+        <label class="widget-toggle">
+          <input type="checkbox" data-widget="stat-engrate" checked>
+          Eng. rate
+        </label>
+        <label class="widget-toggle">
+          <input type="checkbox" data-widget="stat-followers" checked>
+          Total followers
+        </label>
+        <label class="widget-toggle">
+          <input type="checkbox" data-widget="stat-clicks" checked>
+          Clicks from social
+        </label>
+      </div>
+    </div>
+
+    <!-- Analytics charts section -->
+    <div class="panel-section" data-section="charts">
+      <div class="section-header">
+        <span class="drag-handle" title="Drag to reorder">⠿</span>
+        <span class="section-label">Analytics charts</span>
+      </div>
+      <div class="section-items">
+        <label class="widget-toggle">
+          <input type="checkbox" data-widget="engagement-chart" checked>
+          Engagement chart
+        </label>
+        <label class="widget-toggle">
+          <input type="checkbox" data-widget="channel-breakdown" checked>
+          Channel breakdown
+        </label>
+      </div>
+    </div>
+
+    <!-- Reports & tools section -->
+    <div class="panel-section" data-section="bottom">
+      <div class="section-header">
+        <span class="drag-handle" title="Drag to reorder">⠿</span>
+        <span class="section-label">Reports & tools</span>
+      </div>
+      <div class="section-items">
+        <label class="widget-toggle">
+          <input type="checkbox" data-widget="recent-reports" checked>
+          Recent reports
+        </label>
+        <label class="widget-toggle">
+          <input type="checkbox" data-widget="upload-card" checked>
+          Add report
+        </label>
+        <label class="widget-toggle">
+          <input type="checkbox" data-widget="top-movers" checked>
+          Top movers
+        </label>
+      </div>
+    </div>
+
+  </div>
+  <div class="panel-footer">
+    <button class="btn-ghost" onclick="resetLayout()">Reset to default</button>
+  </div>
+</div>
+
+<script>
+// ── Platform config ──────────────────────────────────────────────
+const PLATFORMS=[
+  {slug:'linkedin', label:'LinkedIn',   short:'LI',color:'#045CFC',chip:'chip-linkedin',reach:'impressions',eng:'engrate',   followers:'followers',   clicks:'clicks',   page:'linkedin.html'},
+  {slug:'twitter',  label:'Twitter / X',short:'X', color:'#403F4C',chip:'chip-twitter', reach:'impressions',eng:'engrate',   followers:'followers',   clicks:'links',    page:'twitter.html'},
+  {slug:'bluesky',  label:'Bluesky',   short:'BS',color:'#9563FF',chip:'chip-bluesky', reach:'impressions',eng:null,         followers:'followers',   clicks:'links',    page:'bluesky.html'},
+  {slug:'youtube',  label:'YouTube',   short:'YT',color:'#D14040',chip:'chip-youtube', reach:'views',      eng:'ctr',        followers:'subscribers', clicks:null,       page:'youtube.html'},
+  {slug:'dribbble', label:'Dribbble',  short:'DR',color:'#F3809C',chip:'chip-dribbble',reach:'views',      eng:null,         followers:'followers',   clicks:'links',    page:'dribbble.html'},
+  {slug:'website',  label:'Website',   short:'WB',color:'#1B9A6A',chip:'chip-website', reach:'sessions',   eng:null,         followers:null,          clicks:'referrals',page:'website.html'},
+];
+
+function fmtN(v){if(v===undefined||v===null||v==='')return'—';const n=parseFloat(String(v).replace(/,/g,''));if(isNaN(n))return'—';if(n>=1e6)return(n/1e6).toFixed(1).replace(/\.0$/,'')+'M';if(n>=1e3)return(n/1e3).toFixed(1).replace(/\.0$/,'')+'K';return n.toLocaleString();}
+function fmtDate(d){return d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';}
+function fmtAge(d){const diff=Math.floor((Date.now()-new Date(d))/86400000);if(diff===0)return'Today';if(diff===1)return'Yesterday';return fmtDate(d);}
+function pctD(c,p){return p&&+p!==0?((+c-+p)/Math.abs(+p)*100).toFixed(1):null;}
+
+// ── Auth-gated init ───────────────────────────────────────────────
+async function loadDashboard(days, fromDate, toDate){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',days&&b.dataset.range==days));
+  try{
+    const{data:dbP}=await window._sb.from('platforms').select('id,slug');
+    const pm={};(dbP||[]).forEach(p=>{pm[p.slug]=p;});
+    const results=await Promise.all(PLATFORMS.map(async cfg=>{
+      const pl=pm[cfg.slug];if(!pl)return{cfg,reports:[]};
+      const{data:rs}=await window._sb.from('reports')
+        .select('id,period_start,period_end,source,created_at')
+        .eq('platform_id',pl.id).order('period_end',{ascending:false}).limit(20);
+      if(!rs||!rs.length)return{cfg,reports:[]};
+      let curr;
+      if(fromDate&&toDate){
+        const f=new Date(fromDate),t=new Date(toDate);
+        curr=rs.find(r=>new Date(r.period_start)<=t&&new Date(r.period_end)>=f)||rs[0];
+      }else{
+        const score=r=>Math.abs((new Date(r.period_end)-new Date(r.period_start))/86400000-(days||30));
+        curr=[...rs].sort((a,b)=>score(a)-score(b))[0]||null;
+      }
+      const prev=curr?rs.find(r=>r.id!==curr.id):null;
+      if(!curr)return{cfg,reports:[]};
+      const[{data:cm},{data:pm2}]=await Promise.all([
+        window._sb.from('metrics').select('key,value').eq('report_id',curr.id),
+        prev?window._sb.from('metrics').select('key,value').eq('report_id',prev.id):Promise.resolve({data:[]})
+      ]);
+      curr._m=Object.fromEntries((cm||[]).map(r=>[r.key,r.value]));
+      const pRep=prev?{...prev,_m:Object.fromEntries((pm2||[]).map(r=>[r.key,r.value]))}:null;
+      return{cfg,reports:pRep?[curr,pRep]:[curr]};
+    }));
+    const hasData=results.some(r=>r.reports.length>0);
+    renderKPIs(results,hasData);
+    renderRecentReports(results);
+    renderDonut(results,hasData);
+    renderTopMovers(results);
+    renderEngEmpty();
+    // Update date display
+    const first=results.find(r=>r.reports.length>0);
+    if(first&&first.reports[0]){
+      const rep=first.reports[0];
+      const _fmt=d=>new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+      const dl=document.getElementById('date-label');if(dl)dl.textContent=_fmt(rep.period_start)+' – '+_fmt(rep.period_end);
+      const cf=document.getElementById('custom-from'),ct=document.getElementById('custom-to');
+      if(cf&&rep.period_start)cf.value=rep.period_start;if(ct&&rep.period_end)ct.value=rep.period_end;
+    }
+  }catch(e){console.error(e);}
+}
+window._onAuthReady=async function(){
+  const dp=localStorage.getItem('sb-default-period')||'30';
+  await loadDashboard(+dp,null,null);
+  applyState(loadState());
+};
+
+// ── KPI summary cards ─────────────────────────────────────────────
+function renderKPIs(results,hasData){
+  if(!hasData){
+    ['stat-impressions','stat-engrate','stat-followers','stat-clicks'].forEach(w=>{
+      const c=document.querySelector(`[data-widget="${w}"]`);
+      if(c){c.querySelector('.stat-value').textContent='—';c.querySelector('.stat-delta').textContent='';}
+    });
+    return;
+  }
+  let tR=0,pR=0,tF=0,pF=0,tC=0,pC=0;const eR=[],peR=[];
+  results.forEach(({cfg,reports})=>{
+    if(!reports.length)return;
+    const m=reports[0]._m,pm=reports[1]?reports[1]._m:{};
+    const r=parseFloat(m[cfg.reach]||0);if(r)tR+=r;
+    const pr=parseFloat(pm[cfg.reach]||0);if(pr)pR+=pr;
+    if(cfg.eng){const e=parseFloat(m[cfg.eng]||0);if(e)eR.push(e);const pe=parseFloat(pm[cfg.eng]||0);if(pe)peR.push(pe);}
+    if(cfg.followers){const f=parseFloat(m[cfg.followers]||0);if(f)tF+=f;const pf=parseFloat(pm[cfg.followers]||0);if(pf)pF+=pf;}
+    if(cfg.clicks){const c=parseFloat(m[cfg.clicks]||0);if(c)tC+=c;const pc=parseFloat(pm[cfg.clicks]||0);if(pc)pC+=pc;}
+  });
+  const avgE=eR.length?eR.reduce((a,b)=>a+b,0)/eR.length:null;
+  const pavgE=peR.length?peR.reduce((a,b)=>a+b,0)/peR.length:null;
+  setKPI('stat-impressions',fmtN(tR),pctD(tR,pR),true,false);
+  setKPI('stat-engrate',avgE?avgE.toFixed(1)+'%':'—',(avgE&&pavgE)?(avgE-pavgE).toFixed(1):null,false,true);
+  setKPI('stat-followers',tF?fmtN(tF):'—',pctD(tF,pF),false,false);
+  setKPI('stat-clicks',tC?fmtN(tC):'—',pctD(tC,pC),false,false);
+}
+function setKPI(widget,val,delta,featured,isPP){
+  const card=document.querySelector(`[data-widget="${widget}"]`);if(!card)return;
+  card.querySelector('.stat-value').textContent=val;
+  const el=card.querySelector('.stat-delta');
+  if(delta!==null&&delta!==undefined){
+    const up=parseFloat(delta)>=0;
+    el.textContent=(up?'↑ +':'↓ ')+Math.abs(parseFloat(delta))+(isPP?'pp':'%');
+    el.className='stat-delta '+(featured?(up?'delta-up-white':'delta-down-white'):(up?'delta-up':'delta-down'));
+  }else{el.textContent='';el.className='stat-delta';}
+}
+
+// ── Recent reports table ──────────────────────────────────────────
+function renderRecentReports(results){
+  const all=[];
+  results.forEach(({cfg,reports})=>{reports.forEach(r=>all.push({...r,cfg}));});
+  all.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  const top5=all.slice(0,5);
+  const tbody=document.querySelector('[data-widget="recent-reports"] tbody');
+  if(!tbody)return;
+  if(!top5.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--ink-faint);font-size:12px">No reports yet. <a href="upload.html" style="color:var(--blue)">Upload one →</a></td></tr>';return;}
+  tbody.innerHTML=top5.map(r=>{
+    const reach=r._m[r.cfg.reach];
+    const er=r.cfg.eng?parseFloat(r._m[r.cfg.eng]||0):null;
+    const erCol=er!==null?(er>=3?'var(--green)':'var(--ink-faint)'):'';
+    return`<tr>
+      <td><span class="platform-chip ${r.cfg.chip}">● ${r.cfg.label}</span></td>
+      <td style="color:var(--ink-light)">${fmtDate(r.period_start)}–${fmtDate(r.period_end)}</td>
+      <td style="font-weight:500">${reach?fmtN(+reach):'—'}</td>
+      <td>${er!==null?`<span style="color:${erCol};font-weight:500">${er.toFixed(1)}%</span>`:'<span style="color:var(--ink-faint)">—</span>'}</td>
+      <td style="color:var(--ink-faint)">${fmtAge(r.created_at)}</td>
+      <td style="text-align:right"><a href="${r.cfg.page}" style="color:var(--blue);font-size:11px;text-decoration:none">View →</a></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Channel split donut ───────────────────────────────────────────
+function renderDonut(results,hasData){
+  if(!hasData){renderDonutEmpty();return;}
+  const data=[];
+  results.forEach(({cfg,reports})=>{
+    if(!reports.length)return;
+    const reach=parseFloat(reports[0]._m[cfg.reach]||0);
+    if(reach>0)data.push({cfg,reach});
+  });
+  if(!data.length){renderDonutEmpty();return;}
+  const total=data.reduce((s,d)=>s+d.reach,0);
+  const cEl=document.querySelector('.donut-total');if(cEl)cEl.textContent=fmtN(total);
+  const canvas=document.getElementById('donutChart');if(!canvas)return;
+  const ex=Chart.getChart(canvas);if(ex)ex.destroy();
+  new Chart(canvas.getContext('2d'),{
+    type:'doughnut',
+    data:{labels:data.map(d=>d.cfg.label),datasets:[{data:data.map(d=>Math.round(d.reach/total*100)),backgroundColor:data.map(d=>d.cfg.color),borderWidth:0,hoverOffset:4}]},
+    options:{cutout:'72%',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#2421AB',bodyColor:'#403F4C',borderColor:'rgba(4,92,252,0.15)',borderWidth:1,padding:8,bodyFont:{family:"'DM Sans',sans-serif",size:11},callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed}%`}}}}
+  });
+  const bd=document.querySelector('.platform-breakdown');
+  if(bd)bd.innerHTML=data.map(d=>{const pct=Math.round(d.reach/total*100);return`<div class="breakdown-item"><span class="platform-dot" style="background:${d.cfg.color}"></span><span class="breakdown-name">${d.cfg.label}</span><div class="breakdown-bar-bg"><div class="breakdown-bar" style="width:${pct}%;background:${d.cfg.color}"></div></div><span class="breakdown-pct">${pct}%</span></div>`;}).join('');
+}
+function renderDonutEmpty(){
+  const c=document.querySelector('.donut-total');if(c)c.textContent='—';
+  const b=document.querySelector('.platform-breakdown');if(b)b.innerHTML='<div style="text-align:center;padding:12px;color:var(--ink-faint);font-size:12px">No data yet</div>';
+}
+
+// ── Top movers ────────────────────────────────────────────────────
+function renderTopMovers(results){
+  const movers=[];
+  results.forEach(({cfg,reports})=>{
+    if(reports.length<2)return;
+    const c=parseFloat(reports[0]._m[cfg.reach]||0),p=parseFloat(reports[1]._m[cfg.reach]||0);
+    if(!c||!p||p===0)return;
+    movers.push({cfg,pct:parseFloat(((c-p)/Math.abs(p)*100).toFixed(1))});
+  });
+  movers.sort((a,b)=>b.pct-a.pct);
+  const top3=movers.slice(0,3);
+  const grid=document.querySelector('.sparkline-grid');if(!grid)return;
+  if(!top3.length){grid.innerHTML='<div style="text-align:center;padding:20px;color:var(--ink-faint);font-size:12px">Upload 2+ reports per channel to see movers</div>';return;}
+  const labels={impressions:'Impressions',views:'Views',sessions:'Sessions'};
+  grid.innerHTML=top3.map(m=>{
+    const up=m.pct>=0;
+    return`<a href="${m.cfg.page}" class="sparkline-row" style="text-decoration:none">
+      <span class="platform-chip ${m.cfg.chip}" style="font-size:10px;padding:2px 7px">${m.cfg.short}</span>
+      <div class="sparkline-info">
+        <div class="sparkline-name">${labels[m.cfg.reach]||m.cfg.reach}</div>
+        <div class="sparkline-metric">${m.cfg.label}</div>
+      </div>
+      <div class="sparkline-value" style="color:${up?'var(--green)':'var(--red)'};font-size:13px">${up?'+':''}${m.pct}%</div>
+    </a>`;
+  }).join('');
+}
+
+// ── Engagement chart → empty state ───────────────────────────────
+function renderEngEmpty(){
+  const wrap=document.querySelector('[data-widget="engagement-chart"] .chart-wrap');
+  if(!wrap)return;
+  wrap.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;text-align:center;padding:20px">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20L9 13L14 16.5L19.5 9L25 13"/><line x1="2.5" y1="22" x2="25.5" y2="22"/></svg>
+    <div style="font-size:12px;font-weight:500;color:var(--ink)">No trend data yet</div>
+    <div style="font-size:11px;color:var(--ink-faint)">Upload more reports to see trends over time</div>
+    <a href="upload.html" style="font-size:11px;color:var(--blue);text-decoration:none;font-weight:500;margin-top:4px">Upload a report →</a>
+  </div>`;
+  const leg=document.querySelector('[data-widget="engagement-chart"] .chart-legend');
+  if(leg)leg.style.display='none';
+}
+
+});
+// ── Period switcher ──────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>loadDashboard(+btn.dataset.range,null,null));
+});
+['custom-from','custom-to'].forEach(id=>document.getElementById(id).addEventListener('change',function(){
+  const from=document.getElementById('custom-from').value,to=document.getElementById('custom-to').value;
+  if(from&&to)loadDashboard(null,from,to);
+}));
+
+// ── Widget customization panel ────────────────────────────────────
+const STORAGE_KEY='subsocial-layout';
+const DEFAULT_STATE={rowOrder:['stats','charts','bottom'],hidden:[]};
+function loadState(){try{const s=JSON.parse(localStorage.getItem(STORAGE_KEY));return s||DEFAULT_STATE;}catch{return DEFAULT_STATE;}}
+function saveState(){
+  const ro=[...document.querySelectorAll('.panel-section')].map(s=>s.dataset.section);
+  const hd=[...document.querySelectorAll('.widget-toggle input:not(:checked)')].map(cb=>cb.dataset.widget);
+  localStorage.setItem(STORAGE_KEY,JSON.stringify({rowOrder:ro,hidden:hd}));
+}
+function syncRowVisibility(){
+  document.querySelectorAll('.widget-row').forEach(row=>{
+    const cards=row.querySelectorAll('[data-widget]');
+    row.style.display=[...cards].every(c=>c.classList.contains('widget-hidden'))?'none':'';
+  });
+  const br=document.getElementById('bottom-right-col');
+  if(br){br.style.display=[...br.querySelectorAll('[data-widget]')].some(c=>!c.classList.contains('widget-hidden'))?'flex':'none';}
+  const ec=document.querySelector('[data-widget="engagement-chart"]'),dc=document.querySelector('[data-widget="channel-breakdown"]');
+  if(ec&&dc){const eh=ec.classList.contains('widget-hidden'),dh=dc.classList.contains('widget-hidden');ec.style.gridColumn=(!eh&&dh)?'1 / -1':'';dc.style.gridColumn=(eh&&!dh)?'1 / -1':'';}
+  const rc=document.querySelector('[data-widget="recent-reports"]');
+  if(rc&&br){rc.style.gridColumn=(br.style.display==='none')?'1 / -1':'';}
+  const sg=document.querySelector('[data-row="stats"] .stats-grid');
+  if(sg){const vc=[...sg.querySelectorAll('[data-widget]')].filter(c=>!c.classList.contains('widget-hidden')).length;sg.style.gridTemplateColumns=vc>0?`repeat(${vc},1fr)`:'';}
+}
+function applyState(state){
+  const stack=document.getElementById('widget-stack');
+  state.rowOrder.forEach(id=>{const r=stack.querySelector(`[data-row="${id}"]`);if(r)stack.appendChild(r);});
+  const pb=document.querySelector('.panel-body');
+  state.rowOrder.forEach(id=>{const s=pb.querySelector(`[data-section="${id}"]`);if(s)pb.appendChild(s);});
+  document.querySelectorAll('[data-widget]').forEach(el=>el.classList.toggle('widget-hidden',state.hidden.includes(el.dataset.widget)));
+  document.querySelectorAll('.widget-toggle input').forEach(cb=>{cb.checked=!state.hidden.includes(cb.dataset.widget);});
+  syncRowVisibility();
+}
+function openCustomizePanel(){document.getElementById('customize-panel').classList.add('open');document.getElementById('customize-overlay').classList.add('open');document.getElementById('customize-btn').classList.add('active');}
+function closeCustomizePanel(){document.getElementById('customize-panel').classList.remove('open');document.getElementById('customize-overlay').classList.remove('open');document.getElementById('customize-btn').classList.remove('active');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCustomizePanel();});
+document.querySelectorAll('.widget-toggle input').forEach(cb=>{
+  cb.addEventListener('change',()=>{
+    const id=cb.dataset.widget;
+    document.querySelectorAll(`[data-widget="${id}"]`).forEach(el=>el.classList.toggle('widget-hidden',!cb.checked));
+    syncRowVisibility();saveState();
+  });
+});
+function resetLayout(){localStorage.removeItem(STORAGE_KEY);applyState(DEFAULT_STATE);}
+let dragSrc=null;
+document.querySelectorAll('.panel-section').forEach(section=>{
+  section.setAttribute('draggable','true');
+  section.addEventListener('dragstart',e=>{dragSrc=section;requestAnimationFrame(()=>section.classList.add('dragging'));e.dataTransfer.effectAllowed='move';});
+  section.addEventListener('dragend',()=>{
+    document.querySelectorAll('.panel-section').forEach(s=>s.classList.remove('dragging','drag-over'));
+    dragSrc=null;
+    const stack=document.getElementById('widget-stack');
+    document.querySelectorAll('.panel-section').forEach(s=>{const r=stack.querySelector(`[data-row="${s.dataset.section}"]`);if(r)stack.appendChild(r);});
+    saveState();
+  });
+  section.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';if(dragSrc&&section!==dragSrc)section.classList.add('drag-over');});
+  section.addEventListener('dragleave',()=>section.classList.remove('drag-over'));
+  section.addEventListener('drop',e=>{e.preventDefault();if(!dragSrc||dragSrc===section)return;section.classList.remove('drag-over');document.querySelector('.panel-body').insertBefore(dragSrc,section);});
+});
+applyState(loadState());
+</script>
+</body>
+</html>

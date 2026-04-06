@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>(function(){var t=localStorage.getItem('sb-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script>(function(){
+  var _url='https://bgdyahjipkxwosbbkkqd.supabase.co';
+  var _key='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnZHlhaGppcGt4d29zYmJra3FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODMyODEsImV4cCI6MjA5MDQ1OTI4MX0.rB6ePMZjZM5_g9Gq1pxIoNxaFXFKoAaIKfXxSWkigR4';
+  window._sb=supabase.createClient(_url,_key);
+  document.documentElement.style.visibility='hidden';
+  window._sb.auth.getSession().then(function(r){
+    var session=r.data.session;
+    if(!session){window.location.replace('supabase-auth.html');}
+    else{document.documentElement.style.visibility='';if(window._onAuthReady)window._onAuthReady(session);}
+  });
+})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subvisual · Upload Report</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap');
+  :root {
+    --blue:#045CFC;--indigo:#2421AB;--violet:#9563FF;--pink:#F3809C;
+    --ink:#403F4C;--ink-light:#6B6A77;--ink-faint:#9E9DA8;
+    --bg:#F4F4F8;--surface:#FFFFFF;
+    --border:rgba(4,92,252,0.10);--border-md:rgba(4,92,252,0.18);--blue-tint:rgba(4,92,252,0.07);
+    --green:#1B9A6A;--red:#D14040;
+    --sidebar-w:220px;--radius:12px;--radius-sm:8px;
+  }
+  [data-theme="dark"]{
+    --bg:#18181f;
+    --surface:#22212d;
+    --border:rgba(255,255,255,0.08);
+    --border-md:rgba(255,255,255,0.15);
+    --border-light:rgba(255,255,255,0.05);
+    --blue-tint:rgba(4,92,252,0.18);
+    --ink:#e0dff0;
+    --ink-light:#a8a7b8;
+    --ink-faint:#6b6a7c;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;overflow-x:hidden}
+
+  /* ── Sidebar ── */
+  .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;padding:0 0 24px}
+  .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border);margin-bottom:8px}
+  .logo-mark{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .logo-symbol{width:32px;height:32px;background:var(--indigo);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;letter-spacing:-1px}
+  .logo-text{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--indigo);letter-spacing:-0.2px}
+  .sidebar-section{padding:0 12px;margin-bottom:4px}
+  .sidebar-section-label{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);padding:8px 8px 6px}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius-sm);font-size:13px;font-weight:400;color:var(--ink-light);cursor:pointer;transition:background 0.15s,color 0.15s;text-decoration:none}
+  .nav-item:hover{background:var(--blue-tint);color:var(--blue)}
+  .nav-item.active{background:var(--blue-tint);color:var(--blue);font-weight:500}
+  .nav-icon{width:16px;height:16px;opacity:0.6;flex-shrink:0}
+  .nav-item.active .nav-icon{opacity:1}
+  .platform-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .sidebar-footer{margin-top:auto;padding:16px 20px 0;border-top:1px solid var(--border)}
+  .user-pill{display:flex;align-items:center;gap:10px}
+  .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:500;flex-shrink:0}
+  .user-name{font-size:13px;font-weight:500;color:var(--ink)}
+  .user-role{font-size:11px;color:var(--ink-faint)}
+  .role-badge{margin-left:auto;font-size:10px;font-weight:500;padding:2px 7px;border-radius:100px;background:rgba(4,92,252,0.1);color:var(--blue)}
+
+  /* ── Main ── */
+  .main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column}
+
+  /* ── Topbar with stepper ── */
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+  .topbar-left{display:flex;align-items:center;gap:12px}
+  .page-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--indigo);letter-spacing:-0.3px}
+  .topbar-right{display:flex;align-items:center;gap:8px}
+  .btn-ghost{display:flex;align-items:center;gap:6px;padding:7px 14px;background:transparent;color:var(--ink-light);border:1px solid var(--border-md);border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s;text-decoration:none}
+  .btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+
+  /* ── Stepper ── */
+  .stepper{display:flex;align-items:center;gap:0}
+  .step{display:flex;align-items:center;gap:8px;padding:0 16px;height:56px;font-size:12px;font-weight:500;color:var(--ink-faint);border-bottom:2px solid transparent;transition:all 0.2s;cursor:default}
+  .step.active{color:var(--blue);border-bottom-color:var(--blue)}
+  .step.done{color:var(--green)}
+  .step-num{width:20px;height:20px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border-md);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;transition:all 0.2s}
+  .step.active .step-num{background:var(--blue);border-color:var(--blue);color:#fff}
+  .step.done .step-num{background:var(--green);border-color:var(--green);color:#fff}
+  .step-sep{width:24px;height:1px;background:var(--border-md)}
+
+  /* ── Content ── */
+  .content{padding:40px 28px;flex:1;display:flex;flex-direction:column;align-items:center}
+  .wizard-wrap{width:100%;max-width:680px}
+
+  /* ── Step panels ── */
+  .step-panel{display:none;animation:fadeUp 0.3s ease both}
+  .step-panel.active{display:block}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+  .panel-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--indigo);letter-spacing:-0.3px;margin-bottom:6px}
+  .panel-sub{font-size:13px;color:var(--ink-faint);margin-bottom:28px}
+
+  /* ── Platform cards ── */
+  .platform-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+  .plat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 18px;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;display:flex;align-items:center;gap:12px}
+  .plat-card:hover{border-color:var(--border-md);box-shadow:0 2px 12px rgba(4,92,252,0.06)}
+  .plat-card.selected{border-color:var(--blue);box-shadow:0 0 0 3px rgba(4,92,252,0.08)}
+  .plat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .plat-name{font-size:13px;font-weight:500;color:var(--ink)}
+  .plat-check{margin-left:auto;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s}
+  .plat-card.selected .plat-check{background:var(--blue);border-color:var(--blue)}
+  .plat-card.selected .plat-check::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff}
+
+  /* ── Date row ── */
+  .date-row{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+  .date-row label{font-size:12px;font-weight:500;color:var(--ink-light);white-space:nowrap}
+  .date-field{padding:8px 12px;border:1px solid var(--border-md);border-radius:var(--radius-sm);font-size:12px;font-family:inherit;color:var(--ink);background:var(--surface);flex:1}
+  .date-field:focus{outline:none;border-color:var(--blue)}
+
+  /* ── Method toggle ── */
+  .method-toggle{display:flex;background:var(--bg);border-radius:var(--radius-sm);padding:3px;gap:2px;margin-bottom:24px;width:fit-content}
+  .method-btn{padding:7px 20px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--ink-light);transition:all 0.15s;font-family:inherit}
+  .method-btn.active{background:var(--surface);color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+
+  /* ── Upload zone ── */
+  .upload-zone{border:1.5px dashed var(--border-md);border-radius:var(--radius);padding:40px 24px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:border-color 0.15s,background 0.15s;text-align:center;background:var(--surface);margin-bottom:16px}
+  .upload-zone:hover,.upload-zone.dragover{border-color:var(--blue);background:rgba(4,92,252,0.02)}
+  .upload-icon{width:40px;height:40px;border-radius:50%;background:var(--blue-tint);display:flex;align-items:center;justify-content:center}
+  .upload-title{font-size:14px;font-weight:500;color:var(--ink)}
+  .upload-sub{font-size:12px;color:var(--ink-faint)}
+  .upload-formats{font-size:11px;color:var(--ink-faint);margin-top:4px}
+  .upload-file-input{display:none}
+
+  /* ── Manual form ── */
+  .manual-form{display:none}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+  .form-group{display:flex;flex-direction:column;gap:5px}
+  .form-label{font-size:11px;font-weight:500;color:var(--ink-light);text-transform:uppercase;letter-spacing:0.07em}
+  .form-input{padding:8px 12px;border:1px solid var(--border-md);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;color:var(--ink);background:var(--surface);transition:border-color 0.15s}
+  .form-input:focus{outline:none;border-color:var(--blue)}
+  .form-hint{font-size:10px;color:var(--ink-faint)}
+
+  /* ── Review card ── */
+  .review-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px}
+  .review-header{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+  .review-platform-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+  .review-platform-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--indigo)}
+  .review-period{font-size:12px;color:var(--ink-faint);margin-left:auto}
+  .review-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .review-item{display:flex;flex-direction:column;gap:3px}
+  .review-label{font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:var(--ink-faint)}
+  .review-value{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--indigo)}
+  .review-delta{font-size:11px;color:var(--green)}
+  .review-delta.down{color:var(--red)}
+
+  /* ── Comparison note ── */
+  .compare-note{background:rgba(4,92,252,0.04);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;font-size:12px;color:var(--ink-light);margin-bottom:24px;display:flex;align-items:flex-start;gap:10px}
+  .compare-note svg{flex-shrink:0;margin-top:1px}
+
+  /* ── Action row ── */
+  .action-row{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+  .action-row-right{display:flex;align-items:center;gap:10px}
+  .btn-primary{display:flex;align-items:center;gap:6px;padding:9px 20px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:background 0.15s}
+  .btn-primary:hover{background:var(--indigo)}
+  .btn-primary:disabled{background:var(--ink-faint);cursor:not-allowed}
+  .btn-secondary{display:flex;align-items:center;gap:6px;padding:9px 20px;background:transparent;color:var(--ink-light);border:1px solid var(--border-md);border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s}
+  .btn-secondary:hover{border-color:var(--blue);color:var(--blue)}
+  .btn-back{font-size:12px;color:var(--ink-faint);cursor:pointer;background:none;border:none;font-family:inherit;padding:0;display:flex;align-items:center;gap:4px}
+  .btn-back:hover{color:var(--ink)}
+
+  /* ── Success state ── */
+  .success-wrap{display:none;flex-direction:column;align-items:center;text-align:center;padding:48px 0;animation:fadeUp 0.4s ease both}
+  .success-icon{width:56px;height:56px;border-radius:50%;background:rgba(27,154,106,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+  .success-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--indigo);margin-bottom:8px}
+  .success-sub{font-size:14px;color:var(--ink-faint);margin-bottom:28px;max-width:360px}
+  .success-links{display:flex;align-items:center;gap:12px}
+
+  /* ── XLSX notice ── */
+  .xlsx-notice{display:none;background:rgba(4,92,252,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:var(--blue);margin-bottom:16px;align-items:center;gap:8px}
+
+  /* ── Toast ── */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--indigo);color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;opacity:0;transition:all 0.25s;pointer-events:none;z-index:999;white-space:nowrap}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ── File pill ── */
+  .file-pill{display:none;align-items:center;gap:8px;padding:8px 14px;background:rgba(27,154,106,0.08);border:1px solid rgba(27,154,106,0.25);border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--green);max-width:100%}
+  .file-pill-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .file-pill-remove{cursor:pointer;color:var(--ink-faint);background:none;border:none;font-size:18px;line-height:1;padding:0 2px;flex-shrink:0;font-family:inherit;transition:color 0.15s}
+  .file-pill-remove:hover{color:var(--red)}
+
+  /* ── Source badge (review screen) ── */
+  .source-badge{display:none;font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:2px 8px;border-radius:100px;background:rgba(4,92,252,0.1);color:var(--blue);margin-left:8px}
+
+  /* ── Upload zone inline error ── */
+  .upload-zone-error{display:none;margin-top:10px;padding:10px 14px;background:rgba(209,64,64,0.06);border:1px solid rgba(209,64,64,0.2);border-radius:var(--radius-sm);font-size:12px;color:var(--red);line-height:1.5}
+  .upload-zone-error a{color:var(--red);font-weight:600;text-decoration:underline;cursor:pointer}
+</style>
+  
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a class="logo-mark" href="dashboard.html"><div class="logo-symbol"><img src="symbol-white_8x.png" alt="Subvisual" style="width:22px;height:22px;object-fit:contain;display:block;"></div><span class="logo-text">SubSocial</span></a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Menu</div>
+    <a class="nav-item" href="dashboard.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>Overview</a>
+    <a class="nav-item" href="analytics.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12 L5 8 L8 10 L11 5 L14 7"/><rect x="1" y="13" width="14" height="1" rx="0.5" fill="currentColor" stroke="none"/></svg>Analytics</a>
+    <a class="nav-item" href="reports.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 7h6M5 9.5h4"/></svg>Reports</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Organic</div>
+    <a class="nav-item" href="linkedin.html"><div class="platform-dot" style="background:#045CFC"></div>LinkedIn</a>
+    <a class="nav-item" href="twitter.html"><div class="platform-dot" style="background:#403F4C"></div>Twitter / X</a>
+    <a class="nav-item" href="bluesky.html"><div class="platform-dot" style="background:#9563FF"></div>Bluesky</a>
+    <a class="nav-item" href="youtube.html"><div class="platform-dot" style="background:#D14040"></div>YouTube</a>
+    <a class="nav-item" href="dribbble.html"><div class="platform-dot" style="background:#F3809C"></div>Dribbble</a>
+    <a class="nav-item" href="website.html"><div class="platform-dot" style="background:#1B9A6A"></div>Website</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Paid</div>
+    <a class="nav-item" href="linkedin-ads.html"><div class="platform-dot" style="background:#0A66C2"></div>LinkedIn Ads</a>
+    <a class="nav-item" href="twitter-ads.html"><div class="platform-dot" style="background:#1DA1F2"></div>Twitter Ads</a>
+    <a class="nav-item" href="google-ads.html"><div class="platform-dot" style="background:#FBBC04"></div>Google Ads</a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar">M</div>
+      <div><div class="user-name">Mariana</div><div class="user-role">Social Media Manager</div></div>
+      <span class="role-badge">Admin</span>
+    </div>
+    <button onclick="window._sb.auth.signOut().then(function(){location.replace('supabase-auth.html')})" style="margin-top:10px;background:none;border:none;font-family:inherit;font-size:11px;color:var(--ink-faint);cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 6H1M4 3l-3 3 3 3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 1h5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5" stroke-linecap="round"/></svg>Sign out</button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="page-title">Upload Report</span>
+    </div>
+    <div class="stepper">
+      <div class="step active" id="step-indicator-1">
+        <div class="step-num" id="step-num-1">1</div>
+        Platform & period
+      </div>
+      <div class="step-sep"></div>
+      <div class="step" id="step-indicator-2">
+        <div class="step-num" id="step-num-2">2</div>
+        Enter data
+      </div>
+      <div class="step-sep"></div>
+      <div class="step" id="step-indicator-3">
+        <div class="step-num" id="step-num-3">3</div>
+        Review & save
+      </div>
+    </div>
+    <div class="topbar-right">
+      <a class="btn-ghost" href="dashboard.html">← Back to dashboard</a>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="wizard-wrap">
+
+      <!-- ── Step 1: Platform & Period ── -->
+      <div class="step-panel active" id="panel-1">
+        <div class="panel-title">Select platform & period</div>
+        <div class="panel-sub">Choose which channel this report covers and set the date range.</div>
+
+        <div class="platform-grid">
+          <div class="plat-card" data-platform="linkedin" data-color="#045CFC" onclick="selectPlatform(this)">
+            <div class="plat-dot" style="background:#045CFC"></div>
+            <span class="plat-name">LinkedIn</span>
+            <div class="plat-check"></div>
+          </div>
+          <div class="plat-card" data-platform="twitter" data-color="#403F4C" onclick="selectPlatform(this)">
+            <div class="plat-dot" style="background:#403F4C"></div>
+            <span class="plat-name">Twitter / X</span>
+            <div class="plat-check"></div>
+          </div>
+          <div class="plat-card" data-platform="bluesky" data-color="#9563FF" onclick="selectPlatform(this)">
+            <div class="plat-dot" style="background:#9563FF"></div>
+            <span class="plat-name">Bluesky</span>
+            <div class="plat-check"></div>
+          </div>
+          <div class="plat-card" data-platform="youtube" data-color="#D14040" onclick="selectPlatform(this)">
+            <div class="plat-dot" style="background:#D14040"></div>
+            <span class="plat-name">YouTube</span>
+            <div class="plat-check"></div>
+          </div>
+          <div class="plat-card" data-platform="dribbble" data-color="#F3809C" onclick="selectPlatform(this)">
+            <div class="plat-dot" style="background:#F3809C"></div>
+            <span class="plat-name">Dribbble</span>
+            <div class="plat-check"></div>
+          </div>
+          <div class="plat-card" data-platform="website" data-color="#1B9A6A" onclick="selectPlatform(this)">
+            <div class="plat-dot" style="background:#1B9A6A"></div>
+            <span class="plat-name">Website</span>
+            <div class="plat-check"></div>
+          </div>
+        </div>
+
+        <div class="date-row">
+          <label>Period from</label>
+          <input type="date" class="date-field" id="period-from" value="2026-02-24">
+          <label>to</label>
+          <input type="date" class="date-field" id="period-to" value="2026-03-24">
+        </div>
+
+        <div class="action-row">
+          <span style="font-size:12px;color:var(--ink-faint)" id="step1-hint">Select a platform to continue</span>
+          <button class="btn-primary" id="btn-step1" disabled onclick="goToStep(2)">
+            Continue
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6h8M7 3l3 3-3 3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Step 2: Enter Data ── -->
+      <div class="step-panel" id="panel-2">
+        <div class="panel-title" id="step2-title">Enter LinkedIn data</div>
+        <div class="panel-sub" id="step2-sub">Upload a CSV export or fill in the key metrics manually.</div>
+
+        <div class="method-toggle">
+          <button class="method-btn active" id="method-upload" onclick="setMethod('upload')">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M6 1v7M3 5l3-4 3 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10h10" stroke-linecap="round"/></svg>
+            Upload CSV
+          </button>
+          <button class="method-btn" id="method-manual" onclick="setMethod('manual')">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M2 3h8M2 6h8M2 9h5"/></svg>
+            Enter manually
+          </button>
+        </div>
+
+        <div class="xlsx-notice" id="xlsx-notice"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2v7M4 5l3-3 3 3" stroke-linecap="round"/><rect x="1" y="9" width="12" height="4" rx="1"/></svg><span id="xlsx-notice-text"></span></div>
+          <!-- Upload mode -->
+        <div id="upload-mode">
+          <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+            <div class="upload-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#045CFC" stroke-width="1.5"><path d="M9 2v10M5 6l4-4 4 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 14h14" stroke-linecap="round"/></svg>
+            </div>
+            <div class="upload-title" id="upload-title">Drop your CSV or XLSX here, or click to browse</div>
+            <div class="upload-sub">Export your analytics from the platform and upload the file</div>
+            <div class="upload-formats">Accepted: .csv, .xlsx · Max 10MB</div>
+            <div class="file-pill" id="file-pill">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l3 3 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="file-pill-name" id="file-pill-name"></span>
+              <button class="file-pill-remove" onclick="clearFile(event)" title="Remove file">×</button>
+            </div>
+          </div>
+          <div class="upload-zone-error" id="upload-zone-error">Couldn't read metrics from this file — <a onclick="setMethod('manual')">try manual entry instead</a></div>
+          <input type="file" id="file-input" class="upload-file-input" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event)">
+        </div>
+
+        <!-- Manual mode -->
+        <div class="manual-form" id="manual-mode">
+          <div class="form-grid" id="manual-fields">
+            <!-- Fields injected by JS based on platform -->
+          </div>
+          <div id="extra-fields" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div>
+          <button type="button" onclick="addExtraMetric()" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--blue);background:none;border:1px dashed var(--border-md);border-radius:var(--radius-sm);padding:6px 14px;cursor:pointer;font-family:inherit;transition:all 0.15s;margin-bottom:8px">
+            + Add metric
+          </button>
+        </div>
+
+        <div class="action-row">
+          <button class="btn-back" onclick="goToStep(1)">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 6H2M5 3L2 6l3 3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Back
+          </button>
+          <div class="action-row-right">
+            <span style="font-size:12px;color:var(--ink-faint)" id="step2-hint"></span>
+            <button class="btn-primary" id="btn-step2" onclick="goToStep(3)">
+              Preview
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6h8M7 3l3 3-3 3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Step 3: Review & Save ── -->
+      <div class="step-panel" id="panel-3">
+        <div class="panel-title">Review & confirm</div>
+        <div class="panel-sub">Check the data before saving. This will be added to your report history.</div>
+
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-platform-dot" id="review-dot"></div>
+            <div class="review-platform-name" id="review-platform-name">LinkedIn</div>
+            <div class="review-period" id="review-period">Feb 24 – Mar 24, 2026</div>
+            <span class="source-badge" id="review-source-badge"></span>
+          </div>
+          <div class="review-grid" id="review-grid">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <div class="compare-note">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#045CFC" stroke-width="1.5" flex-shrink="0"><circle cx="7" cy="7" r="6"/><path d="M7 5v3M7 9.5v.5"/></svg>
+          <span>Deltas shown are vs. the previous equivalent period pulled from your report history. They will update automatically once this report is saved.</span>
+        </div>
+
+        <div class="action-row">
+          <button class="btn-back" onclick="goToStep(2)">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 6H2M5 3L2 6l3 3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Back
+          </button>
+          <div class="action-row-right">
+            <button class="btn-secondary" onclick="goToStep(1)">Start over</button>
+            <button class="btn-primary" id="btn-save" onclick="saveReport()">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7l3 3 5-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Save report
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Success ── -->
+      <div class="success-wrap" id="success-wrap">
+        <div class="success-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B9A6A" stroke-width="2"><path d="M4 13l5 5L20 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="success-title">Report saved!</div>
+        <div class="success-sub" id="success-sub">Your LinkedIn report for Feb 24 – Mar 24, 2026 has been saved and is now visible in the dashboard.</div>
+        <div class="success-links">
+          <a class="btn-secondary" href="dashboard.html">View overview</a>
+          <button class="btn-primary" id="success-platform-btn" onclick="location.href='linkedin.html'">
+            View LinkedIn analytics
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6h8M7 3l3 3-3 3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──
+let selectedPlatform = null;
+let selectedMethod = 'upload';
+let fileSelected = false;
+let xlsxData = null;        // { filename, metrics: [{key, label, value}] }
+let uploadedFileExt = null; // 'xlsx'|'csv' — set when a file is selected, cleared on reset
+
+const PLATFORM_META = {
+  linkedin: { name:'LinkedIn', color:'#045CFC', page:'linkedin.html',
+    fields:[{id:'impressions',label:'Impressions',hint:'e.g. 108300'},{id:'reach',label:'Reach',hint:'e.g. 74100'},{id:'engrate',label:'Engagement rate (%)',hint:'e.g. 5.2'},{id:'clicks',label:'Clicks',hint:'e.g. 3840'},{id:'followers',label:'New followers',hint:'e.g. 187'},{id:'reactions',label:'Reactions',hint:'e.g. 2841'},{id:'comments',label:'Comments',hint:'e.g. 394'},{id:'shares',label:'Shares',hint:'e.g. 221'}] },
+  twitter:  { name:'Twitter / X', color:'#403F4C', page:'twitter.html',
+    fields:[{id:'impressions',label:'Impressions',hint:'e.g. 142600'},{id:'engagements',label:'Engagements',hint:'e.g. 5920'},{id:'engrate',label:'Engagement rate (%)',hint:'e.g. 4.2'},{id:'reposts',label:'Reposts',hint:'e.g. 1248'},{id:'followers',label:'New followers',hint:'e.g. 312'},{id:'likes',label:'Likes',hint:'e.g. 3104'},{id:'replies',label:'Replies',hint:'e.g. 284'}] },
+  bluesky:  { name:'Bluesky', color:'#9563FF', page:'bluesky.html',
+    fields:[{id:'impressions',label:'Impressions',hint:'e.g. 38400'},{id:'reposts',label:'Reposts',hint:'e.g. 841'},{id:'likes',label:'Likes',hint:'e.g. 2140'},{id:'replies',label:'Replies',hint:'e.g. 312'},{id:'followers',label:'New followers',hint:'e.g. 218'},{id:'quotes',label:'Quote posts',hint:'e.g. 94'}] },
+  youtube:  { name:'YouTube', color:'#D14040', page:'youtube.html',
+    fields:[{id:'views',label:'Views',hint:'e.g. 84200'},{id:'watchtime',label:'Watch time (hours)',hint:'e.g. 3840'},{id:'subscribers',label:'Subscribers gained',hint:'e.g. 482'},{id:'duration',label:'Avg. view duration (mm:ss)',hint:'e.g. 4:12'},{id:'ctr',label:'Click-through rate (%)',hint:'e.g. 6.8'},{id:'likes',label:'Likes',hint:'e.g. 4210'}] },
+  dribbble: { name:'Dribbble', color:'#F3809C', page:'dribbble.html',
+    fields:[{id:'views',label:'Views',hint:'e.g. 48200'},{id:'likes',label:'Likes',hint:'e.g. 3140'},{id:'saves',label:'Saves',hint:'e.g. 1284'},{id:'comments',label:'Comments',hint:'e.g. 284'},{id:'followers',label:'New followers',hint:'e.g. 142'},{id:'profile',label:'Profile views',hint:'e.g. 2841'}] },
+  website:  { name:'Website', color:'#1B9A6A', page:'website.html',
+    fields:[{id:'sessions',label:'Sessions',hint:'e.g. 18420'},{id:'visitors',label:'Unique visitors',hint:'e.g. 12840'},{id:'referrals',label:'Social referrals',hint:'e.g. 4210'},{id:'duration',label:'Avg. session duration (mm:ss)',hint:'e.g. 2:48'},{id:'bounce',label:'Bounce rate (%)',hint:'e.g. 42.1'}] },
+  'linkedin-ads': { name:'LinkedIn Ads', color:'#0A66C2', page:'linkedin-ads.html',
+    fields:[{id:'impressions',label:'Impressions',hint:'e.g. 450000'},{id:'clicks',label:'Clicks',hint:'e.g. 12500'},{id:'ctr',label:'CTR (%)',hint:'e.g. 2.8'},{id:'spend',label:'Spend ($)',hint:'e.g. 4200'},{id:'cpc',label:'CPC ($)',hint:'e.g. 0.34'},{id:'cpm',label:'CPM ($)',hint:'e.g. 9.33'},{id:'conversions',label:'Conversions',hint:'e.g. 184'},{id:'conversion_rate',label:'Conversion rate (%)',hint:'e.g. 1.47'},{id:'leads',label:'Leads',hint:'e.g. 96'}] },
+  'twitter-ads': { name:'Twitter Ads', color:'#1DA1F2', page:'twitter-ads.html',
+    fields:[{id:'impressions',label:'Impressions',hint:'e.g. 680000'},{id:'clicks',label:'Clicks',hint:'e.g. 9800'},{id:'ctr',label:'CTR (%)',hint:'e.g. 1.44'},{id:'spend',label:'Spend ($)',hint:'e.g. 3100'},{id:'cpc',label:'CPC ($)',hint:'e.g. 0.32'},{id:'cpm',label:'CPM ($)',hint:'e.g. 4.56'},{id:'engagements',label:'Engagements',hint:'e.g. 28400'},{id:'engrate',label:'Engagement rate (%)',hint:'e.g. 4.18'},{id:'conversions',label:'Conversions',hint:'e.g. 142'}] },
+  'google-ads': { name:'Google Ads', color:'#FBBC04', page:'google-ads.html',
+    fields:[{id:'impressions',label:'Impressions',hint:'e.g. 120000'},{id:'clicks',label:'Clicks',hint:'e.g. 8400'},{id:'ctr',label:'CTR (%)',hint:'e.g. 7.0'},{id:'spend',label:'Spend ($)',hint:'e.g. 5800'},{id:'cpc',label:'CPC ($)',hint:'e.g. 0.69'},{id:'conversions',label:'Conversions',hint:'e.g. 320'},{id:'conversion_rate',label:'Conversion rate (%)',hint:'e.g. 3.81'},{id:'cost_per_conversion',label:'Cost per conversion ($)',hint:'e.g. 18.13'},{id:'search_impression_share',label:'Search impression share (%)',hint:'e.g. 42.5'}] }
+};
+
+function selectPlatform(el) {
+  document.querySelectorAll('.plat-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPlatform = el.dataset.platform;
+  document.getElementById('btn-step1').disabled = false;
+  document.getElementById('step1-hint').textContent = PLATFORM_META[selectedPlatform].name + ' selected';
+}
+
+function goToStep(n) {
+  if (n === 1) { xlsxData = null; fileSelected = false; uploadedFileExt = null; resetUploadZone(); }
+  // Update panels
+  [1,2,3].forEach(i => {
+    document.getElementById(`panel-${i}`).classList.toggle('active', i === n);
+  });
+  // Update stepper
+  [1,2,3].forEach(i => {
+    const ind = document.getElementById(`step-indicator-${i}`);
+    const num = document.getElementById(`step-num-${i}`);
+    ind.className = 'step' + (i === n ? ' active' : i < n ? ' done' : '');
+    if (i < n) num.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><path d="M2 5l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    else num.textContent = i;
+  });
+
+  if (n === 2) buildStep2();
+  if (n === 3) buildReview();
+}
+
+function buildStep2() {
+  const meta = PLATFORM_META[selectedPlatform];
+  document.getElementById('step2-title').textContent = `Enter ${meta.name} data`;
+
+  const fields = meta.fields;
+  const grid = document.getElementById('manual-fields');
+  // Clear extra fields on rebuild
+  const ef = document.getElementById('extra-fields'); if (ef) ef.innerHTML = '';
+  grid.innerHTML = fields.map(f => `
+    <div class="form-group">
+      <label class="form-label">${f.label}</label>
+      <input class="form-input" type="text" id="field-${f.id}" placeholder="${f.hint}">
+      <span class="form-hint">Required</span>
+    </div>`).join('');
+}
+
+function buildReview() {
+  const meta = PLATFORM_META[selectedPlatform];
+  const from = document.getElementById('period-from').value;
+  const to = document.getElementById('period-to').value;
+  const fmtDate = d => new Date(d).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+
+  document.getElementById('review-dot').style.background = meta.color;
+  document.getElementById('review-platform-name').textContent = meta.name;
+  document.getElementById('review-period').textContent = fmtDate(from) + ' – ' + fmtDate(to);
+
+  const fields = meta.fields;
+  const grid = document.getElementById('review-grid');
+  const sourceBadge = document.getElementById('review-source-badge');
+
+  if (xlsxData) {
+    // XLSX path: read-only metrics from parsed file
+    grid.innerHTML = xlsxData.metrics.map(m =>
+      `<div class="review-item"><div class="review-label">${m.label}</div><div class="review-value">${m.value}</div></div>`
+    ).join('');
+    if (sourceBadge) { sourceBadge.textContent = (uploadedFileExt || 'xlsx').toUpperCase(); sourceBadge.style.display = 'inline-block'; }
+  } else {
+    // Manual path
+    grid.innerHTML = fields.map(f => {
+      const inputEl = document.getElementById(`field-${f.id}`);
+      const val = (selectedMethod === 'manual' && inputEl && inputEl.value) ? inputEl.value : '—';
+      return `<div class="review-item"><div class="review-label">${f.label}</div><div class="review-value">${val}</div></div>`;
+    }).join('');
+    // Append extra metrics
+    const extraRows = [];
+    document.querySelectorAll('#extra-fields .extra-metric-row').forEach(function(row){
+      const lbl=row.querySelector('.extra-label').value.trim();
+      const val=row.querySelector('.extra-value').value.trim();
+      if(lbl&&val)extraRows.push({lbl,val});
+    });
+    if(extraRows.length) grid.innerHTML += extraRows.map(x=>'<div class="review-item"><div class="review-label">'+x.lbl+'</div><div class="review-value">'+x.val+'</div></div>').join('');
+    if (sourceBadge) sourceBadge.style.display = 'none';
+  }
+}
+
+function setMethod(m) {
+  selectedMethod = m;
+  document.getElementById('method-upload').classList.toggle('active', m === 'upload');
+  document.getElementById('method-manual').classList.toggle('active', m === 'manual');
+  document.getElementById('upload-mode').style.display = m === 'upload' ? 'block' : 'none';
+  document.getElementById('manual-mode').style.display = m === 'manual' ? 'block' : 'none';
+}
+
+function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('dragover'); }
+function handleDragLeave(e) { document.getElementById('drop-zone').classList.remove('dragover'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) setFile(file);
+}
+function handleFileSelect(e) { if (e.target.files[0]) setFile(e.target.files[0]); }
+function setFile(file) {
+  xlsxData = null;
+  fileSelected = true;
+  uploadedFileExt = (file.name.split('.').pop() || '').toLowerCase();
+  document.getElementById('upload-zone-error').style.display = 'none';
+  if (!selectedPlatform) { showToast('Select a platform first, then re-upload.'); fileSelected = false; uploadedFileExt = null; return; }
+  // Parse all file types (CSV and XLSX) client-side with SheetJS
+  _showPillText('⏳ Parsing ' + file.name + '…', false);
+  const zone = document.getElementById('drop-zone');
+  zone.style.borderColor = 'var(--blue)';
+  zone.onclick = null;
+  parseXlsxForUpload(file);
+}
+
+function _showPillText(text, green) {
+  document.querySelector('.upload-icon').style.display = 'none';
+  document.getElementById('upload-title').style.display = 'none';
+  document.querySelector('.upload-sub').style.display = 'none';
+  document.querySelector('.upload-formats').style.display = 'none';
+  document.getElementById('file-pill-name').textContent = text;
+  document.getElementById('file-pill').style.display = 'flex';
+  const zone = document.getElementById('drop-zone');
+  if (green) { zone.style.borderColor = 'var(--green)'; zone.style.background = 'rgba(27,154,106,0.02)'; }
+}
+
+function showFilePill(filename) {
+  _showPillText('✓ ' + filename, true);
+  document.getElementById('drop-zone').onclick = null;
+}
+
+function clearFile(event) {
+  if (event) event.stopPropagation();
+  xlsxData = null;
+  fileSelected = false;
+  uploadedFileExt = null;
+  resetUploadZone();
+}
+
+function resetUploadZone() {
+  const zone = document.getElementById('drop-zone');
+  zone.style.borderColor = '';
+  zone.style.background = '';
+  zone.onclick = function() { document.getElementById('file-input').click(); };
+  document.querySelector('.upload-icon').style.display = '';
+  document.getElementById('upload-title').style.display = '';
+  document.querySelector('.upload-sub').style.display = '';
+  document.querySelector('.upload-formats').style.display = '';
+  document.getElementById('file-pill').style.display = 'none';
+  document.getElementById('upload-zone-error').style.display = 'none';
+  document.getElementById('file-input').value = '';
+}
+
+
+// ── XLSX metric aliases (EN + PT) ─────────────────────────────────────────
+// Organic variants listed before total/paid so they win when both columns exist.
+const METRIC_ALIASES = {
+  // ── Reach / Impressions ──
+  impressions: [
+    // LinkedIn PT — organic first
+    'impressões (orgânicas)','impressões (patrocinadas)','impressões (total)',
+    // Twitter/generic PT
+    'impressões','total de impressões','total impressões',
+    // EN
+    'impressions','post impressions','total impressions',
+  ],
+  reach: [
+    // LinkedIn PT
+    'impressões únicas (orgânicas)','alcance',
+    // EN
+    'reach','unique impressions','accounts reached',
+  ],
+
+  // ── Clicks ──
+  clicks: [
+    // LinkedIn PT — organic first
+    'cliques (orgânicos)','cliques (patrocinados)','cliques (total)',
+    // Generic PT
+    'cliques',
+    // EN
+    'clicks','click-throughs','link clicks','url clicks',
+  ],
+
+  // ── Engagement rate ──
+  engrate: [
+    // LinkedIn PT — organic first
+    'taxa de engajamento (orgânico)','taxa de engajamento (patrocinado)','taxa de engajamento (total)',
+    // Generic PT
+    'taxa de engajamento',
+    // EN
+    'engagement rate','eng rate','engagements / impressions','engagement rate (%)',
+  ],
+
+  // ── Reactions / Likes ──
+  reactions: [
+    // LinkedIn PT — organic first
+    'reações (orgânicas)','reações (patrocinadas)','reações (total)',
+    // Generic PT
+    'reações',
+    // EN
+    'reactions','post reactions','post likes',
+  ],
+  likes: [
+    // PT
+    'curtidas','gostos','favoritos',
+    // EN
+    'likes','favorites','hearts',
+  ],
+
+  // ── Comments ──
+  comments: [
+    // LinkedIn PT — organic first
+    'comentários (orgânicos)','comentários (patrocinados)','comentários (total)',
+    // Generic PT
+    'comentários',
+    // EN
+    'comments',
+  ],
+
+  // ── Shares / Reposts ──
+  shares: [
+    // LinkedIn PT — organic first
+    'compartilhamentos (orgânicos)','compartilhamentos (patrocinados)','compartilhamentos (total)',
+    // Generic PT
+    'compartilhamentos',
+    // EN
+    'shares','reposts','retweets',
+  ],
+  reposts: [
+    // PT
+    'republicações','compartilhamentos',
+    // EN
+    'reposts','retweets',
+  ],
+
+  // ── Followers / Subscribers ──
+  followers: [
+    // PT
+    'novos seguidores','seguidores ganhos',
+    // EN
+    'new followers','followers gained','net followers','subscribers gained','new subscribers',
+  ],
+  subscribers: [
+    // PT
+    'inscritos ganhos','novos inscritos','inscritos',
+    // EN
+    'subscribers','subscribers gained','new subscribers',
+  ],
+
+  // ── Engagements (total interactions) ──
+  engagements: [
+    // PT
+    'engajamentos','total de engajamentos',
+    // EN
+    'engagements','total engagements',
+  ],
+
+  // ── Replies / Quotes ──
+  replies: [
+    // PT
+    'respostas',
+    // EN
+    'replies',
+  ],
+  quotes: [
+    // PT
+    'citações','posts com citação',
+    // EN
+    'quotes','quote posts','quote tweets',
+  ],
+
+  // ── Views / Watch time ──
+  views: [
+    // PT
+    'visualizações','visualizações de vídeo','exibições',
+    // EN
+    'views','video views','page views','total views',
+  ],
+  watchtime: [
+    // PT
+    'tempo de exibição','horas assistidas','tempo assistido (horas)','tempo de exibição (horas)',
+    // EN
+    'watch time','watch time (hours)','watch hours','watchtime',
+  ],
+
+  // ── Duration ──
+  duration: [
+    // PT
+    'duração média da visualização','duração média da sessão','duração média','tempo médio na sessão',
+    // EN
+    'average view duration','avg. view duration','avg session duration','avg. session duration',
+  ],
+
+  // ── CTR ──
+  ctr: [
+    // PT
+    'taxa de cliques','taxa de cliques (%)','ctr (%)',
+    // EN
+    'ctr','click-through rate','click through rate',
+  ],
+
+  // ── Saves / Bookmarks ──
+  saves: [
+    // PT
+    'salvos',
+    // EN
+    'saves','bookmarks',
+  ],
+
+  // ── Profile views ──
+  profile: [
+    // PT
+    'visualizações de perfil','visitas ao perfil',
+    // EN
+    'profile views','profile clicks',
+  ],
+
+  // ── Website metrics ──
+  sessions: [
+    // PT
+    'sessões','total de sessões',
+    // EN
+    'sessions','total sessions','visits',
+  ],
+  visitors: [
+    // PT
+    'usuários','visitantes únicos','visitantes',
+    // EN
+    'users','unique visitors','unique users','active users',
+  ],
+  referrals: [
+    // PT
+    'referências sociais','sessões de referência','referências',
+    // EN
+    'referral sessions','social referrals','referrals',
+  ],
+  bounce: [
+    // PT
+    'taxa de rejeição','taxa de rejeição (%)',
+    // EN
+    'bounce rate','bounce rate (%)',
+  ],
+
+  // ── Paid / Ads metrics ──
+  links:       ['link clicks','url clicks','outbound link clicks','cliques em links'],
+  spend:       ['spend','cost','total spend','total cost','amount spent','gasto','custo total','valor gasto'],
+  cpc:         ['cpc','cost per click','avg. cpc','custo por clique'],
+  cpm:         ['cpm','cost per thousand','cost per mille','custo por mil'],
+  conversions: ['conversions','total conversions','conv.','conversões','total de conversões'],
+  conversion_rate: ['conversion rate','conv. rate','cvr','conversion rate (%)','taxa de conversão'],
+  leads:       ['leads','lead form completions','captações de leads'],
+  cost_per_conversion: ['cost per conversion','cost / conv.','cost/conversion','custo por conversão'],
+  search_impression_share: ['search impression share','impression share','search impr. share','parcela de impressões de pesquisa'],
+};
+
+async function parseXlsxForUpload(file) {
+  try {
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    let wb;
+    if (ext === 'csv') {
+      const text = await file.text();
+      console.log('[upload] CSV raw text (first 500 chars):', text.slice(0, 500));
+      wb = XLSX.read(text, { type: 'string' });
+    } else {
+      const buf = await file.arrayBuffer();
+      wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
+    }
+    const ws   = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
+    console.log('[upload] SheetJS rows (first 5):', JSON.stringify(rows.slice(0, 5)));
+    const mapped = mapXlsxRows(rows, selectedPlatform);
+    console.log('[upload] mapXlsxRows result:', JSON.stringify(mapped));
+    const meta   = PLATFORM_META[selectedPlatform];
+
+    const metrics = meta.fields
+      .filter(f => mapped[f.id] !== undefined && mapped[f.id] !== '')
+      .map(f => ({ key: f.id, label: f.label, value: mapped[f.id] }));
+
+    if (metrics.length === 0) {
+      _showXlsxError();
+      return;
+    }
+
+    xlsxData = { filename: file.name, metrics };
+    fileSelected = true;
+    _showPillText('✓ ' + file.name + ' · ' + metrics.length + ' metrics', true);
+    document.getElementById('drop-zone').onclick = null;
+    showToast('Parsed ' + metrics.length + ' metrics · click Preview to continue');
+  } catch (err) {
+    console.error('XLSX parse error:', err);
+    _showXlsxError();
+  }
+}
+
+function _showXlsxError() {
+  xlsxData = null;
+  fileSelected = false;
+  uploadedFileExt = null;
+  resetUploadZone();
+  const zone = document.getElementById('drop-zone');
+  zone.style.borderColor = 'var(--red)';
+  document.getElementById('upload-zone-error').style.display = 'block';
+}
+
+function mapXlsxRows(rows, platform) {
+  const result = {};
+  if (!rows || rows.length < 1) return result;
+  const meta = PLATFORM_META[platform];
+  if (!meta) return result;
+
+  // Try tabular format: row 0 = headers, row 1 = values
+  const headerRow = (rows[0] || []).map(function(h) { return String(h || '').toLowerCase().trim(); });
+  const dataRow   = rows[1] || [];
+
+  if (headerRow.length > 1) {
+    meta.fields.forEach(function(f) {
+      var aliases = METRIC_ALIASES[f.id] || [f.id];
+      for (var i = 0; i < aliases.length; i++) {
+        var al = aliases[i].toLowerCase();
+        var idx = -1;
+        for (var j = 0; j < headerRow.length; j++) {
+          if (headerRow[j] === al || headerRow[j].indexOf(al) !== -1 || al.indexOf(headerRow[j]) !== -1) {
+            idx = j; break;
+          }
+        }
+        if (idx !== -1 && dataRow[idx] !== null && dataRow[idx] !== undefined) {
+          var v = String(dataRow[idx]).trim().replace(/,/g, '');
+          if (f.id === 'engrate' || f.id === 'ctr' || f.id === 'bounce') v = v.replace(/%/g, '');
+          if (v) { result[f.id] = v; break; }
+        }
+      }
+    });
+  }
+
+  // If tabular didn't map anything, try key:value pairs (col A = label, col B = value)
+  if (!Object.keys(result).length) {
+    rows.forEach(function(row) {
+      if (!row || row.length < 2 || row[0] === null) return;
+      var key = String(row[0]).toLowerCase().trim();
+      var val = row[1] !== null && row[1] !== undefined ? String(row[1]).trim().replace(/,/g, '') : '';
+      if (!val) return;
+      meta.fields.forEach(function(f) {
+        if (result[f.id]) return;
+        var aliases = METRIC_ALIASES[f.id] || [f.id];
+        for (var i = 0; i < aliases.length; i++) {
+          var al = aliases[i].toLowerCase();
+          if (key.indexOf(al) !== -1 || al.indexOf(key) !== -1) {
+            var v = val;
+            if (f.id === 'engrate' || f.id === 'ctr' || f.id === 'bounce') v = v.replace(/%/g, '');
+            if (v) { result[f.id] = v; break; }
+          }
+        }
+      });
+    });
+  }
+
+  return result;
+}
+
+function addExtraMetric() {
+  const container = document.getElementById('extra-fields');
+  const row = document.createElement('div');
+  row.className = 'extra-metric-row';
+  row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end';
+  row.innerHTML = '<div class="form-group"><label class="form-label">Metric label</label><input class="form-input extra-label" type="text" placeholder="e.g. Video views"></div><div class="form-group"><label class="form-label">Value</label><input class="form-input extra-value" type="text" placeholder="e.g. 4200"></div>';
+  container.appendChild(row);
+}
+
+async function saveReport() {
+  const meta = PLATFORM_META[selectedPlatform];
+  const from = document.getElementById('period-from').value;
+  const to   = document.getElementById('period-to').value;
+  const btn  = document.getElementById('btn-save');
+  const fmtDate = d => new Date(d).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  // ── Diagnostic log ──────────────────────────────────────────────
+  console.log('[save] fileSelected:', fileSelected,
+    '| uploadedFileExt:', uploadedFileExt,
+    '| xlsxData:', xlsxData ? { metricsCount: xlsxData.metrics.length, keys: xlsxData.metrics.map(m=>m.key) } : null,
+    '| selectedMethod:', selectedMethod);
+
+  try {
+    // 1. Look up platform id by slug
+    const { data: platform, error: platErr } = await window._sb
+      .from('platforms').select('id').eq('slug', selectedPlatform).single();
+    console.log('[save] platform lookup:', platform, platErr);
+    if (platErr) throw platErr;
+
+    // 2. Insert report row
+    // Source comes from the file extension when a file was uploaded — never from selectedMethod
+    const source = uploadedFileExt || selectedMethod;
+    const { data: report, error: reportErr } = await window._sb
+      .from('reports')
+      .insert({ platform_id: platform.id, period_start: from, period_end: to, source })
+      .select('id').single();
+    console.log('[save] report insert:', report, reportErr);
+    if (reportErr) throw reportErr;
+
+    // 3. Insert metric rows
+    // File path: use xlsxData (parsed from file). Manual path: use form fields.
+    const rows = [];
+    if (xlsxData && xlsxData.metrics) {
+      xlsxData.metrics.forEach(m => {
+        const v = m.value !== null && m.value !== undefined ? String(m.value).trim() : '';
+        if (v) rows.push({ report_id: report.id, key: m.key, value: v });
+      });
+    } else if (!fileSelected && selectedMethod === 'manual') {
+      meta.fields.forEach(f => {
+        const v = (document.getElementById('field-' + f.id)?.value || '').trim();
+        if (v) rows.push({ report_id: report.id, key: f.id, value: v });
+      });
+      document.querySelectorAll('#extra-fields .extra-metric-row').forEach(function(row){
+        const lbl=row.querySelector('.extra-label').value.trim();
+        const val=row.querySelector('.extra-value').value.trim();
+        if(lbl&&val)rows.push({report_id:report.id,key:lbl.toLowerCase().replace(/[^a-z0-9]+/g,'_'),value:val});
+      });
+    }
+    console.log('[save] metric rows to insert (' + rows.length + '):', JSON.stringify(rows));
+    if (rows.length > 0) {
+      const { error: metricsErr } = await window._sb.from('metrics').insert(rows);
+      console.log('[save] metrics insert error:', metricsErr);
+      if (metricsErr) throw metricsErr;
+    }
+
+    // 4. Show success screen
+    [1,2,3].forEach(i => document.getElementById('panel-' + i).classList.remove('active'));
+    const sw = document.getElementById('success-wrap');
+    sw.style.display = 'flex';
+    document.getElementById('success-sub').textContent =
+      `Your ${meta.name} report for ${fmtDate(from)} – ${fmtDate(to)} has been saved.`;
+    document.getElementById('success-platform-btn').textContent = `View ${meta.name} analytics →`;
+    document.getElementById('success-platform-btn').onclick = () => location.href = meta.page;
+    showToast('Report saved successfully');
+
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7l3 3 5-6" stroke-linecap="round" stroke-linejoin="round"/></svg> Save report';
+    showToast('Error: ' + (err.message || 'Could not save report'));
+    console.error('saveReport:', err);
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>

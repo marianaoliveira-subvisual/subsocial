@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>(function(){var t=localStorage.getItem('sb-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>(function(){var _u='https://bgdyahjipkxwosbbkkqd.supabase.co',_k='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnZHlhaGppcGt4d29zYmJra3FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODMyODEsImV4cCI6MjA5MDQ1OTI4MX0.rB6ePMZjZM5_g9Gq1pxIoNxaFXFKoAaIKfXxSWkigR4';window._sb=supabase.createClient(_u,_k);document.documentElement.style.visibility='hidden';window._sb.auth.getSession().then(function(r){var s=r.data.session;if(!s){window.location.replace('supabase-auth.html');}else{document.documentElement.style.visibility='';if(window._onAuthReady)window._onAuthReady(s);}});})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SubSocial · Settings</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap');
+  :root{--blue:#045CFC;--indigo:#2421AB;--ink:#403F4C;--ink-light:#6B6A77;--ink-faint:#9E9DA8;--bg:#F4F4F8;--surface:#FFFFFF;--border:rgba(4,92,252,0.10);--border-md:rgba(4,92,252,0.18);--blue-tint:rgba(4,92,252,0.07);--green:#1B9A6A;--red:#D14040;--sidebar-w:220px;--radius:12px;--radius-sm:8px;}
+  [data-theme="dark"]{
+    --bg:#18181f;
+    --surface:#22212d;
+    --border:rgba(255,255,255,0.08);
+    --border-md:rgba(255,255,255,0.15);
+    --border-light:rgba(255,255,255,0.05);
+    --blue-tint:rgba(4,92,252,0.18);
+    --ink:#e0dff0;
+    --ink-light:#a8a7b8;
+    --ink-faint:#6b6a7c;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;overflow-x:hidden}
+  .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;padding:0 0 24px}
+  .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border);margin-bottom:8px}
+  .logo-mark{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .logo-symbol{width:32px;height:32px;background:var(--indigo);border-radius:8px;display:flex;align-items:center;justify-content:center}
+  .logo-text{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--indigo);letter-spacing:-0.2px}
+  .sidebar-section{padding:0 12px;margin-bottom:4px}
+  .sidebar-section-label{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);padding:8px 8px 6px}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius-sm);font-size:13px;font-weight:400;color:var(--ink-light);cursor:pointer;transition:background 0.15s,color 0.15s;text-decoration:none}
+  .nav-item:hover{background:var(--blue-tint);color:var(--blue)}
+  .nav-item.active{background:var(--blue-tint);color:var(--blue);font-weight:500}
+  .nav-icon{width:16px;height:16px;opacity:0.6;flex-shrink:0}
+  .nav-item.active .nav-icon{opacity:1}
+  .platform-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .sidebar-footer{margin-top:auto;padding:16px 20px 0;border-top:1px solid var(--border)}
+  .user-pill{display:flex;align-items:center;gap:10px}
+  .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:500;flex-shrink:0}
+  .user-name{font-size:13px;font-weight:500;color:var(--ink)}
+  .user-role{font-size:11px;color:var(--ink-faint)}
+  .role-badge{margin-left:auto;font-size:10px;font-weight:500;padding:2px 7px;border-radius:100px;background:rgba(4,92,252,0.1);color:var(--blue)}
+  .main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+  .page-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--indigo);letter-spacing:-0.3px}
+  .content{padding:28px;flex:1}
+  .btn-primary{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;text-decoration:none;transition:background 0.15s}
+  .btn-primary:hover{background:var(--indigo)}
+  .empty-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 40px;gap:16px;text-align:center}
+  .empty-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--indigo)}
+  .empty-sub{font-size:13px;color:var(--ink-faint);max-width:320px}
+  .loading-msg{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--ink-faint);font-size:13px}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .settings-stack{display:flex;flex-direction:column;gap:18px;max-width:560px}
+  .settings-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;animation:fadeUp 0.35s ease both}
+  .settings-card:nth-child(2){animation-delay:0.05s}
+  .settings-card:nth-child(3){animation-delay:0.1s}
+  .settings-card-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--indigo);margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+  .settings-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+  .settings-field label{font-size:11px;font-weight:500;color:var(--ink-light);text-transform:uppercase;letter-spacing:0.07em}
+  .settings-input{padding:9px 12px;border:1px solid var(--border-md);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;color:var(--ink);background:var(--surface);transition:border-color 0.15s}
+  .settings-input:focus{outline:none;border-color:var(--blue)}
+  .settings-input[readonly]{background:var(--bg);color:var(--ink-light);cursor:default}
+  .btn-save{padding:8px 18px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:background 0.15s}
+  .btn-save:hover{background:var(--indigo)}
+  .feedback{font-size:12px;margin-top:8px;min-height:16px}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between}
+  .toggle-label{font-size:13px;font-weight:500;color:var(--ink)}
+  .toggle-sub{font-size:11px;color:var(--ink-faint);margin-top:2px}
+  .toggle{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0}
+  .toggle input{opacity:0;width:0;height:0}
+  .toggle-track{position:absolute;inset:0;background:var(--border-md);border-radius:100px;cursor:pointer;transition:background 0.2s}
+  .toggle input:checked+.toggle-track{background:var(--blue)}
+  .toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;background:white;border-radius:50%;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.15)}
+  .toggle input:checked+.toggle-track .toggle-thumb{transform:translateX(18px)}
+  .radio-group{display:flex;gap:10px;margin-top:6px}
+  .radio-opt{display:flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--border-md);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:border-color 0.15s,background 0.15s}
+  .radio-opt input{accent-color:var(--blue)}
+  .radio-opt:has(input:checked){border-color:var(--blue);background:var(--blue-tint);color:var(--blue);font-weight:500}
+</style>
+  
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a class="logo-mark" href="dashboard.html">
+      <div class="logo-symbol"><img src="symbol-white_8x.png" alt="SubSocial" style="width:22px;height:22px;object-fit:contain;display:block;"></div>
+      <span class="logo-text">SubSocial</span>
+    </a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Menu</div>
+    <a class="nav-item" href="dashboard.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>Overview</a>
+    <a class="nav-item" href="analytics.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12 L5 8 L8 10 L11 5 L14 7"/><rect x="1" y="13" width="14" height="1" rx="0.5" fill="currentColor" stroke="none"/></svg>Analytics</a>
+    <a class="nav-item" href="reports.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 7h6M5 9.5h4"/></svg>Reports</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Organic</div>
+    <a class="nav-item" href="linkedin.html"><div class="platform-dot" style="background:#045CFC"></div>LinkedIn</a>
+    <a class="nav-item" href="twitter.html"><div class="platform-dot" style="background:#403F4C"></div>Twitter / X</a>
+    <a class="nav-item" href="bluesky.html"><div class="platform-dot" style="background:#9563FF"></div>Bluesky</a>
+    <a class="nav-item" href="youtube.html"><div class="platform-dot" style="background:#D14040"></div>YouTube</a>
+    <a class="nav-item" href="dribbble.html"><div class="platform-dot" style="background:#F3809C"></div>Dribbble</a>
+    <a class="nav-item" href="website.html"><div class="platform-dot" style="background:#1B9A6A"></div>Website</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Paid</div>
+    <a class="nav-item" href="linkedin-ads.html"><div class="platform-dot" style="background:#0A66C2"></div>LinkedIn Ads</a>
+    <a class="nav-item" href="twitter-ads.html"><div class="platform-dot" style="background:#1DA1F2"></div>Twitter Ads</a>
+    <a class="nav-item" href="google-ads.html"><div class="platform-dot" style="background:#FBBC04"></div>Google Ads</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Team</div>
+    <a class="nav-item" href="sharing.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2.5"/><circle cx="11" cy="5" r="2.5"/><path d="M1 13c0-2.5 2.5-4 5-4s5 1.5 5 4"/><path d="M11 9c1.5 0 4 .8 4 4" stroke-dasharray="2 1"/></svg>Members</a>
+    <a class="nav-item active" href="settings.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.1 3.1l1.1 1.1M11.8 11.8l1.1 1.1M3.1 12.9l1.1-1.1M11.8 4.2l1.1-1.1"/></svg>Settings</a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar">M</div>
+      <div><div class="user-name">Mariana</div><div class="user-role">Social Media Manager</div></div>
+      <span class="role-badge">Admin</span>
+    </div>
+    <button onclick="window._sb.auth.signOut().then(function(){location.replace('supabase-auth.html')})" style="margin-top:10px;background:none;border:none;font-family:inherit;font-size:11px;color:var(--ink-faint);cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 6H1M4 3l-3 3 3 3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 1h5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5" stroke-linecap="round"/></svg>Sign out</button>
+  </div>
+</aside>
+<div class="main">
+  <header class="topbar">
+    <span class="page-title">Settings</span>
+  </header>
+  <div class="content">
+    <div class="settings-stack">
+
+      <div class="settings-card">
+        <div class="settings-card-title">Account</div>
+        <div class="settings-field">
+          <label>Email</label>
+          <input class="settings-input" type="email" id="account-email" readonly>
+        </div>
+        <div class="settings-field">
+          <label>New password</label>
+          <input class="settings-input" type="password" id="new-pw" placeholder="Enter new password (min. 6 characters)">
+        </div>
+        <div class="settings-field">
+  <label>Confirm new password</label>
+  <input class="settings-input" type="password" id="confirm-pw" placeholder="Re-enter new password">
+</div>
+<button class="btn-save" id="btn-change-pw" onclick="changePw()">Update password</button>
+        <div class="feedback" id="pw-msg"></div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card-title">Appearance</div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Dark mode</div>
+            <div class="toggle-sub">Applies a dark theme across the dashboard</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="dark-toggle" onchange="setTheme(this.checked)">
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card-title">Dashboard preferences</div>
+        <div class="settings-field">
+          <label>Default period</label>
+          <div class="radio-group" id="period-radios">
+            <label class="radio-opt"><input type="radio" name="period" value="7" onchange="savePeriod(this.value)"> 7 days</label>
+            <label class="radio-opt"><input type="radio" name="period" value="30" onchange="savePeriod(this.value)"> 30 days</label>
+            <label class="radio-opt"><input type="radio" name="period" value="90" onchange="savePeriod(this.value)"> 90 days</label>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script>
+// ── Toast ─────────────────────────────────────────────────────────────
+function _toast(msg, ok){
+  let t=document.getElementById('_settings_toast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='_settings_toast';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:nowrap';
+    document.body.appendChild(t);
+  }
+  t.style.background = ok===false ? 'var(--red)' : '#403F4C';
+  t.textContent=msg;
+  t.style.opacity='1';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(function(){t.style.opacity='0';},3000);
+}
+
+// ── Auth ready ────────────────────────────────────────────────────────
+window._onAuthReady=async function(session){
+  // 1. Email — prefer getUser() for freshest data
+  try{
+    const{data:{user}}=await window._sb.auth.getUser();
+    document.getElementById('account-email').value=(user&&user.email)||session.user.email||'';
+  }catch(e){
+    document.getElementById('account-email').value=session.user.email||'';
+  }
+
+  // 2. Dark mode toggle
+  const theme=localStorage.getItem('sb-theme')||'light';
+  document.getElementById('dark-toggle').checked=(theme==='dark');
+  applyTheme(theme);
+
+  // 3. Default period radios
+  const period=localStorage.getItem('sb-default-period')||'30';
+  document.querySelectorAll('input[name="period"]').forEach(function(r){r.checked=(r.value===period);});
+};
+
+// ── Change password ───────────────────────────────────────────────────
+async function changePw(){
+  const pw  = document.getElementById('new-pw').value.trim();
+  const cpw = document.getElementById('confirm-pw').value.trim();
+  const msg = document.getElementById('pw-msg');
+  const btn = document.getElementById('btn-change-pw');
+
+  if(!pw||pw.length<6){
+    msg.style.color='var(--red)';msg.textContent='Password must be at least 6 characters.';return;
+  }
+  if(pw!==cpw){
+    msg.style.color='var(--red)';msg.textContent='Passwords do not match.';return;
+  }
+  msg.textContent='';
+  btn.disabled=true;btn.textContent='Updating…';
+
+  const{error}=await window._sb.auth.updateUser({password:pw});
+  btn.disabled=false;btn.textContent='Update password';
+  if(error){
+    msg.style.color='var(--red)';msg.textContent=error.message||'Update failed.';
+    _toast(error.message||'Could not update password.',false);
+  }else{
+    msg.style.color='var(--green)';msg.textContent='Password updated.';
+    document.getElementById('new-pw').value='';
+    document.getElementById('confirm-pw').value='';
+    _toast('Password updated.✓',true);
+  }
+}
+
+// ── Theme ─────────────────────────────────────────────────────────────
+function setTheme(dark){
+  const t=dark?'dark':'light';
+  localStorage.setItem('sb-theme',t);
+  applyTheme(t);
+}
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+}
+
+// ── Default period ────────────────────────────────────────────────────
+function savePeriod(v){
+  localStorage.setItem('sb-default-period',v);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>(function(){var t=localStorage.getItem('sb-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+async function deleteReport(id,btn){
+  if(!confirm('Delete this report? This cannot be undone.'))return;
+  btn.disabled=true;
+  const{data,error}=await window._sb.from('reports').delete().eq('id',id).select();
+  if(error){console.error('[SubSocial] Delete failed',{code:error.code,msg:error.message,hint:error.hint,details:error.details});showToast('Delete failed: '+(error.message||error.code||'RLS policy may be blocking deletes'));btn.disabled=false;return;}
+console.log('[SubSocial] Deleted report',id,'rows returned:',data&&data.length);
+  const row=btn.closest('tr');if(row)row.remove();
+  ALL=ALL.filter(function(x){return x.id!==id;});
+  const countEl=document.querySelector('.count-label');
+  if(countEl){const m=countEl.textContent.match(/\d+/);if(m){const n=+m[0]-1;countEl.textContent=n+' report'+(n!==1?'s':'');}}
+  showToast('Report deleted.');
+}
+function showToast(msg){
+  let t=document.getElementById('_toast');
+  if(!t){t=document.createElement('div');t.id='_toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#403F4C;color:white;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.25s;pointer-events:none';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';clearTimeout(t._timer);t._timer=setTimeout(function(){t.style.opacity='0';},2800);
+}
+</script>
+<script>(function(){var _u='https://bgdyahjipkxwosbbkkqd.supabase.co',_k='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnZHlhaGppcGt4d29zYmJra3FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODMyODEsImV4cCI6MjA5MDQ1OTI4MX0.rB6ePMZjZM5_g9Gq1pxIoNxaFXFKoAaIKfXxSWkigR4';window._sb=supabase.createClient(_u,_k);document.documentElement.style.visibility='hidden';window._sb.auth.getSession().then(function(r){var s=r.data.session;if(!s){window.location.replace('supabase-auth.html');}else{document.documentElement.style.visibility='';if(window._onAuthReady)window._onAuthReady(s);}});})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SubSocial · Reports</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap');
+  :root{--blue:#045CFC;--indigo:#2421AB;--ink:#403F4C;--ink-light:#6B6A77;--ink-faint:#9E9DA8;--bg:#F4F4F8;--surface:#FFFFFF;--border:rgba(4,92,252,0.10);--border-md:rgba(4,92,252,0.18);--blue-tint:rgba(4,92,252,0.07);--green:#1B9A6A;--red:#D14040;--sidebar-w:220px;--radius:12px;--radius-sm:8px;}
+  [data-theme="dark"]{
+    --bg:#18181f;
+    --surface:#22212d;
+    --border:rgba(255,255,255,0.08);
+    --border-md:rgba(255,255,255,0.15);
+    --border-light:rgba(255,255,255,0.05);
+    --blue-tint:rgba(4,92,252,0.18);
+    --ink:#e0dff0;
+    --ink-light:#a8a7b8;
+    --ink-faint:#6b6a7c;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;overflow-x:hidden}
+  .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;padding:0 0 24px}
+  .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border);margin-bottom:8px}
+  .logo-mark{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .logo-symbol{width:32px;height:32px;background:var(--indigo);border-radius:8px;display:flex;align-items:center;justify-content:center}
+  .logo-text{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--indigo);letter-spacing:-0.2px}
+  .sidebar-section{padding:0 12px;margin-bottom:4px}
+  .sidebar-section-label{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);padding:8px 8px 6px}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius-sm);font-size:13px;font-weight:400;color:var(--ink-light);cursor:pointer;transition:background 0.15s,color 0.15s;text-decoration:none}
+  .nav-item:hover{background:var(--blue-tint);color:var(--blue)}
+  .nav-item.active{background:var(--blue-tint);color:var(--blue);font-weight:500}
+  .nav-icon{width:16px;height:16px;opacity:0.6;flex-shrink:0}
+  .nav-item.active .nav-icon{opacity:1}
+  .platform-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .sidebar-footer{margin-top:auto;padding:16px 20px 0;border-top:1px solid var(--border)}
+  .user-pill{display:flex;align-items:center;gap:10px}
+  .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:500;flex-shrink:0}
+  .user-name{font-size:13px;font-weight:500;color:var(--ink)}
+  .user-role{font-size:11px;color:var(--ink-faint)}
+  .role-badge{margin-left:auto;font-size:10px;font-weight:500;padding:2px 7px;border-radius:100px;background:rgba(4,92,252,0.1);color:var(--blue)}
+  .main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+  .page-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--indigo);letter-spacing:-0.3px}
+  .content{padding:28px;flex:1}
+  .btn-primary{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;text-decoration:none;transition:background 0.15s}
+  .btn-primary:hover{background:var(--indigo)}
+  .empty-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 40px;gap:16px;text-align:center}
+  .empty-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--indigo)}
+  .empty-sub{font-size:13px;color:var(--ink-faint);max-width:320px}
+  .loading-msg{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--ink-faint);font-size:13px}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .filter-bar{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  .filter-label{font-size:11px;font-weight:500;color:var(--ink-light);text-transform:uppercase;letter-spacing:0.07em}
+  .filter-select{padding:6px 10px;border:1px solid var(--border-md);border-radius:var(--radius-sm);font-size:12px;font-family:inherit;color:var(--ink);background:var(--surface);cursor:pointer}
+  .filter-select:focus{outline:none;border-color:var(--blue)}
+  .count-label{font-size:12px;color:var(--ink-faint)}
+  .table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;animation:fadeUp 0.35s ease both}
+  .reports-table{width:100%;border-collapse:collapse;font-size:12px}
+  .reports-table th{text-align:left;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg)}
+  .reports-table td{padding:13px 16px;border-bottom:1px solid var(--border);color:var(--ink);vertical-align:middle}
+  .reports-table tr:last-child td{border-bottom:none}
+  .reports-table tr:hover td{background:rgba(4,92,252,0.02)}
+  .platform-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--ink)}
+  .chip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .badge{display:inline-flex;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500}
+  .badge-csv{background:rgba(149,99,255,0.1);color:#9563FF}
+  .badge-manual{background:rgba(4,92,252,0.08);color:var(--blue)}
+  .metric-val{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--indigo)}
+  .metric-key{font-size:11px;color:var(--ink-faint)}
+  .view-btn{display:inline-flex;padding:5px 12px;border-radius:var(--radius-sm);background:var(--blue-tint);color:var(--blue);font-size:11px;font-weight:500;text-decoration:none;transition:background 0.15s}
+  .view-btn:hover{background:rgba(4,92,252,0.14)}
+  .empty-cell{text-align:center;padding:40px;color:var(--ink-faint);font-size:13px}
+
+  .delete-btn{background:none;border:none;cursor:pointer;padding:5px;color:var(--ink-faint);border-radius:4px;transition:color .15s,background .15s;line-height:0;display:inline-flex;align-items:center;}
+  .delete-btn:hover{color:var(--red);background:rgba(209,64,64,0.08);}
+  .delete-btn:disabled{opacity:0.4;cursor:default;}
+</style>
+  
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a class="logo-mark" href="dashboard.html">
+      <div class="logo-symbol"><img src="symbol-white_8x.png" alt="SubSocial" style="width:22px;height:22px;object-fit:contain;display:block;"></div>
+      <span class="logo-text">SubSocial</span>
+    </a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Menu</div>
+    <a class="nav-item" href="dashboard.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>Overview</a>
+    <a class="nav-item" href="analytics.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12 L5 8 L8 10 L11 5 L14 7"/><rect x="1" y="13" width="14" height="1" rx="0.5" fill="currentColor" stroke="none"/></svg>Analytics</a>
+    <a class="nav-item active" href="reports.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 7h6M5 9.5h4"/></svg>Reports</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Organic</div>
+    <a class="nav-item" href="linkedin.html"><div class="platform-dot" style="background:#045CFC"></div>LinkedIn</a>
+    <a class="nav-item" href="twitter.html"><div class="platform-dot" style="background:#403F4C"></div>Twitter / X</a>
+    <a class="nav-item" href="bluesky.html"><div class="platform-dot" style="background:#9563FF"></div>Bluesky</a>
+    <a class="nav-item" href="youtube.html"><div class="platform-dot" style="background:#D14040"></div>YouTube</a>
+    <a class="nav-item" href="dribbble.html"><div class="platform-dot" style="background:#F3809C"></div>Dribbble</a>
+    <a class="nav-item" href="website.html"><div class="platform-dot" style="background:#1B9A6A"></div>Website</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Paid</div>
+    <a class="nav-item" href="linkedin-ads.html"><div class="platform-dot" style="background:#0A66C2"></div>LinkedIn Ads</a>
+    <a class="nav-item" href="twitter-ads.html"><div class="platform-dot" style="background:#1DA1F2"></div>Twitter Ads</a>
+    <a class="nav-item" href="google-ads.html"><div class="platform-dot" style="background:#FBBC04"></div>Google Ads</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Team</div>
+    <a class="nav-item" href="sharing.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2.5"/><circle cx="11" cy="5" r="2.5"/><path d="M1 13c0-2.5 2.5-4 5-4s5 1.5 5 4"/><path d="M11 9c1.5 0 4 .8 4 4" stroke-dasharray="2 1"/></svg>Members</a>
+    <a class="nav-item" href="settings.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.1 3.1l1.1 1.1M11.8 11.8l1.1 1.1M3.1 12.9l1.1-1.1M11.8 4.2l1.1-1.1"/></svg>Settings</a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar">M</div>
+      <div><div class="user-name">Mariana</div><div class="user-role">Social Media Manager</div></div>
+      <span class="role-badge">Admin</span>
+    </div>
+    <button onclick="window._sb.auth.signOut().then(function(){location.replace('supabase-auth.html')})" style="margin-top:10px;background:none;border:none;font-family:inherit;font-size:11px;color:var(--ink-faint);cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 6H1M4 3l-3 3 3 3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 1h5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5" stroke-linecap="round"/></svg>Sign out</button>
+  </div>
+</aside>
+<div class="main">
+  <header class="topbar">
+    <span class="page-title">Reports</span>
+    <a class="btn-primary" href="upload.html">+ Upload report</a>
+  </header>
+  <div class="content" id="main-content">
+    <div class="loading-msg">Loading reports…</div>
+  </div>
+</div>
+<script>
+const PAGE_MAP={linkedin:'linkedin.html',twitter:'twitter.html',bluesky:'bluesky.html',youtube:'youtube.html',dribbble:'dribbble.html',website:'website.html'};
+const REACH_KEY={linkedin:'impressions',twitter:'impressions',bluesky:'impressions',youtube:'views',dribbble:'views',website:'sessions'};
+const REACH_LBL={linkedin:'Impressions',twitter:'Impressions',bluesky:'Impressions',youtube:'Views',dribbble:'Views',website:'Sessions'};
+let ALL=[];
+
+function fmtDate(d){return d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';}
+function fmtNum(n){if(!n||isNaN(+n))return'—';n=+n;if(n>=1e6)return(n/1e6).toFixed(1).replace(/\.0$/,'')+'M';if(n>=1e3)return(n/1e3).toFixed(1).replace(/\.0$/,'')+'K';return n.toLocaleString();}
+
+window._onAuthReady=async function(){
+  try{
+    const {data,error}=await window._sb.from('reports').select('id,period_start,period_end,source,created_at,platforms(slug,label,color),metrics(key,value)').order('created_at',{ascending:false});
+    if(error||!data||!data.length){showEmpty();return;}
+    ALL=data;renderReports('all');
+  }catch(e){console.error(e);showEmpty();}
+};
+
+function showEmpty(){
+  document.getElementById('main-content').innerHTML='<div class="empty-wrap"><div class="empty-title">No reports yet</div><div class="empty-sub">Upload your first analytics report to see it here.</div><a class="btn-primary" href="upload.html">Upload a report →</a></div>';
+}
+
+function renderReports(slug){
+  const filtered=slug==='all'?ALL:ALL.filter(r=>r.platforms&&r.platforms.slug===slug);
+  const slugs=[...new Set(ALL.map(r=>r.platforms&&r.platforms.slug).filter(Boolean))];
+  const opts=['all',...slugs].map(s=>{
+    const p=ALL.find(r=>r.platforms&&r.platforms.slug===s);
+    return `<option value="${s}"${slug===s?' selected':''}>${s==='all'?'All platforms':(p&&p.platforms.label)||s}</option>`;
+  }).join('');
+
+  const rows=filtered.map(r=>{
+    const p=r.platforms||{};
+    const mByKey={};(r.metrics||[]).forEach(m=>mByKey[m.key]=m.value);
+    const rk=REACH_KEY[p.slug]||'impressions';
+    const rv=mByKey[rk]?fmtNum(+mByKey[rk]):'—';
+    const rl=REACH_LBL[p.slug]||'Impressions';
+    const period=fmtDate(r.period_start)+' – '+fmtDate(r.period_end);
+    const badge=r.source==='csv'?'<span class="badge badge-csv">CSV</span>':'<span class="badge badge-manual">Manual</span>';
+    return `<tr data-rid="${r.id}"><td><span class="platform-chip"><span class="chip-dot" style="background:${p.color||'#ccc'}"></span>${p.label||'—'}</span></td><td>${period}</td><td>${badge}</td><td><span class="metric-val">${rv}</span> <span class="metric-key">${rl}</span></td><td style="color:var(--ink-faint)">${fmtDate(r.created_at)}</td><td><a class="view-btn" href="${PAGE_MAP[p.slug]||'#'}">View →</a></td><td><button class="delete-btn" data-rid="${r.id}" onclick="deleteReport(this.dataset.rid,this)" title="Delete report"><svg width="13" height="13" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3h8M4.5 3V1.5h3V3M3 3l.5 7.5h5L9 3"/><path d="M5 5.5v3M7 5.5v3"/></svg></button></td></tr>`;
+  }).join('')||'<tr><td colspan="6" class="empty-cell">No reports for this filter.</td></tr>';
+
+  document.getElementById('main-content').innerHTML=`
+    <div class="filter-bar">
+      <span class="filter-label">Platform</span>
+      <select class="filter-select" onchange="renderReports(this.value)">${opts}</select>
+      <span class="count-label">${filtered.length} report${filtered.length!==1?'s':''}</span>
+    </div>
+    <div class="table-card">
+      <table class="reports-table"><thead><tr><th>Platform</th><th>Period</th><th>Source</th><th>Summary</th><th>Uploaded</th><th></th><th></th></tr></thead>
+      <tbody>${rows}</tbody></table>
+    </div>`;
+}
+</script>
+</body>
+</html>

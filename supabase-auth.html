@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>(function(){var t=localStorage.getItem('sb-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SubSocial · Sign in</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap');
+  :root {
+    --blue:#045CFC; --indigo:#2421AB; --ink:#403F4C;
+    --ink-light:#6B6A77; --ink-faint:#9E9DA8;
+    --bg:#F4F4F8; --surface:#FFFFFF;
+    --border:rgba(4,92,252,0.10); --border-md:rgba(4,92,252,0.18);
+    --green:#1B9A6A; --red:#D14040;
+    --radius:12px; --radius-sm:8px;
+  }
+  [data-theme="dark"]{
+    --bg:#18181f;
+    --surface:#22212d;
+    --border:rgba(255,255,255,0.08);
+    --border-md:rgba(255,255,255,0.15);
+    --border-light:rgba(255,255,255,0.05);
+    --blue-tint:rgba(4,92,252,0.18);
+    --ink:#e0dff0;
+    --ink-light:#a8a7b8;
+    --ink-faint:#6b6a7c;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--bg); color: var(--ink);
+    min-height: 100vh; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .auth-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 40px; width: 100%; max-width: 380px;
+    box-shadow: 0 4px 24px rgba(36,33,171,0.06);
+  }
+  .logo-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
+  .logo-symbol {
+    width: 36px; height: 36px; background: var(--indigo);
+    border-radius: 9px; display: flex; align-items: center; justify-content: center;
+  }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; color: var(--indigo); }
+  h1 { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--indigo); margin-bottom: 6px; letter-spacing: -0.3px; }
+  .sub { font-size: 13px; color: var(--ink-faint); margin-bottom: 28px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+  label { font-size: 11px; font-weight: 500; color: var(--ink-light); text-transform: uppercase; letter-spacing: 0.07em; }
+  input {
+    padding: 10px 12px; border: 1px solid var(--border-md);
+    border-radius: var(--radius-sm); font-size: 13px;
+    font-family: inherit; color: var(--ink); background: var(--surface);
+    transition: border-color 0.15s;
+  }
+  input:focus { outline: none; border-color: var(--blue); }
+  .btn-primary {
+    width: 100%; padding: 11px; background: var(--blue); color: white;
+    border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: inherit; transition: background 0.15s; margin-top: 8px;
+  }
+  .btn-primary:hover { background: var(--indigo); }
+  .btn-primary:disabled { background: var(--ink-faint); cursor: not-allowed; }
+  .error-msg {
+    font-size: 12px; color: var(--red);
+    background: rgba(209,64,64,0.07); border: 1px solid rgba(209,64,64,0.2);
+    border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 12px; display: none;
+  }
+  .hint { font-size: 11px; color: var(--ink-faint); text-align: center; margin-top: 20px; line-height: 1.5; }
+</style>
+  
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+</head>
+<body>
+
+<div class="auth-card">
+  <div class="logo-wrap">
+    <div class="logo-symbol">
+      <img src="symbol-white_8x.png" alt="SubSocial" style="width:22px;height:22px;object-fit:contain;display:block;">
+    </div>
+    <span class="logo-text">SubSocial</span>
+  </div>
+
+  <h1>Sign in</h1>
+  <p class="sub">Internal analytics dashboard · Subvisual</p>
+
+  <form id="auth-form" onsubmit="handleSignIn(event)">
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" required placeholder="you@subvisual.co" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" id="sign-in-btn" type="submit">Sign in</button>
+    <div class="error-msg" id="error-msg"></div>
+  </form>
+
+  <p class="hint">No account? Ask an admin to invite you via the Members page.</p>
+</div>
+
+<script>
+const _sb = supabase.createClient(
+  'https://bgdyahjipkxwosbbkkqd.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnZHlhaGppcGt4d29zYmJra3FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODMyODEsImV4cCI6MjA5MDQ1OTI4MX0.rB6ePMZjZM5_g9Gq1pxIoNxaFXFKoAaIKfXxSWkigR4'
+);
+
+// Already logged in → skip straight to dashboard
+_sb.auth.getSession().then(({ data: { session } }) => {
+  if (session) window.location.replace('dashboard.html');
+});
+
+async function handleSignIn(e) {
+  e.preventDefault();
+  const btn = document.getElementById('sign-in-btn');
+  const errEl = document.getElementById('error-msg');
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  errEl.style.display = 'none';
+
+  const { error } = await _sb.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    errEl.textContent = error.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Sign in';
+  } else {
+    window.location.href = 'dashboard.html';
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>(function(){var t=localStorage.getItem('sb-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>(function(){
+  var _url='https://bgdyahjipkxwosbbkkqd.supabase.co';
+  var _key='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnZHlhaGppcGt4d29zYmJra3FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODMyODEsImV4cCI6MjA5MDQ1OTI4MX0.rB6ePMZjZM5_g9Gq1pxIoNxaFXFKoAaIKfXxSWkigR4';
+  window._sb=supabase.createClient(_url,_key);
+  document.documentElement.style.visibility='hidden';
+  window._sb.auth.getSession().then(function(r){
+    var session=r.data.session;
+    if(!session){window.location.replace('supabase-auth.html');}
+    else{document.documentElement.style.visibility='';if(window._onAuthReady)window._onAuthReady(session);}
+  });
+})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subvisual · Backend Handoff</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --blue:        #045CFC;
+    --indigo:      #2421AB;
+    --violet:      #9563FF;
+    --pink:        #F3809C;
+    --ink:         #403F4C;
+    --ink-light:   #6B6A77;
+    --ink-faint:   #9E9DA8;
+    --bg:          #F4F4F8;
+    --surface:     #FFFFFF;
+    --border:      rgba(4,92,252,0.10);
+    --border-md:   rgba(4,92,252,0.18);
+    --border-light:rgba(4,92,252,0.07);
+    --blue-tint:   rgba(4,92,252,0.07);
+    --green:       #1B9A6A;
+    --red:         #D14040;
+    --amber:       #b07800;
+    --sidebar-w:   220px;
+    --radius:      12px;
+    --radius-sm:   8px;
+    --content-max: 860px;
+  }
+  [data-theme="dark"]{
+    --bg:#18181f;
+    --surface:#22212d;
+    --border:rgba(255,255,255,0.08);
+    --border-md:rgba(255,255,255,0.15);
+    --border-light:rgba(255,255,255,0.05);
+    --blue-tint:rgba(4,92,252,0.18);
+    --ink:#e0dff0;
+    --ink-light:#a8a7b8;
+    --ink-faint:#6b6a7c;
+  }
+
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w); min-height: 100vh;
+    background: var(--surface); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    position: fixed; top: 0; left: 0; z-index: 100; padding: 0 0 24px;
+  }
+  .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+  .logo-mark { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-symbol {
+    width: 32px; height: 32px; background: var(--indigo); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; letter-spacing: -1px;
+  }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; color: var(--indigo); letter-spacing: -0.2px; }
+  .sidebar-section { padding: 0 12px; margin-bottom: 4px; }
+  .sidebar-section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); padding: 8px 8px 6px; }
+  .nav-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: var(--radius-sm); font-size: 13px; color: var(--ink-light); cursor: pointer; transition: background 0.15s, color 0.15s; text-decoration: none; }
+  .nav-item:hover { background: var(--blue-tint); color: var(--blue); }
+  .nav-item.active { background: var(--blue-tint); color: var(--blue); font-weight: 500; }
+  .nav-item .nav-icon { width: 16px; height: 16px; opacity: 0.6; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .platform-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .sidebar-footer { margin-top: auto; padding: 16px 20px 0; border-top: 1px solid var(--border); }
+  .user-pill { display: flex; align-items: center; gap: 10px; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .user-role-text { font-size: 11px; color: var(--ink-faint); }
+  .role-badge { margin-left: auto; font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 100px; background: rgba(4,92,252,0.1); color: var(--blue); }
+
+  /* ── Main ── */
+  .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* ── Topbar ── */
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 28px; height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .page-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: var(--indigo); letter-spacing: -0.3px; }
+  .topbar-badge { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 100px; background: rgba(209,64,64,0.09); color: var(--red); }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+  .doc-meta { font-size: 11px; color: var(--ink-faint); }
+
+  /* ── Content ── */
+  .content { padding: 32px 28px; flex: 1; }
+  .doc-body { max-width: var(--content-max); display: flex; flex-direction: column; gap: 28px; }
+
+  /* ── TOC card ── */
+  .toc-card {
+    background: var(--indigo); color: white;
+    border-radius: var(--radius); padding: 24px 28px;
+  }
+  .toc-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; margin-bottom: 14px; color: rgba(255,255,255,0.9); letter-spacing: -0.2px; }
+  .toc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; }
+  .toc-link { font-size: 12px; color: rgba(255,255,255,0.65); text-decoration: none; padding: 3px 0; display: flex; align-items: center; gap: 7px; transition: color 0.15s; }
+  .toc-link:hover { color: rgba(255,255,255,0.95); }
+  .toc-link::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.35); flex-shrink: 0; }
+  .toc-num { font-size: 10px; color: rgba(255,255,255,0.3); margin-right: 2px; }
+
+  /* ── Section cards ── */
+  .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+  .section-header {
+    padding: 20px 24px 0;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 16px;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+
+  .section-num { font-size: 11px; font-weight: 500; color: var(--ink-faint); min-width: 20px; }
+
+  .section-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; color: var(--indigo); letter-spacing: -0.3px; }
+
+  .section-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* ── Subsections ── */
+  .subsection-title { font-size: 12px; font-weight: 600; color: var(--ink-light); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
+
+  /* ── Tables ── */
+  .spec-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .spec-table th {
+    text-align: left; font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-faint); padding: 0 12px 8px; border-bottom: 1px solid var(--border);
+  }
+  .spec-table th:first-child { padding-left: 0; }
+  .spec-table td { padding: 9px 12px; border-bottom: 1px solid var(--border-light); color: var(--ink); vertical-align: top; line-height: 1.4; }
+  .spec-table td:first-child { padding-left: 0; }
+  .spec-table tr:last-child td { border-bottom: none; }
+
+  /* ── Code blocks ── */
+  pre {
+    background: #1e1d2e; border-radius: var(--radius-sm);
+    padding: 16px 18px; overflow-x: auto;
+    font-family: 'DM Mono', 'Fira Code', monospace;
+    font-size: 11.5px; line-height: 1.65;
+    color: #c9c7e0;
+  }
+  .token-key    { color: #9563FF; }
+  .token-str    { color: #6dd6a2; }
+  .token-num    { color: #f3809c; }
+  .token-bool   { color: #fcb040; }
+  .token-null   { color: #9E9DA8; }
+  .token-cmt    { color: #4e4c6a; font-style: italic; }
+  .token-method { color: #045CFC; font-weight: 500; }
+  .token-path   { color: #f3d080; }
+
+  /* ── Inline chips ── */
+  .chip {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px; border-radius: 100px;
+    font-size: 11px; font-weight: 500; font-family: 'DM Mono', monospace;
+    vertical-align: middle;
+  }
+  .chip-get    { background: rgba(27,154,106,0.1);  color: var(--green); }
+  .chip-post   { background: rgba(4,92,252,0.09);   color: var(--blue); }
+  .chip-patch  { background: rgba(176,120,0,0.1);   color: var(--amber); }
+  .chip-put    { background: rgba(149,99,255,0.1);  color: var(--violet); }
+  .chip-delete { background: rgba(209,64,64,0.09);  color: var(--red); }
+  .chip-admin  { background: rgba(4,92,252,0.09);   color: var(--blue); }
+  .chip-viewer { background: rgba(64,63,76,0.07);   color: var(--ink-light); }
+  .chip-type   { background: var(--bg); color: var(--ink-faint); border: 1px solid var(--border-light); font-family: 'DM Mono', monospace; }
+
+  /* ── Gotcha cards ── */
+  .gotcha-list { display: flex; flex-direction: column; gap: 10px; }
+  .gotcha {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 13px 16px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+    background: var(--bg);
+  }
+  .gotcha-icon {
+    width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .gotcha-icon.warn  { background: rgba(176,120,0,0.1); }
+  .gotcha-icon.info  { background: rgba(4,92,252,0.08); }
+  .gotcha-icon.fix   { background: rgba(27,154,106,0.1); }
+  .gotcha-text { flex: 1; }
+  .gotcha-title { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+  .gotcha-desc  { font-size: 12px; color: var(--ink-light); line-height: 1.5; }
+  code { font-family: 'DM Mono', monospace; font-size: 11px; background: rgba(4,92,252,0.06); color: var(--indigo); padding: 1px 5px; border-radius: 4px; }
+
+  /* ── Role comparison ── */
+  .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .role-box { border-radius: var(--radius-sm); padding: 14px 16px; }
+  .role-box.admin-box  { background: rgba(4,92,252,0.05);  border: 1px solid rgba(4,92,252,0.15); }
+  .role-box.viewer-box { background: rgba(64,63,76,0.04);  border: 1px solid rgba(64,63,76,0.12); }
+  .role-box-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+  .role-box.admin-box  .role-box-title { color: var(--blue); }
+  .role-box.viewer-box .role-box-title { color: var(--ink-light); }
+  .perm-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+  .perm-list li { font-size: 12px; color: var(--ink-light); display: flex; align-items: flex-start; gap: 7px; line-height: 1.4; }
+  .perm-list li .dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .perm-list.allow li .dot { background: var(--blue); }
+  .perm-list.deny  li .dot { background: rgba(64,63,76,0.3); }
+
+  /* ── Flow steps ── */
+  .flow { display: flex; flex-direction: column; gap: 0; }
+  .flow-step { display: flex; gap: 14px; }
+  .flow-spine { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .flow-dot { width: 24px; height: 24px; border-radius: 50%; background: var(--blue-tint); border: 2px solid rgba(4,92,252,0.2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: var(--blue); flex-shrink: 0; }
+  .flow-line { width: 2px; flex: 1; background: var(--border-light); min-height: 12px; }
+  .flow-step:last-child .flow-line { display: none; }
+  .flow-content { padding: 2px 0 16px; flex: 1; }
+  .flow-label { font-size: 12px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+  .flow-detail { font-size: 11px; color: var(--ink-faint); line-height: 1.5; }
+
+  /* ── localStorage table ── */
+  .storage-row td:first-child { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--violet); }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  .section-card { animation: fadeUp 0.35s ease both; }
+  .section-card:nth-child(2)  { animation-delay: 0.04s; }
+  .section-card:nth-child(3)  { animation-delay: 0.08s; }
+  .section-card:nth-child(4)  { animation-delay: 0.12s; }
+  .section-card:nth-child(5)  { animation-delay: 0.16s; }
+  .section-card:nth-child(6)  { animation-delay: 0.20s; }
+  .section-card:nth-child(7)  { animation-delay: 0.24s; }
+  .section-card:nth-child(8)  { animation-delay: 0.28s; }
+  .section-card:nth-child(9)  { animation-delay: 0.32s; }
+</style>
+  
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a class="logo-mark" href="dashboard.html">
+      <div class="logo-symbol"><img src="symbol-white_8x.png" alt="Subvisual" style="width:22px;height:22px;object-fit:contain;display:block;"></div>
+      <span class="logo-text">SubSocial</span>
+    </a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Menu</div>
+    <a class="nav-item" href="dashboard.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+      Overview
+    </a>
+    <a class="nav-item" href="analytics.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12 L5 8 L8 10 L11 5 L14 7"/><rect x="1" y="13" width="14" height="1" rx="0.5" fill="currentColor" stroke="none"/></svg>
+      Analytics
+    </a>
+    <a class="nav-item active" href="handoff.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 7h6M5 9.5h4"/></svg>
+      Handoff spec
+    </a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Organic</div>
+    <a class="nav-item" href="linkedin.html"><div class="platform-dot" style="background:#045CFC"></div>LinkedIn</a>
+    <a class="nav-item" href="twitter.html"><div class="platform-dot" style="background:#403F4C"></div>Twitter / X</a>
+    <a class="nav-item" href="bluesky.html"><div class="platform-dot" style="background:#9563FF"></div>Bluesky</a>
+    <a class="nav-item" href="youtube.html"><div class="platform-dot" style="background:#D14040"></div>YouTube</a>
+    <a class="nav-item" href="dribbble.html"><div class="platform-dot" style="background:#F3809C"></div>Dribbble</a>
+    <a class="nav-item" href="website.html"><div class="platform-dot" style="background:#1B9A6A"></div>Website</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Paid</div>
+    <a class="nav-item" href="linkedin-ads.html"><div class="platform-dot" style="background:#0A66C2"></div>LinkedIn Ads</a>
+    <a class="nav-item" href="twitter-ads.html"><div class="platform-dot" style="background:#1DA1F2"></div>Twitter Ads</a>
+    <a class="nav-item" href="google-ads.html"><div class="platform-dot" style="background:#FBBC04"></div>Google Ads</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Team</div>
+    <a class="nav-item" href="sharing.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2.5"/><circle cx="11" cy="5" r="2.5"/><path d="M1 13c0-2.5 2.5-4 5-4s5 1.5 5 4"/><path d="M11 9c1.5 0 4 .8 4 4" stroke-dasharray="2 1"/></svg>
+      Members
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar">M</div>
+      <div><div class="user-name">Mariana</div><div class="user-role-text">Social Media Manager</div></div>
+      <span class="role-badge">Admin</span>
+    </div>
+    <button onclick="window._sb.auth.signOut().then(function(){location.replace('supabase-auth.html')})" style="margin-top:10px;background:none;border:none;font-family:inherit;font-size:11px;color:var(--ink-faint);cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 6H1M4 3l-3 3 3 3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 1h5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5" stroke-linecap="round"/></svg>Sign out</button>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="page-title">Backend Handoff Spec</span>
+      <span class="topbar-badge">For developers</span>
+    </div>
+    <div class="topbar-right">
+      <span class="doc-meta">SubSocial v1 · Last updated Mar 2026</span>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="doc-body">
+
+      <!-- TOC -->
+      <div class="toc-card">
+        <div class="toc-title">Contents</div>
+        <div class="toc-grid">
+          <a class="toc-link" href="#data-model"><span class="toc-num">1</span> Data model</a>
+          <a class="toc-link" href="#api-overview"><span class="toc-num">2</span> API — Overview dashboard</a>
+          <a class="toc-link" href="#api-platforms"><span class="toc-num">3</span> API — Platform pages</a>
+          <a class="toc-link" href="#api-upload"><span class="toc-num">4</span> API — Upload wizard</a>
+          <a class="toc-link" href="#api-sharing"><span class="toc-num">5</span> API — Sharing & Access</a>
+          <a class="toc-link" href="#auth"><span class="toc-num">6</span> Auth & roles</a>
+          <a class="toc-link" href="#localstorage"><span class="toc-num">7</span> localStorage → server</a>
+          <a class="toc-link" href="#upload-flow"><span class="toc-num">8</span> Upload flow detail</a>
+          <a class="toc-link" href="#sharing-flow"><span class="toc-num">9</span> Sharing flow detail</a>
+          <a class="toc-link" href="#gotchas"><span class="toc-num">10</span> Gotchas</a>
+        </div>
+      </div>
+
+      <!-- ── 1. Data model ── -->
+      <div class="section-card" id="data-model">
+        <div class="section-header">
+          <span class="section-num">1</span>
+          <span class="section-title">Data model</span>
+        </div>
+        <div class="section-body">
+
+          <div>
+            <div class="subsection-title">users</div>
+            <table class="spec-table">
+              <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td><code>id</code></td><td><span class="chip chip-type">uuid</span></td><td>Primary key</td></tr>
+                <tr><td><code>name</code></td><td><span class="chip chip-type">string</span></td><td>Full display name</td></tr>
+                <tr><td><code>email</code></td><td><span class="chip chip-type">string</span></td><td>Unique, used for invite lookup</td></tr>
+                <tr><td><code>role</code></td><td><span class="chip chip-type">enum</span></td><td><code>admin</code> | <code>viewer</code></td></tr>
+                <tr><td><code>avatar_color</code></td><td><span class="chip chip-type">string</span></td><td>Hex. Currently hardcoded per member — derive from name hash or store explicitly</td></tr>
+                <tr><td><code>invited_by</code></td><td><span class="chip chip-type">uuid?</span></td><td>FK → users. Null for seed/original accounts</td></tr>
+                <tr><td><code>created_at</code></td><td><span class="chip chip-type">timestamp</span></td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <div class="subsection-title">platforms</div>
+            <table class="spec-table">
+              <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td><code>id</code></td><td><span class="chip chip-type">uuid</span></td><td></td></tr>
+                <tr><td><code>slug</code></td><td><span class="chip chip-type">string</span></td><td><code>linkedin</code> | <code>twitter</code> | <code>bluesky</code> | <code>youtube</code> | <code>dribbble</code> | <code>website</code></td></tr>
+                <tr><td><code>name</code></td><td><span class="chip chip-type">string</span></td><td>Display name e.g. "Twitter / X"</td></tr>
+                <tr><td><code>color</code></td><td><span class="chip chip-type">string</span></td><td>Brand hex. See design tokens above.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <div class="subsection-title">reports</div>
+            <table class="spec-table">
+              <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td><code>id</code></td><td><span class="chip chip-type">uuid</span></td><td></td></tr>
+                <tr><td><code>platform_id</code></td><td><span class="chip chip-type">uuid</span></td><td>FK → platforms</td></tr>
+                <tr><td><code>period_start</code></td><td><span class="chip chip-type">date</span></td><td></td></tr>
+                <tr><td><code>period_end</code></td><td><span class="chip chip-type">date</span></td><td></td></tr>
+                <tr><td><code>uploaded_by</code></td><td><span class="chip chip-type">uuid</span></td><td>FK → users</td></tr>
+                <tr><td><code>uploaded_at</code></td><td><span class="chip chip-type">timestamp</span></td><td></td></tr>
+                <tr><td><code>source</code></td><td><span class="chip chip-type">enum</span></td><td><code>csv</code> | <code>manual</code></td></tr>
+                <tr><td><code>status</code></td><td><span class="chip chip-type">enum</span></td><td><code>processing</code> | <code>ready</code> | <code>error</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <div class="subsection-title">metrics</div>
+            <table class="spec-table">
+              <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td><code>id</code></td><td><span class="chip chip-type">uuid</span></td><td></td></tr>
+                <tr><td><code>report_id</code></td><td><span class="chip chip-type">uuid</span></td><td>FK → reports</td></tr>
+                <tr><td><code>key</code></td><td><span class="chip chip-type">string</span></td><td>e.g. <code>impressions</code>, <code>eng_rate</code>, <code>clicks</code>, <code>followers_gained</code>, <code>watch_time_hrs</code>, <code>bounce_rate</code></td></tr>
+                <tr><td><code>value</code></td><td><span class="chip chip-type">decimal</span></td><td>Raw number. Format (K, %, pp) applied client-side.</td></tr>
+                <tr><td><code>unit</code></td><td><span class="chip chip-type">string</span></td><td><code>count</code> | <code>percent</code> | <code>duration_sec</code> | <code>hours</code></td></tr>
+                <tr><td><code>date</code></td><td><span class="chip chip-type">date</span></td><td>For time-series rows. Null for period aggregates.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <div class="subsection-title">widget_layouts</div>
+            <table class="spec-table">
+              <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td><code>id</code></td><td><span class="chip chip-type">uuid</span></td><td></td></tr>
+                <tr><td><code>user_id</code></td><td><span class="chip chip-type">uuid</span></td><td>FK → users. One row per user.</td></tr>
+                <tr><td><code>row_order</code></td><td><span class="chip chip-type">json</span></td><td>e.g. <code>["stats","charts","bottom"]</code></td></tr>
+                <tr><td><code>hidden_widgets</code></td><td><span class="chip chip-type">json</span></td><td>e.g. <code>["stat-clicks","top-movers"]</code></td></tr>
+                <tr><td><code>updated_at</code></td><td><span class="chip chip-type">timestamp</span></td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <div class="subsection-title">invite_tokens</div>
+            <table class="spec-table">
+              <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td><code>id</code></td><td><span class="chip chip-type">uuid</span></td><td></td></tr>
+                <tr><td><code>email</code></td><td><span class="chip chip-type">string</span></td><td>Invite target</td></tr>
+                <tr><td><code>role</code></td><td><span class="chip chip-type">enum</span></td><td><code>admin</code> | <code>viewer</code></td></tr>
+                <tr><td><code>invited_by</code></td><td><span class="chip chip-type">uuid</span></td><td>FK → users</td></tr>
+                <tr><td><code>token</code></td><td><span class="chip chip-type">string</span></td><td>Unique, cryptographically random, URL-safe</td></tr>
+                <tr><td><code>expires_at</code></td><td><span class="chip chip-type">timestamp</span></td><td>Recommend 7 days</td></tr>
+                <tr><td><code>accepted_at</code></td><td><span class="chip chip-type">timestamp?</span></td><td>Null until accepted</td></tr>
+                <tr><td><code>revoked_at</code></td><td><span class="chip chip-type">timestamp?</span></td><td>Null until revoked</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <div class="subsection-title">share_links</div>
+            <table class="spec-table">
+              <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td><code>id</code></td><td><span class="chip chip-type">uuid</span></td><td></td></tr>
+                <tr><td><code>token</code></td><td><span class="chip chip-type">string</span></td><td>URL-safe random token. Only one active row at a time.</td></tr>
+                <tr><td><code>created_by</code></td><td><span class="chip chip-type">uuid</span></td><td>FK → users</td></tr>
+                <tr><td><code>is_active</code></td><td><span class="chip chip-type">boolean</span></td><td>Toggled by sharing settings UI</td></tr>
+                <tr><td><code>created_at</code></td><td><span class="chip chip-type">timestamp</span></td><td></td></tr>
+                <tr><td><code>invalidated_at</code></td><td><span class="chip chip-type">timestamp?</span></td><td>Set on Regenerate</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── 2. API — Overview ── -->
+      <div class="section-card" id="api-overview">
+        <div class="section-header">
+          <span class="section-num">2</span>
+          <span class="section-title">API — dashboard.html</span>
+        </div>
+        <div class="section-body">
+          <table class="spec-table">
+            <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><span class="chip chip-get">GET</span></td><td><code>/api/overview?period=30</code></td><td>Any</td><td>Aggregate KPIs (total impressions, avg eng rate, total followers, social clicks) + engagement time-series (30 daily points per platform) + channel split percentages</td></tr>
+              <tr><td><span class="chip chip-get">GET</span></td><td><code>/api/reports?limit=5&sort=uploaded_at:desc</code></td><td>Any</td><td>Recent reports table rows</td></tr>
+              <tr><td><span class="chip chip-get">GET</span></td><td><code>/api/layout</code></td><td>Any</td><td>User's saved widget row_order + hidden_widgets</td></tr>
+              <tr><td><span class="chip chip-put">PUT</span></td><td><code>/api/layout</code></td><td>Any</td><td>Persist widget layout. Currently written to localStorage under <code>subsocial-layout</code>.</td></tr>
+            </tbody>
+          </table>
+
+          <div>
+            <div class="subsection-title">GET /api/overview response shape</div>
+            <pre><span class="token-key">{
+  "period"</span>: <span class="token-num">30</span>,
+  <span class="token-key">"kpis"</span>: {
+    <span class="token-key">"impressions"</span>: { <span class="token-key">"value"</span>: <span class="token-num">284700</span>, <span class="token-key">"prev"</span>: <span class="token-num">240000</span>, <span class="token-key">"delta_pct"</span>: <span class="token-num">18.6</span> },
+    <span class="token-key">"eng_rate"</span>:    { <span class="token-key">"value"</span>: <span class="token-num">4.8</span>,   <span class="token-key">"prev"</span>: <span class="token-num">4.2</span>,   <span class="token-key">"delta_pp"</span>: <span class="token-num">0.6</span> },
+    <span class="token-key">"followers"</span>:    { <span class="token-key">"value"</span>: <span class="token-num">31200</span>,  <span class="token-key">"gained"</span>: <span class="token-num">412</span> },
+    <span class="token-key">"social_clicks"</span>:{ <span class="token-key">"value"</span>: <span class="token-num">8940</span>,  <span class="token-key">"prev"</span>: <span class="token-num">9227</span>,  <span class="token-key">"delta_pct"</span>: <span class="token-num">-3.1</span> }
+  },
+  <span class="token-key">"channel_split"</span>: [
+    { <span class="token-key">"platform"</span>: <span class="token-str">"linkedin"</span>, <span class="token-key">"pct"</span>: <span class="token-num">38</span> },
+    { <span class="token-key">"platform"</span>: <span class="token-str">"youtube"</span>,  <span class="token-key">"pct"</span>: <span class="token-num">27</span> }
+    <span class="token-cmt">// …</span>
+  ],
+  <span class="token-key">"engagement_series"</span>: {
+    <span class="token-key">"labels"</span>: [<span class="token-str">"24 Feb"</span>, <span class="token-str">"25 Feb"</span> <span class="token-cmt">/* … 30 items */</span>],
+    <span class="token-key">"platforms"</span>: {
+      <span class="token-key">"linkedin"</span>: [<span class="token-num">3200</span>, <span class="token-num">3850</span> <span class="token-cmt">/* … */</span>],
+      <span class="token-key">"bluesky"</span>:  [<span class="token-num">1100</span>, <span class="token-num">980</span>  <span class="token-cmt">/* … */</span>],
+      <span class="token-key">"dribbble"</span>: [<span class="token-num">700</span>,  <span class="token-num">640</span>  <span class="token-cmt">/* … */</span>]
+    }
+  },
+  <span class="token-key">"top_movers"</span>: [
+    { <span class="token-key">"platform"</span>: <span class="token-str">"youtube"</span>,  <span class="token-key">"metric"</span>: <span class="token-str">"watch_time"</span>, <span class="token-key">"delta_pct"</span>: <span class="token-num">41</span>, <span class="token-key">"series"</span>: [<span class="token-num">40</span>,<span class="token-num">45</span>,<span class="token-num">52</span> <span class="token-cmt">/* … */</span>] },
+    { <span class="token-key">"platform"</span>: <span class="token-str">"linkedin"</span>, <span class="token-key">"metric"</span>: <span class="token-str">"reach"</span>,      <span class="token-key">"delta_pct"</span>: <span class="token-num">22</span>, <span class="token-key">"series"</span>: [<span class="token-cmt">…</span>] },
+    { <span class="token-key">"platform"</span>: <span class="token-str">"twitter"</span>,  <span class="token-key">"metric"</span>: <span class="token-str">"link_clicks"</span>, <span class="token-key">"delta_pct"</span>: <span class="token-num">-8</span>, <span class="token-key">"series"</span>: [<span class="token-cmt">…</span>] }
+  ]
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 3. API — Platform pages ── -->
+      <div class="section-card" id="api-platforms">
+        <div class="section-header">
+          <span class="section-num">3</span>
+          <span class="section-title">API — Platform pages (×6)</span>
+        </div>
+        <div class="section-body">
+          <p style="font-size:13px;color:var(--ink-light);line-height:1.6">All six platform pages share the same endpoint shape. The <code>:slug</code> is one of: <code>linkedin</code>, <code>twitter</code>, <code>bluesky</code>, <code>youtube</code>, <code>dribbble</code>, <code>website</code>.</p>
+
+          <table class="spec-table">
+            <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><span class="chip chip-get">GET</span></td><td><code>/api/platforms/:slug/metrics?period=30</code></td><td>Any</td><td>KPI cards, engagement breakdown, chart series, follower growth, donut value. <code>period</code> = 7 | 30 | 90. For custom range, pass <code>from=YYYY-MM-DD&to=YYYY-MM-DD</code> instead.</td></tr>
+              <tr><td><span class="chip chip-get">GET</span></td><td><code>/api/platforms/:slug/posts?period=30&limit=5</code></td><td>Any</td><td>Top posts table rows (not applicable to <code>website</code> — return traffic sources instead).</td></tr>
+            </tbody>
+          </table>
+
+          <div>
+            <div class="subsection-title">GET /api/platforms/:slug/metrics response shape</div>
+            <pre><span class="token-key">{
+  "platform"</span>: <span class="token-str">"linkedin"</span>,
+  <span class="token-key">"period"</span>: <span class="token-num">30</span>,
+  <span class="token-key">"date_label"</span>: <span class="token-str">"Feb 24 – Mar 24, 2026"</span>,
+  <span class="token-key">"kpis"</span>: {
+    <span class="token-key">"impressions"</span>: { <span class="token-key">"value"</span>: <span class="token-num">108300</span>, <span class="token-key">"prev"</span>: <span class="token-num">91600</span>, <span class="token-key">"delta_pct"</span>: <span class="token-num">18.2</span>  },
+    <span class="token-key">"reach"</span>:       { <span class="token-key">"value"</span>: <span class="token-num">74100</span>,  <span class="token-key">"prev"</span>: <span class="token-num">66500</span>, <span class="token-key">"delta_pct"</span>: <span class="token-num">11.4</span>  },
+    <span class="token-key">"eng_rate"</span>:    { <span class="token-key">"value"</span>: <span class="token-num">5.2</span>,    <span class="token-key">"prev"</span>: <span class="token-num">4.4</span>,   <span class="token-key">"delta_pp"</span>: <span class="token-num">0.8</span>   },
+    <span class="token-key">"clicks"</span>:      { <span class="token-key">"value"</span>: <span class="token-num">3840</span>,   <span class="token-key">"prev"</span>: <span class="token-num">3145</span>,  <span class="token-key">"delta_pct"</span>: <span class="token-num">22.1</span>  },
+    <span class="token-key">"followers"</span>:   { <span class="token-key">"gained"</span>: <span class="token-num">187</span>, <span class="token-key">"prev_gained"</span>: <span class="token-num">153</span>, <span class="token-key">"total"</span>: <span class="token-num">12840</span> }
+  },
+  <span class="token-key">"engagement_breakdown"</span>: {
+    <span class="token-key">"reactions"</span>: { <span class="token-key">"value"</span>: <span class="token-num">2841</span>, <span class="token-key">"delta_pct"</span>: <span class="token-num">12</span> },
+    <span class="token-key">"comments"</span>:  { <span class="token-key">"value"</span>: <span class="token-num">394</span>,  <span class="token-key">"delta_pct"</span>: <span class="token-num">28</span> },
+    <span class="token-key">"shares"</span>:    { <span class="token-key">"value"</span>: <span class="token-num">221</span>,  <span class="token-key">"delta_pct"</span>: <span class="token-num">-4</span> }
+    <span class="token-cmt">// …platform-specific keys</span>
+  },
+  <span class="token-key">"imp_series"</span>: { <span class="token-key">"labels"</span>: [<span class="token-cmt">…</span>], <span class="token-key">"impressions"</span>: [<span class="token-cmt">…</span>], <span class="token-key">"reach"</span>: [<span class="token-cmt">…</span>] },
+  <span class="token-key">"growth_series"</span>: { <span class="token-key">"labels"</span>: [<span class="token-cmt">…</span>], <span class="token-key">"values"</span>: [<span class="token-cmt">…</span>] },
+  <span class="token-key">"donut"</span>: { <span class="token-key">"current"</span>: <span class="token-num">5.2</span>, <span class="token-key">"previous"</span>: <span class="token-num">4.4</span> }
+  <span class="token-cmt">// website only: "bounce_rate" instead of "eng_rate"; lower delta = good</span>
+  <span class="token-cmt">// youtube only: "ctr" instead of "eng_rate"; "watch_time_hrs" as extra KPI</span>
+}</pre>
+          </div>
+
+          <div>
+            <div class="subsection-title">Per-platform KPI key mapping</div>
+            <table class="spec-table">
+              <thead><tr><th>Page</th><th>KPI keys in metrics response</th><th>Donut metric</th></tr></thead>
+              <tbody>
+                <tr><td>linkedin</td><td>impressions, reach, eng_rate, clicks, followers</td><td>eng_rate</td></tr>
+                <tr><td>twitter</td><td>impressions, engagements, eng_rate, reposts, followers</td><td>eng_rate</td></tr>
+                <tr><td>bluesky</td><td>impressions, reposts, likes, replies, followers</td><td>eng_rate</td></tr>
+                <tr><td>youtube</td><td>views, watch_time_hrs, subscribers_gained, avg_duration_sec, ctr</td><td>ctr</td></tr>
+                <tr><td>dribbble</td><td>views, likes, saves, comments, followers</td><td>like_rate</td></tr>
+                <tr><td>website</td><td>sessions, unique_visitors, social_referrals, avg_session_sec, bounce_rate</td><td>bounce_rate (inverted)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 4. API — Upload ── -->
+      <div class="section-card" id="api-upload">
+        <div class="section-header">
+          <span class="section-num">4</span>
+          <span class="section-title">API — upload.html</span>
+        </div>
+        <div class="section-body">
+          <table class="spec-table">
+            <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><span class="chip chip-get">GET</span></td><td><code>/api/platforms</code></td><td>Any</td><td>Populate Step 1 platform radio cards with name, slug, color</td></tr>
+              <tr><td><span class="chip chip-post">POST</span></td><td><code>/api/reports/upload</code></td><td>Admin</td><td>CSV file upload. Returns 202 with report ID. Poll for status.</td></tr>
+              <tr><td><span class="chip chip-post">POST</span></td><td><code>/api/reports/manual</code></td><td>Admin</td><td>Manual form submission. Returns 201 with created report.</td></tr>
+              <tr><td><span class="chip chip-get">GET</span></td><td><code>/api/reports/:id</code></td><td>Admin</td><td>Poll for CSV processing status (<code>processing</code> → <code>ready</code> | <code>error</code>)</td></tr>
+            </tbody>
+          </table>
+
+          <div>
+            <div class="subsection-title">POST /api/reports/upload — multipart/form-data</div>
+            <pre><span class="token-cmt"># Form fields</span>
+platform_id: <span class="token-str">"uuid"</span>
+period_from:  <span class="token-str">"2026-02-01"</span>
+period_to:    <span class="token-str">"2026-02-28"</span>
+file:         <span class="token-str">&lt;binary CSV&gt;</span>
+
+<span class="token-cmt"># 202 Accepted</span>
+{ <span class="token-key">"report_id"</span>: <span class="token-str">"uuid"</span>, <span class="token-key">"status"</span>: <span class="token-str">"processing"</span> }
+
+<span class="token-cmt"># Polling — GET /api/reports/:id</span>
+{ <span class="token-key">"report_id"</span>: <span class="token-str">"uuid"</span>, <span class="token-key">"status"</span>: <span class="token-str">"ready"</span>, <span class="token-key">"metrics_count"</span>: <span class="token-num">42</span> }
+{ <span class="token-key">"report_id"</span>: <span class="token-str">"uuid"</span>, <span class="token-key">"status"</span>: <span class="token-str">"error"</span>,  <span class="token-key">"error"</span>: <span class="token-str">"Missing column: impressions"</span> }</pre>
+          </div>
+
+          <div>
+            <div class="subsection-title">POST /api/reports/manual — JSON body</div>
+            <pre>{
+  <span class="token-key">"platform_id"</span>: <span class="token-str">"uuid"</span>,
+  <span class="token-key">"period_from"</span>: <span class="token-str">"2026-02-01"</span>,
+  <span class="token-key">"period_to"</span>:   <span class="token-str">"2026-02-28"</span>,
+  <span class="token-key">"metrics"</span>: {
+    <span class="token-key">"impressions"</span>: <span class="token-num">108300</span>,
+    <span class="token-key">"reach"</span>:       <span class="token-num">74100</span>,
+    <span class="token-key">"eng_rate"</span>:    <span class="token-num">5.2</span>,
+    <span class="token-key">"clicks"</span>:      <span class="token-num">3840</span>,
+    <span class="token-key">"followers_gained"</span>: <span class="token-num">187</span>
+    <span class="token-cmt">// keys vary per platform — see KPI mapping table above</span>
+  }
+}
+
+<span class="token-cmt"># 201 Created</span>
+{ <span class="token-key">"report_id"</span>: <span class="token-str">"uuid"</span>, <span class="token-key">"status"</span>: <span class="token-str">"ready"</span> }</pre>
+          </div>
+
+          <div>
+            <div class="subsection-title">CSV column expectations per platform</div>
+            <table class="spec-table">
+              <thead><tr><th>Platform</th><th>Required columns</th></tr></thead>
+              <tbody>
+                <tr><td>linkedin</td><td><code>date, impressions, reach, reactions, comments, shares, clicks, saves, profile_views, followers_total</code></td></tr>
+                <tr><td>twitter</td><td><code>date, impressions, engagements, likes, reposts, replies, bookmarks, link_clicks, profile_visits, followers_total</code></td></tr>
+                <tr><td>bluesky</td><td><code>date, impressions, reposts, likes, replies, quote_posts, link_clicks, followers_total</code></td></tr>
+                <tr><td>youtube</td><td><code>date, views, watch_time_hours, subscribers_gained, avg_view_duration_sec, ctr, likes, comments</code></td></tr>
+                <tr><td>dribbble</td><td><code>date, views, likes, saves, comments, follows, followers_total</code></td></tr>
+                <tr><td>website</td><td><code>date, sessions, unique_visitors, social_referrals, avg_session_sec, bounce_rate, source</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 5. API — Sharing ── -->
+      <div class="section-card" id="api-sharing">
+        <div class="section-header">
+          <span class="section-num">5</span>
+          <span class="section-title">API — sharing.html</span>
+        </div>
+        <div class="section-body">
+          <table class="spec-table">
+            <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><span class="chip chip-get">GET</span></td><td><code>/api/team/members</code></td><td>Admin</td><td>List all users with id, name, email, role, avatar_color</td></tr>
+              <tr><td><span class="chip chip-patch">PATCH</span></td><td><code>/api/team/members/:id</code></td><td>Admin</td><td>Change role. Body: <code>{ "role": "viewer" }</code></td></tr>
+              <tr><td><span class="chip chip-delete">DELETE</span></td><td><code>/api/team/members/:id</code></td><td>Admin</td><td>Remove member. Cannot remove self.</td></tr>
+              <tr><td><span class="chip chip-post">POST</span></td><td><code>/api/team/invites</code></td><td>Admin</td><td>Create invite token + trigger email. Body: <code>{ "name", "email", "role" }</code></td></tr>
+              <tr><td><span class="chip chip-get">GET</span></td><td><code>/api/team/invites</code></td><td>Admin</td><td>List pending (non-accepted, non-expired) invites</td></tr>
+              <tr><td><span class="chip chip-delete">DELETE</span></td><td><code>/api/team/invites/:id</code></td><td>Admin</td><td>Revoke a pending invite</td></tr>
+              <tr><td><span class="chip chip-get">GET</span></td><td><code>/api/team/share-link</code></td><td>Admin</td><td>Return current active link token + is_active flag</td></tr>
+              <tr><td><span class="chip chip-patch">PATCH</span></td><td><code>/api/team/share-link</code></td><td>Admin</td><td>Toggle link on/off. Body: <code>{ "is_active": false }</code></td></tr>
+              <tr><td><span class="chip chip-post">POST</span></td><td><code>/api/team/share-link/regenerate</code></td><td>Admin</td><td>Invalidate current token, generate and return new one</td></tr>
+              <tr><td><span class="chip chip-get">GET</span></td><td><code>/view/:token</code></td><td>None</td><td>Serve read-only dashboard for share link. Verify token is active; 404/403 otherwise.</td></tr>
+              <tr><td><span class="chip chip-get">GET</span></td><td><code>/invite/:token</code></td><td>None</td><td>Accept invite page. Validates token not expired/revoked.</td></tr>
+              <tr><td><span class="chip chip-post">POST</span></td><td><code>/invite/:token/accept</code></td><td>None</td><td>Create user account, mark token as accepted.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── 6. Auth ── -->
+      <div class="section-card" id="auth">
+        <div class="section-header">
+          <span class="section-num">6</span>
+          <span class="section-title">Auth & roles</span>
+        </div>
+        <div class="section-body">
+          <div class="role-grid">
+            <div class="role-box admin-box">
+              <div class="role-box-title">Admin <span class="chip chip-admin" style="font-family:inherit;font-size:10px">admin</span></div>
+              <ul class="perm-list allow">
+                <li><span class="dot"></span>View all dashboards and reports</li>
+                <li><span class="dot"></span>Upload CSV and manual reports</li>
+                <li><span class="dot"></span>Invite new team members</li>
+                <li><span class="dot"></span>Remove existing members</li>
+                <li><span class="dot"></span>Change member roles</li>
+                <li><span class="dot"></span>Enable / disable shareable link</li>
+                <li><span class="dot"></span>Regenerate shareable link token</li>
+                <li><span class="dot"></span>Save widget layout (persisted per user)</li>
+              </ul>
+            </div>
+            <div class="role-box viewer-box">
+              <div class="role-box-title">Viewer <span class="chip chip-viewer" style="font-family:inherit;font-size:10px">viewer</span></div>
+              <ul class="perm-list allow">
+                <li><span class="dot"></span>View all dashboards and reports</li>
+                <li><span class="dot"></span>Change period / date range filters</li>
+                <li><span class="dot"></span>Save their own widget layout</li>
+              </ul>
+              <ul class="perm-list deny" style="margin-top:10px">
+                <li><span class="dot"></span>Cannot upload or edit data</li>
+                <li><span class="dot"></span>Cannot access sharing.html</li>
+                <li><span class="dot"></span>Cannot manage members or roles</li>
+                <li><span class="dot"></span>Cannot manage share link</li>
+              </ul>
+            </div>
+          </div>
+
+          <div>
+            <div class="subsection-title">Share link access</div>
+            <p style="font-size:13px;color:var(--ink-light);line-height:1.6">A visitor arriving via <code>/view/:token</code> gets anonymous read-only access equivalent to Viewer — no login required. The server should render the dashboard with auth context <code>role: "public"</code>, hiding all upload/admin controls. If <code>is_active = false</code> or the token doesn't exist, return a 404 or friendly "link no longer active" page.</p>
+          </div>
+
+          <div>
+            <div class="subsection-title">Session / token suggestion</div>
+            <p style="font-size:13px;color:var(--ink-light);line-height:1.6">The frontend currently has no auth flow — all pages load without any session check. The recommended approach is cookie-based sessions (httpOnly, Secure) returned on login, with the server injecting the current user's role into the page as a JSON data attribute or small inline script. This avoids a full SPA refactor of the existing static HTML structure.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 7. localStorage ── -->
+      <div class="section-card" id="localstorage">
+        <div class="section-header">
+          <span class="section-num">7</span>
+          <span class="section-title">localStorage → server-side replacements</span>
+        </div>
+        <div class="section-body">
+          <table class="spec-table storage-row">
+            <thead><tr><th>Key</th><th>Used in</th><th>Current value shape</th><th>Server replacement</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>subsocial-layout</td>
+                <td>dashboard.html</td>
+                <td><code>{ rowOrder: string[], hidden: string[] }</code></td>
+                <td><code>GET/PUT /api/layout</code> — stored in <code>widget_layouts</code> per user. On page load, fetch and call <code>applyState()</code> with the response. On change, debounce the <code>PUT</code> 500ms.</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size:12px;color:var(--ink-faint);line-height:1.5">No other localStorage keys are currently in use. All mock data (MOCK objects in platform pages) is hardcoded JS — there is no localStorage caching of API responses.</p>
+        </div>
+      </div>
+
+      <!-- ── 8. Upload flow ── -->
+      <div class="section-card" id="upload-flow">
+        <div class="section-header">
+          <span class="section-num">8</span>
+          <span class="section-title">Upload flow detail</span>
+        </div>
+        <div class="section-body">
+          <div class="flow">
+            <div class="flow-step">
+              <div class="flow-spine"><div class="flow-dot">1</div><div class="flow-line"></div></div>
+              <div class="flow-content">
+                <div class="flow-label">User selects platform + date range (Step 1)</div>
+                <div class="flow-detail">Frontend holds selected platform_id + from/to dates in JS state. No API call yet.</div>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-spine"><div class="flow-dot">2</div><div class="flow-line"></div></div>
+              <div class="flow-content">
+                <div class="flow-label">CSV drop / file picker (Step 2, upload mode)</div>
+                <div class="flow-detail">On file select, show filename + size. On "Preview →": <code>POST /api/reports/upload</code> with multipart form. Server validates headers against expected columns for the platform, rejects with <code>400 { error, missing_columns }</code> if invalid, or returns <code>202 { report_id, status: "processing" }</code>.</div>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-spine"><div class="flow-dot">2b</div><div class="flow-line"></div></div>
+              <div class="flow-content">
+                <div class="flow-label">Manual form (Step 2, manual mode)</div>
+                <div class="flow-detail">All KPI fields for the selected platform are shown. On "Preview →": <code>POST /api/reports/manual</code>. Returns <code>201</code> immediately — no polling needed.</div>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-spine"><div class="flow-dot">3</div><div class="flow-line"></div></div>
+              <div class="flow-content">
+                <div class="flow-label">Review & confirm (Step 3)</div>
+                <div class="flow-detail">Frontend polls <code>GET /api/reports/:id</code> until <code>status = "ready"</code> (or shows error). Displays summary of parsed metrics. On "Save report": update report status to confirmed, show success screen. Recommend polling interval: 1s, max 30s before timeout.</div>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-spine"><div class="flow-dot">4</div><div class="flow-line"></div></div>
+              <div class="flow-content">
+                <div class="flow-label">Success</div>
+                <div class="flow-detail">Frontend shows success screen with links to the platform page and overview. No further API calls needed.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 9. Sharing flow ── -->
+      <div class="section-card" id="sharing-flow">
+        <div class="section-header">
+          <span class="section-num">9</span>
+          <span class="section-title">Sharing flow detail</span>
+        </div>
+        <div class="section-body">
+
+          <div>
+            <div class="subsection-title">Invite flow</div>
+            <div class="flow">
+              <div class="flow-step">
+                <div class="flow-spine"><div class="flow-dot">1</div><div class="flow-line"></div></div>
+                <div class="flow-content">
+                  <div class="flow-label">Admin submits invite form</div>
+                  <div class="flow-detail"><code>POST /api/team/invites</code> with name, email, role. Server creates <code>invite_tokens</code> row, sends email with link <code>https://app.com/invite/:token</code>. Returns <code>201 { invite_id, email, role, expires_at }</code>. Frontend appends to Pending Invites section.</div>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-spine"><div class="flow-dot">2</div><div class="flow-line"></div></div>
+                <div class="flow-content">
+                  <div class="flow-label">Invitee clicks email link</div>
+                  <div class="flow-detail">Server validates token: not expired, not revoked, not already accepted. Shows an accept page (not yet built) with name pre-filled from invite.</div>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-spine"><div class="flow-dot">3</div><div class="flow-line"></div></div>
+                <div class="flow-content">
+                  <div class="flow-label">Invitee sets password and accepts</div>
+                  <div class="flow-detail"><code>POST /invite/:token/accept</code> with <code>{ password }</code>. Server creates user with pre-assigned role, marks token <code>accepted_at</code>, creates session, redirects to dashboard.</div>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-spine"><div class="flow-dot">4</div><div class="flow-line"></div></div>
+                <div class="flow-content">
+                  <div class="flow-label">Admin revokes invite</div>
+                  <div class="flow-detail"><code>DELETE /api/team/invites/:id</code> sets <code>revoked_at</code>. Token immediately becomes invalid. Frontend removes the pending row.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="subsection-title">Shareable link lifecycle</div>
+            <div class="flow">
+              <div class="flow-step">
+                <div class="flow-spine"><div class="flow-dot">1</div><div class="flow-line"></div></div>
+                <div class="flow-content">
+                  <div class="flow-label">First load of sharing.html</div>
+                  <div class="flow-detail"><code>GET /api/team/share-link</code> returns current token and <code>is_active</code>. Frontend constructs display URL as <code>https://subsocial.subvisual.co/view/{token}</code>.</div>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-spine"><div class="flow-dot">2</div><div class="flow-line"></div></div>
+                <div class="flow-content">
+                  <div class="flow-label">Toggle on/off</div>
+                  <div class="flow-detail"><code>PATCH /api/team/share-link { "is_active": false }</code>. Same token is preserved — toggling off just makes <code>/view/:token</code> return 403. Toggling back on re-activates the same URL.</div>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-spine"><div class="flow-dot">3</div><div class="flow-line"></div></div>
+                <div class="flow-content">
+                  <div class="flow-label">Regenerate</div>
+                  <div class="flow-detail"><code>POST /api/team/share-link/regenerate</code>. Server sets <code>invalidated_at</code> on old row, inserts new row with new token. Old URL immediately 404s. Returns <code>{ token, url }</code>. Frontend updates displayed URL.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── 10. Gotchas ── -->
+      <div class="section-card" id="gotchas">
+        <div class="section-header">
+          <span class="section-num">10</span>
+          <span class="section-title">Gotchas</span>
+        </div>
+        <div class="section-body">
+          <div class="gotcha-list">
+
+            <div class="gotcha">
+              <div class="gotcha-icon warn">⚠️</div>
+              <div class="gotcha-text">
+                <div class="gotcha-title">navigator.clipboard requires HTTPS</div>
+                <div class="gotcha-desc">The copy button in <code>sharing.html</code> uses <code>navigator.clipboard.writeText()</code>. This API is unavailable on plain <code>file://</code> or HTTP origins. It will silently fail. Ensure the app is served over HTTPS, or add a fallback using <code>document.execCommand('copy')</code> for local dev.</div>
+              </div>
+            </div>
+
+            <div class="gotcha">
+              <div class="gotcha-icon warn">⚠️</div>
+              <div class="gotcha-text">
+                <div class="gotcha-title">Bounce rate delta is inverted</div>
+                <div class="gotcha-desc">In <code>website.html</code>, a <em>lower</em> bounce rate is better. The delta badge is green when <code>current &lt; previous</code>. The API must flag this: return a <code>"invert_delta": true</code> field for the <code>bounce_rate</code> KPI so the frontend can apply the correct colour logic. All other metrics treat increase as positive.</div>
+              </div>
+            </div>
+
+            <div class="gotcha">
+              <div class="gotcha-icon info">ℹ️</div>
+              <div class="gotcha-text">
+                <div class="gotcha-title">Chart updates use chart.update('active'), not destroy/recreate</div>
+                <div class="gotcha-desc">All platform pages mutate <code>chart.data.labels</code> and <code>chart.data.datasets[n].data</code> directly, then call <code>chart.update('active')</code>. Do not destroy and recreate Chart.js instances on period change — the canvas will flash and animation state will be lost. Keep chart instances in module scope.</div>
+              </div>
+            </div>
+
+            <div class="gotcha">
+              <div class="gotcha-icon fix">🔧</div>
+              <div class="gotcha-text">
+                <div class="gotcha-title">Members nav link is # on all platform pages</div>
+                <div class="gotcha-desc">The "Members" nav item in the sidebar of <code>linkedin.html</code>, <code>twitter.html</code>, <code>bluesky.html</code>, <code>youtube.html</code>, <code>dribbble.html</code>, and <code>website.html</code> currently points to <code>#</code>. Update each to <code>href="sharing.html"</code>.</div>
+              </div>
+            </div>
+
+            <div class="gotcha">
+              <div class="gotcha-icon warn">⚠️</div>
+              <div class="gotcha-text">
+                <div class="gotcha-title">All chart data is Math.random() — re-renders on every page load</div>
+                <div class="gotcha-desc">The <code>wave(base, amp, len)</code> helper in all pages uses <code>Math.random()</code>, so chart lines change on every load. Replace with deterministic data from the API. The function signature is a good guide for expected data shape: an array of <code>len</code> numbers centered around <code>base</code> with variation <code>±amp</code>.</div>
+              </div>
+            </div>
+
+            <div class="gotcha">
+              <div class="gotcha-icon info">ℹ️</div>
+              <div class="gotcha-text">
+                <div class="gotcha-title">Custom date range falls back to 30D mock data</div>
+                <div class="gotcha-desc">On all platform pages, selecting "Custom" shows date inputs but the <code>setRange('custom')</code> function falls back to <code>MOCK[30]</code>. The real implementation must add a <code>from</code> + <code>to</code> query param path: <code>GET /api/platforms/:slug/metrics?from=2026-01-01&to=2026-02-15</code>. The API should handle arbitrary ranges, not just 7/30/90.</div>
+              </div>
+            </div>
+
+            <div class="gotcha">
+              <div class="gotcha-icon info">ℹ️</div>
+              <div class="gotcha-text">
+                <div class="gotcha-title">Overview dashboard period tabs are not yet wired to data</div>
+                <div class="gotcha-desc"><code>dashboard.html</code> has 7D/30D/90D/Custom tabs that only toggle an active CSS class — no data re-fetch on period change (unlike the platform pages which have full <code>setRange()</code> logic). The overview needs the same <code>setRange()</code> pattern added, calling <code>GET /api/overview?period=N</code>.</div>
+              </div>
+            </div>
+
+            <div class="gotcha">
+              <div class="gotcha-icon fix">🔧</div>
+              <div class="gotcha-text">
+                <div class="gotcha-title">No auth guard on any page</div>
+                <div class="gotcha-desc">All HTML files are currently static and open. Once auth is added, the server should return a <code>401</code> redirect to login for unauthenticated requests, and a <code>403</code> for Viewer attempts to access Admin-only endpoints. The "Preview as Viewer" toggle in <code>sharing.html</code> is a UI-only prototype — it does not test real auth logic.</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end doc-body -->
+  </div><!-- end content -->
+</div><!-- end main -->
+
+</body>
+</html>

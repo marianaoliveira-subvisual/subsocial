@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>(function(){var t=localStorage.getItem('sb-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>(function(){
+  var _url='https://bgdyahjipkxwosbbkkqd.supabase.co';
+  var _key='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnZHlhaGppcGt4d29zYmJra3FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODMyODEsImV4cCI6MjA5MDQ1OTI4MX0.rB6ePMZjZM5_g9Gq1pxIoNxaFXFKoAaIKfXxSWkigR4';
+  window._sb=supabase.createClient(_url,_key);
+  document.documentElement.style.visibility='hidden';
+  window._sb.auth.getSession().then(function(r){
+    var session=r.data.session;
+    if(!session){window.location.replace('supabase-auth.html');}
+    else{document.documentElement.style.visibility='';if(window._onAuthReady)window._onAuthReady(session);}
+  });
+})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subvisual · Twitter Ads</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap');
+  :root {
+    --blue:      #045CFC;
+    --indigo:    #2421AB;
+    --violet:    #9563FF;
+    --pink:      #F3809C;
+    --ink:       #403F4C;
+    --ink-light: #6B6A77;
+    --ink-faint: #9E9DA8;
+    --bg:        #F4F4F8;
+    --surface:   #FFFFFF;
+    --border:    rgba(4,92,252,0.10);
+    --border-md: rgba(4,92,252,0.18);
+    --border-light: rgba(4,92,252,0.07);
+    --blue-tint: rgba(4,92,252,0.07);
+    --green:     #1B9A6A;
+    --red:       #D14040;
+    --sidebar-w: 220px;
+    --radius:    12px;
+    --radius-sm: 8px;
+    --platform:  #1DA1F2;
+  }
+  [data-theme="dark"]{
+    --bg:#18181f;
+    --surface:#22212d;
+    --border:rgba(255,255,255,0.08);
+    --border-md:rgba(255,255,255,0.15);
+    --border-light:rgba(255,255,255,0.05);
+    --blue-tint:rgba(4,92,252,0.18);
+    --ink:#e0dff0;
+    --ink-light:#a8a7b8;
+    --ink-faint:#6b6a7c;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;overflow-x:hidden}
+  .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;padding:0 0 24px}
+  .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border);margin-bottom:8px}
+  .logo-mark{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .logo-symbol{width:32px;height:32px;background:var(--indigo);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;letter-spacing:-1px}
+  .logo-text{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--indigo);letter-spacing:-0.2px}
+  .sidebar-section{padding:0 12px;margin-bottom:4px}
+  .sidebar-section-label{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);padding:8px 8px 6px}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius-sm);font-size:13px;font-weight:400;color:var(--ink-light);cursor:pointer;transition:background 0.15s,color 0.15s;text-decoration:none}
+  .nav-item:hover{background:var(--blue-tint);color:var(--blue)}
+  .nav-item.active{background:var(--blue-tint);color:var(--blue);font-weight:500}
+  .nav-item .nav-icon{width:16px;height:16px;opacity:0.6;flex-shrink:0}
+  .nav-item.active .nav-icon{opacity:1}
+  .platform-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .sidebar-footer{margin-top:auto;padding:16px 20px 0;border-top:1px solid var(--border)}
+  .user-pill{display:flex;align-items:center;gap:10px}
+  .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:500;flex-shrink:0}
+  .user-name{font-size:13px;font-weight:500;color:var(--ink)}
+  .user-role{font-size:11px;color:var(--ink-faint)}
+  .role-badge{margin-left:auto;font-size:10px;font-weight:500;padding:2px 7px;border-radius:100px;background:rgba(4,92,252,0.1);color:var(--blue)}
+  .main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+  .topbar-left{display:flex;align-items:center;gap:12px}
+  .platform-badge{display:flex;align-items:center;gap:7px;padding:5px 12px;background:#1DA1F218;border-radius:100px}
+  .platform-badge-dot{width:8px;height:8px;border-radius:50%;background:var(--platform)}
+  .platform-badge-label{font-size:12px;font-weight:500;color:var(--platform)}
+  .page-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--indigo);letter-spacing:-0.3px}
+  .topbar-right{display:flex;align-items:center;gap:8px}
+  .tab-group{display:flex;background:var(--bg);border-radius:var(--radius-sm);padding:3px;gap:2px}
+  .tab-btn{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--ink-light);transition:background 0.15s,color 0.15s;font-family:inherit}
+  .tab-btn.active{background:var(--surface);color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+  .date-picker{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border-md);font-size:12px;font-weight:500;color:var(--ink);background:var(--surface)}
+  .date-input{padding:5px 10px;border:1px solid var(--border-md);border-radius:var(--radius-sm);font-size:12px;font-family:inherit;color:var(--ink);background:var(--surface);cursor:pointer;height:32px}
+  .date-input:focus{outline:none;border-color:var(--blue)}
+  .btn-primary{display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background 0.15s}
+  .btn-primary:hover{background:var(--indigo)}
+  .btn-ghost{display:flex;align-items:center;gap:6px;padding:7px 14px;background:transparent;color:var(--ink-light);border:1px solid var(--border-md);border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s}
+  .btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+  .content{padding:28px;flex:1}
+  .section-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
+  .section-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--indigo);letter-spacing:-0.2px}
+  .section-sub{font-size:11px;color:var(--ink-faint);margin-top:1px}
+  .stats-grid-wide{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;position:relative;overflow:hidden;transition:border-color 0.15s,box-shadow 0.15s;cursor:default;animation:fadeUp 0.35s ease both}
+  .stat-card:hover{border-color:var(--border-md);box-shadow:0 2px 12px rgba(4,92,252,0.06)}
+  .stat-card.featured{background:var(--indigo);border-color:var(--indigo)}
+  .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--platform);opacity:0;transition:opacity 0.15s}
+  .stat-card:hover::before{opacity:1}
+  .stat-card.featured::before{opacity:0}
+  .stat-card:nth-child(1){animation-delay:0.05s}
+  .stat-card:nth-child(2){animation-delay:0.10s}
+  .stat-card:nth-child(3){animation-delay:0.15s}
+  .stat-card:nth-child(4){animation-delay:0.20s}
+  .stat-card:nth-child(5){animation-delay:0.25s}
+  .stat-label{font-size:11px;font-weight:400;color:var(--ink-faint);margin-bottom:6px}
+  .stat-card.featured .stat-label{color:rgba(255,255,255,0.5)}
+  .stat-value{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--indigo);line-height:1;letter-spacing:-0.5px;margin-bottom:6px}
+  .stat-card.featured .stat-value{color:#fff}
+  .stat-delta{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:500;padding:2px 7px;border-radius:100px}
+  .delta-up{background:rgba(27,154,106,0.1);color:var(--green)}
+  .delta-down{background:rgba(209,64,64,0.1);color:var(--red)}
+  .delta-up-white{background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.9)}
+  .delta-down-white{background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.75)}
+  .stat-compare{font-size:10px;color:var(--ink-faint);margin-top:4px}
+  .stat-card.featured .stat-compare{color:rgba(255,255,255,0.4)}
+  .two-col{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px}
+  .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;animation:fadeUp 0.4s ease both;animation-delay:0.3s}
+  .chart-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--indigo);margin-bottom:2px;letter-spacing:-0.2px}
+  .chart-subtitle{font-size:11px;color:var(--ink-faint)}
+  .engage-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+  .engage-item{background:var(--bg);border-radius:var(--radius-sm);padding:12px 14px}
+  .engage-label{font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px}
+  .engage-value{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--indigo)}
+  .engage-delta{font-size:11px;color:var(--green);margin-top:2px}
+  .engage-delta.down{color:var(--red)}
+  .history-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+  .history-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--radius-sm);background:var(--bg);border:1px solid transparent;cursor:pointer;transition:border-color 0.15s;font-size:12px}
+  .history-item:hover{border-color:var(--border-md)}
+  .history-item.active-report{border-color:var(--platform);background:#1DA1F208}
+  .history-period{flex:1;font-weight:500;color:var(--ink)}
+  .history-impressions{color:var(--ink-light)}
+  .history-date{font-size:11px;color:var(--ink-faint)}
+  .history-arrow{color:var(--blue);font-size:11px}
+  .history-del-btn{background:none;border:none;cursor:pointer;padding:3px 4px;margin-left:4px;color:var(--ink-faint);border-radius:4px;transition:color .15s,background .15s;line-height:0;flex-shrink:0}
+  .history-del-btn:hover{color:var(--red);background:rgba(209,64,64,0.08)}
+  .history-del-btn:disabled{opacity:0.4;cursor:default}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+</style>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a class="logo-mark" href="dashboard.html">
+      <div class="logo-symbol"><img src="symbol-white_8x.png" alt="Subvisual" style="width:22px;height:22px;object-fit:contain;display:block;"></div>
+      <span class="logo-text">SubSocial</span>
+    </a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Menu</div>
+    <a class="nav-item" href="dashboard.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+      Overview
+    </a>
+    <a class="nav-item" href="reports.html">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 7h6M5 9.5h4"/></svg>
+      Reports
+    </a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Organic</div>
+    <a class="nav-item" href="linkedin.html"><div class="platform-dot" style="background:#045CFC"></div>LinkedIn</a>
+    <a class="nav-item" href="twitter.html"><div class="platform-dot" style="background:#403F4C"></div>Twitter / X</a>
+    <a class="nav-item" href="bluesky.html"><div class="platform-dot" style="background:#9563FF"></div>Bluesky</a>
+    <a class="nav-item" href="youtube.html"><div class="platform-dot" style="background:#D14040"></div>YouTube</a>
+    <a class="nav-item" href="dribbble.html"><div class="platform-dot" style="background:#F3809C"></div>Dribbble</a>
+    <a class="nav-item" href="website.html"><div class="platform-dot" style="background:#1B9A6A"></div>Website</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px">
+    <div class="sidebar-section-label">Paid</div>
+    <a class="nav-item" href="linkedin-ads.html"><div class="platform-dot" style="background:#0A66C2"></div>LinkedIn Ads</a>
+    <a class="nav-item active" href="twitter-ads.html"><div class="platform-dot" style="background:#1DA1F2"></div>Twitter Ads</a>
+    <a class="nav-item" href="google-ads.html"><div class="platform-dot" style="background:#FBBC04"></div>Google Ads</a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar">M</div>
+      <div>
+        <div class="user-name">Mariana</div>
+        <div class="user-role">Social Media Manager</div>
+      </div>
+      <span class="role-badge">Admin</span>
+    </div>
+    <button onclick="window._sb.auth.signOut().then(function(){location.replace('supabase-auth.html')})" style="margin-top:10px;background:none;border:none;font-family:inherit;font-size:11px;color:var(--ink-faint);cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 6H1M4 3l-3 3 3 3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 1h5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5" stroke-linecap="round"/></svg>Sign out</button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="platform-badge">
+        <div class="platform-badge-dot"></div>
+        <span class="platform-badge-label">Twitter Ads</span>
+      </div>
+      <span class="page-title">Paid Media Analytics</span>
+    </div>
+    <div class="topbar-right">
+      <div class="tab-group">
+        <button class="tab-btn" data-range="7">7D</button>
+        <button class="tab-btn active" data-range="30">30D</button>
+        <button class="tab-btn" data-range="90">90D</button>
+      </div>
+      <div id="date-display" class="date-picker">
+        <span id="date-label">—</span>
+      </div>
+      <div id="custom-inputs" style="display:flex;align-items:center;gap:6px">
+        <input type="date" id="custom-from" class="date-input">
+        <span style="color:var(--ink-faint);font-size:12px">–</span>
+        <input type="date" id="custom-to" class="date-input">
+      </div>
+      <button class="btn-ghost">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 5l3 3 3-3" stroke-linecap="round"/><path d="M1 10h10" stroke-linecap="round"/></svg>
+        Export
+      </button>
+      <button class="btn-primary" onclick="location.href='upload.html'">
+        Upload report
+      </button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- KPI stats -->
+    <div class="stats-grid-wide">
+      <div class="stat-card featured">
+        <div class="stat-label">Impressions</div>
+        <div class="stat-value" id="kpi-imp-val">—</div>
+        <span class="stat-delta delta-up-white" id="kpi-imp-delta"></span>
+        <div class="stat-compare" id="kpi-imp-compare"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Clicks</div>
+        <div class="stat-value" id="kpi-clicks-val">—</div>
+        <span class="stat-delta delta-up" id="kpi-clicks-delta"></span>
+        <div class="stat-compare" id="kpi-clicks-compare"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">CTR</div>
+        <div class="stat-value" id="kpi-ctr-val">—</div>
+        <span class="stat-delta delta-up" id="kpi-ctr-delta"></span>
+        <div class="stat-compare" id="kpi-ctr-compare"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Spend</div>
+        <div class="stat-value" id="kpi-spend-val">—</div>
+        <span class="stat-delta delta-up" id="kpi-spend-delta"></span>
+        <div class="stat-compare" id="kpi-spend-compare"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Conversions</div>
+        <div class="stat-value" id="kpi-conv-val">—</div>
+        <span class="stat-delta delta-up" id="kpi-conv-delta"></span>
+        <div class="stat-compare" id="kpi-conv-compare"></div>
+      </div>
+    </div>
+
+    <!-- Trend chart (empty state) + Engagement breakdown -->
+    <div class="two-col">
+      <div class="chart-card">
+        <div class="chart-title">Performance trend</div>
+        <div class="chart-subtitle">Impressions &amp; clicks over time</div>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;gap:8px;text-align:center">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20L9 13L14 16.5L19.5 9L25 13"/><line x1="2.5" y1="22" x2="25.5" y2="22" stroke-linecap="round"/></svg>
+          <div style="font-size:12px;font-weight:500;color:var(--ink)">No trend data yet</div>
+          <div style="font-size:11px;color:var(--ink-faint)">Upload more reports to see trends over time</div>
+          <a href="upload.html" style="font-size:11px;color:var(--blue);text-decoration:none;font-weight:500;margin-top:4px">Upload a report →</a>
+        </div>
+      </div>
+
+      <!-- Engagement / conversion breakdown -->
+      <div class="chart-card">
+        <div class="chart-title">Performance breakdown</div>
+        <div class="chart-subtitle" style="margin-bottom:0">Key efficiency metrics</div>
+        <div class="engage-grid">
+          <div class="engage-item">
+            <div class="engage-label">CPC</div>
+            <div class="engage-value" id="eng-cpc">—</div>
+            <div class="engage-delta" id="eng-cpc-d"></div>
+          </div>
+          <div class="engage-item">
+            <div class="engage-label">CPM</div>
+            <div class="engage-value" id="eng-cpm">—</div>
+            <div class="engage-delta" id="eng-cpm-d"></div>
+          </div>
+          <div class="engage-item">
+            <div class="engage-label">Engagements</div>
+            <div class="engage-value" id="eng-engagements">—</div>
+            <div class="engage-delta" id="eng-engagements-d"></div>
+          </div>
+          <div class="engage-item">
+            <div class="engage-label">Eng. rate</div>
+            <div class="engage-value" id="eng-engrate">—</div>
+            <div class="engage-delta" id="eng-engrate-d"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Report history -->
+    <div class="chart-card" style="animation-delay:0.4s">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Report history</div>
+          <div class="section-sub">All uploaded Twitter Ads reports</div>
+        </div>
+        <button class="btn-primary" style="font-size:11px;padding:6px 12px" onclick="location.href='upload.html'">+ Upload new</button>
+      </div>
+      <div class="history-list" id="history-list">
+        <div style="padding:24px;text-align:center;font-size:12px;color:var(--ink-faint)">No reports uploaded yet. <a href="upload.html" style="color:var(--blue);font-weight:500">Upload one →</a></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+async function setRange(r){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.range==r));
+  let _res;try{_res=await _fetchPeriod('twitter-ads',+r,null,null);}catch(e){console.error(e);}
+  if(!_res||!_res.curr){_showNotice();return;}_hideNotice();
+  const{rs,curr,prev,m,pm}=_res;
+  const _fmt=d=>new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('date-label').textContent=_fmt(curr.period_start)+' \u2013 '+_fmt(curr.period_end);
+  const _cf=document.getElementById('custom-from'),_ct=document.getElementById('custom-to');
+  if(_cf)_cf.value=curr.period_start;if(_ct)_ct.value=curr.period_end;
+  // KPIs
+  _kpi('imp',m.impressions,pm.impressions,true);
+  _kpi('clicks',m.clicks,pm.clicks,false);
+  // CTR
+  const ctrV=parseFloat(m.ctr||0),ctrP=parseFloat(pm.ctr||0);
+  const ctrEl=document.getElementById('kpi-ctr-val');if(ctrEl&&m.ctr)ctrEl.textContent=ctrV.toFixed(2)+'%';
+  const ctrDE=document.getElementById('kpi-ctr-delta');if(ctrDE&&m.ctr&&pm.ctr){const up=ctrV>=ctrP;ctrDE.textContent=(up?'\u2191 +':'\u2193 ')+Math.abs(ctrV-ctrP).toFixed(2)+'pp';ctrDE.className='stat-delta '+(up?'delta-up':'delta-down');}
+  const ctrCE=document.getElementById('kpi-ctr-compare');if(ctrCE&&pm.ctr)ctrCE.textContent='vs '+ctrP.toFixed(2)+'% prev period';
+  // Spend
+  const spendV=parseFloat(m.spend||0),spendP=parseFloat(pm.spend||0);
+  const spendEl=document.getElementById('kpi-spend-val');if(spendEl&&m.spend)spendEl.textContent='$'+spendV.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0});
+  const spendDE=document.getElementById('kpi-spend-delta');if(spendDE&&m.spend&&pm.spend){const d=_delta(m.spend,pm.spend);if(d){spendDE.textContent=(d.dir==='up'?'\u2191 +':'\u2193 ')+d.pct;spendDE.className='stat-delta '+(d.dir==='up'?'delta-up':'delta-down');}}
+  const spendCE=document.getElementById('kpi-spend-compare');if(spendCE&&pm.spend)spendCE.textContent='vs $'+spendP.toLocaleString()+' prev period';
+  // Conversions
+  _kpi('conv',m.conversions,pm.conversions,false);
+  // Engagement breakdown
+  _eng(['cpc','cpm','engagements','engrate'],m,pm);
+  _history(rs,'#1DA1F2');
+}
+document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>setRange(btn.dataset.range)));
+['custom-from','custom-to'].forEach(id=>document.getElementById(id).addEventListener('change',async()=>{
+  const from=document.getElementById('custom-from').value,to=document.getElementById('custom-to').value;
+  if(from&&to){
+    let _res;try{_res=await _fetchPeriod('twitter-ads',null,from,to);}catch(e){console.error(e);}
+    if(!_res||!_res.curr){_showNotice();return;}_hideNotice();
+    const{rs,curr,prev,m,pm}=_res;
+    const _fmt=d=>new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    document.getElementById('date-label').textContent=_fmt(from)+' \u2013 '+_fmt(to);
+    _kpi('imp',m.impressions,pm.impressions,true);
+    _kpi('clicks',m.clicks,pm.clicks,false);
+    const ctrV2=parseFloat(m.ctr||0),ctrP2=parseFloat(pm.ctr||0);
+    const ctrEl2=document.getElementById('kpi-ctr-val');if(ctrEl2&&m.ctr)ctrEl2.textContent=ctrV2.toFixed(2)+'%';
+    const spendV2=parseFloat(m.spend||0);
+    const spendEl2=document.getElementById('kpi-spend-val');if(spendEl2&&m.spend)spendEl2.textContent='$'+spendV2.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0});
+    _kpi('conv',m.conversions,pm.conversions,false);
+    _eng(['cpc','cpm','engagements','engrate'],m,pm);
+    _history(rs,'#1DA1F2');
+  }
+}));
+
+function _fmtNum(v){if(v===undefined||v===null||v==='')return'—';const n=parseFloat(String(v).replace(/,/g,''));if(isNaN(n))return'—';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString();}
+function _delta(c,p){const cv=parseFloat(String(c).replace(/[^0-9.]/g,'')),pv=parseFloat(String(p).replace(/[^0-9.]/g,''));if(isNaN(cv)||isNaN(pv)||pv===0)return null;return{pct:Math.abs(((cv-pv)/Math.abs(pv)*100)).toFixed(1)+'%',dir:cv>=pv?'up':'down'};}
+function _kpi(dom,val,prev,featured){const v=document.getElementById('kpi-'+dom+'-val');if(v)v.textContent=_fmtNum(val);const e=document.getElementById('kpi-'+dom+'-delta');const c=document.getElementById('kpi-'+dom+'-compare');const d=_delta(val,prev);if(d&&prev){if(e){e.textContent=(d.dir==='up'?'\u2191 +':'\u2193 ')+d.pct;e.className='stat-delta '+(featured?(d.dir==='up'?'delta-up-white':'delta-down-white'):(d.dir==='up'?'delta-up':'delta-down'));}if(c)c.textContent='vs '+_fmtNum(prev)+' prev period';}else{if(e){e.textContent='';e.className='stat-delta';}if(c)c.textContent='';}
+function _eng(keys,m,pm){keys.forEach(k=>{const e=document.getElementById('eng-'+k);if(e)e.textContent=m[k]?_fmtNum(m[k]):'—';const de=document.getElementById('eng-'+k+'-d');if(de){if(m[k]&&pm[k]){const d=_delta(m[k],pm[k]);if(d){de.textContent=(d.dir==='up'?'\u2191 +':'\u2193 ')+d.pct;de.className='engage-delta'+(d.dir==='up'?'':' down');}else de.textContent='';}else de.textContent='';}});}
+function _history(rs,col){const hl=document.getElementById('history-list');if(!hl)return;if(!rs||!rs.length){hl.innerHTML='<div style="padding:24px;text-align:center;font-size:12px;color:var(--ink-faint)">No reports uploaded yet. <a href="upload.html" style="color:var(--blue);font-weight:500">Upload one \u2192</a></div>';return;}const f=d=>new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});const age=d=>{const diff=Math.floor((Date.now()-new Date(d))/86400000);return diff===0?'Uploaded today':diff===1?'Yesterday':f(d);};hl.innerHTML=rs.map((r,i)=>'<div class="history-item '+(i===0?'active-report':'')+'"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="'+(i===0?col:'var(--ink-faint)')+'" stroke-width="1.5"><rect x="2" y="1" width="10" height="12" rx="1.5"/><path d="M4.5 5h5M4.5 7.5h5M4.5 10h3"/></svg><span class="history-period">'+f(r.period_start)+' \u2013 '+f(r.period_end)+'</span><span class="history-impressions">'+(r.source==='manual'?'Manual':'CSV')+'</span><span class="history-date">'+age(r.created_at)+'</span><span class="history-arrow" style="color:'+(i===0?'var(--ink-faint)':'var(--blue)')+';">'+(i===0?'Viewing \u2192':'View \u2192')+'</span><button class="history-del-btn" data-rid="'+r.id+'" onclick="_deleteReport(this.dataset.rid,this)" title="Delete report"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3h8M4.5 3V1.5h3V3M3 3l.5 7.5h5L9 3"/><path d="M5 5.5v3M7 5.5v3"/></svg></button></div>').join('');}
+async function _fetchPeriod(slug,days,fromDate,toDate){
+  const{data:pl}=await window._sb.from('platforms').select('id').eq('slug',slug).single();
+  if(!pl)return null;
+  const{data:rs}=await window._sb.from('reports').select('id,period_start,period_end,source,created_at').eq('platform_id',pl.id).order('period_end',{ascending:false}).limit(20);
+  if(!rs||!rs.length)return null;
+  let curr,prev;
+  if(fromDate&&toDate){const f=new Date(fromDate),t=new Date(toDate);curr=rs.find(r=>new Date(r.period_start)<=t&&new Date(r.period_end)>=f)||rs[0];const i=rs.indexOf(curr);prev=rs[i+1]||null;}
+  else{const score=r=>Math.abs((new Date(r.period_end)-new Date(r.period_start))/86400000-days);curr=[...rs].sort((a,b)=>score(a)-score(b))[0]||null;if(curr)prev=[...rs].filter(r=>r.id!==curr.id).sort((a,b)=>score(a)-score(b))[0]||null;}
+  if(!curr)return{rs,curr:null,m:{},pm:{}};
+  const[{data:cm},{data:pm2}]=await Promise.all([window._sb.from('metrics').select('key,value').eq('report_id',curr.id),prev?window._sb.from('metrics').select('key,value').eq('report_id',prev.id):Promise.resolve({data:[]})]);
+  const m=Object.fromEntries((cm||[]).map(r=>[r.key,r.value]));const pm=Object.fromEntries((pm2||[]).map(r=>[r.key,r.value]));
+  return{rs,curr,prev,m,pm};
+}
+function _showNotice(){let e=document.getElementById('_pnotice');if(!e){e=document.createElement('div');e.id='_pnotice';e.innerHTML='No report found for this period. <a href="upload.html" style="color:var(--blue);font-weight:500;text-decoration:none;margin-left:2px">Upload one \u2192</a>';e.style.cssText='margin-bottom:16px;padding:10px 16px;background:rgba(4,92,252,0.05);border:1px solid rgba(4,92,252,0.12);border-radius:8px;font-size:12px;color:var(--ink-light);display:flex;align-items:center;gap:6px';document.querySelector('.content').prepend(e);}e.style.display='flex';}
+function _hideNotice(){const e=document.getElementById('_pnotice');if(e)e.style.display='none';}
+async function _deleteReport(id,btn){if(!confirm('Delete this report? This cannot be undone.'))return;btn.disabled=true;const{data,error}=await window._sb.from('reports').delete().eq('id',id).select();if(error){console.error('[SubSocial] Delete failed',{code:error.code,msg:error.message,hint:error.hint,details:error.details});_toast('Delete failed: '+(error.message||error.code||'RLS policy may be blocking deletes'));btn.disabled=false;return;}console.log('[SubSocial] Deleted report',id,'rows returned:',data&&data.length);const item=btn.closest('.history-item');if(item)item.remove();_toast('Report deleted.');setRange('30');}
+function _toast(msg){let t=document.getElementById('_toast');if(!t){t=document.createElement('div');t.id='_toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#403F4C;color:white;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.25s;pointer-events:none';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';clearTimeout(t._timer);t._timer=setTimeout(()=>{t.style.opacity='0';},2500);}
+window._onAuthReady=function(){setRange(localStorage.getItem('sb-default-period')||'30');};
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+# Netlify
+.netlify
+netlify.toml
+.netlifyignore
+
+# Claude Code internals
+.claude/
+
+# One-shot patch scripts (build artifacts)
+patch-*.js
+build-pages.js
+wire-platforms.js
+patch-clean.js
