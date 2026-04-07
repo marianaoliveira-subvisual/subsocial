@@ -239,23 +239,7 @@
       </div>
     </div>
 
-    <div class="two-col">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Views & likes</div><div class="chart-subtitle" id="imp-subtitle">Daily performance · last 30 days</div></div>
-          <div class="chart-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#F3809C"></div>Views</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#9563FF"></div>Likes</div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:8px;text-align:center">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20L9 13L14 16.5L19.5 9L25 13" stroke-linecap="round" stroke-linejoin="round"/><line x1="2.5" y1="22" x2="25.5" y2="22" stroke-linecap="round"/></svg>
-          <div style="font-size:12px;font-weight:500;color:var(--ink)">No trend data yet</div>
-          <div style="font-size:11px;color:var(--ink-faint)">Upload more reports to see trends over time</div>
-          <a href="upload.html" style="font-size:11px;color:var(--blue);text-decoration:none;font-weight:500;margin-top:4px">Upload a report →</a>
-        </div>
-      </div>
-      <div class="chart-card">
+    <div class="chart-card">
         <div class="chart-title">Shot breakdown</div>
         <div class="chart-subtitle" style="margin-bottom:0">Interactions across all shots</div>
         <div class="engage-grid">
@@ -267,25 +251,8 @@
           <div class="engage-item"><div class="engage-label">Link clicks</div><div class="engage-value" id="eng-links">—</div><div class="engage-delta down" id="eng-links-d"></div></div>
         </div>
       </div>
-    </div>
 
-    <div class="two-col" style="margin-bottom:20px">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Follower growth</div><div class="chart-subtitle">New followers per week</div></div>
-          <div class="growth-row">
-            <div class="growth-stat"><div class="growth-num" id="follower-total">—</div><div class="growth-lbl">Total followers</div></div>
-            <div class="growth-stat"><div class="growth-num" id="follower-period" style="color:var(--green)">—</div><div class="growth-lbl">This period</div></div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:8px;text-align:center">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20L9 13L14 16.5L19.5 9L25 13" stroke-linecap="round" stroke-linejoin="round"/><line x1="2.5" y1="22" x2="25.5" y2="22" stroke-linecap="round"/></svg>
-          <div style="font-size:12px;font-weight:500;color:var(--ink)">No trend data yet</div>
-          <div style="font-size:11px;color:var(--ink-faint)">Upload more reports to see trends over time</div>
-          <a href="upload.html" style="font-size:11px;color:var(--blue);text-decoration:none;font-weight:500;margin-top:4px">Upload a report →</a>
-        </div>
-      </div>
-      <div class="chart-card" style="display:flex;flex-direction:column">
+    <div class="chart-card" style="display:flex;flex-direction:column">
         <div class="chart-title">Like rate</div>
         <div class="chart-subtitle" style="margin-bottom:16px">vs previous period</div>
         <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:28px">
@@ -304,23 +271,13 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="posts-card">
-      <div class="section-header">
-        <div><div class="section-title">Top performing shots</div><div class="section-sub">Ranked by views · this period</div></div>
-        <span class="see-all">See all shots →</span>
+    <div class="chart-card" style="margin-bottom:20px">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:8px;text-align:center">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="20" height="22" rx="2"/><path d="M9 9h10M9 14h10M9 19h6"/></svg>
+        <div style="font-size:13px;font-weight:500;color:var(--ink)">Post-level data isn't available yet</div>
+        <div style="font-size:12px;color:var(--ink-faint);max-width:340px">This section will populate when individual post tracking is added.</div>
       </div>
-      <table class="posts-table">
-        <thead><tr><th style="width:36px">#</th><th>Shot</th><th>Type</th><th style="text-align:right">Views</th><th style="text-align:right">Likes</th><th style="text-align:right">Saves</th><th style="text-align:right">Comments</th></tr></thead>
-        <tbody>
-          <tr><td style="color:var(--ink-faint);font-size:11px">01</td><td><div class="post-title">Reveel — crypto payment flow redesign · full case study</div><div style="font-size:10px;color:var(--ink-faint);margin-top:2px">Mar 18, 2026</div></td><td><span class="post-type type-case">Case study</span></td><td><span class="metric-val">12.4K</span></td><td><span class="metric-val">841</span></td><td><span class="metric-val">342</span></td><td><span class="metric-val">74</span></td></tr>
-          <tr><td style="color:var(--ink-faint);font-size:11px">02</td><td><div class="post-title">Design system components — light &amp; dark mode exploration</div><div style="font-size:10px;color:var(--ink-faint);margin-top:2px">Mar 12, 2026</div></td><td><span class="post-type type-shot">Shot</span></td><td><span class="metric-val">9.8K</span></td><td><span class="metric-val">612</span></td><td><span class="metric-val">248</span></td><td><span class="metric-val">52</span></td></tr>
-          <tr><td style="color:var(--ink-faint);font-size:11px">03</td><td><div class="post-title">Mobile onboarding screens — fintech wallet app</div><div style="font-size:10px;color:var(--ink-faint);margin-top:2px">Mar 8, 2026</div></td><td><span class="post-type type-shot">Shot</span></td><td><span class="metric-val">8.1K</span></td><td><span class="metric-val">524</span></td><td><span class="metric-val">201</span></td><td><span class="metric-val">41</span></td></tr>
-          <tr><td style="color:var(--ink-faint);font-size:11px">04</td><td><div class="post-title">Dashboard UI — analytics overview with dark theme</div><div style="font-size:10px;color:var(--ink-faint);margin-top:2px">Mar 2, 2026</div></td><td><span class="post-type type-shot">Shot</span></td><td><span class="metric-val">6.4K</span></td><td><span class="metric-val">412</span></td><td><span class="metric-val">168</span></td><td><span class="metric-val">34</span></td></tr>
-          <tr><td style="color:var(--ink-faint);font-size:11px">05</td><td><div class="post-title">Brand identity — logo mark exploration for a Web3 startup</div><div style="font-size:10px;color:var(--ink-faint);margin-top:2px">Feb 26, 2026</div></td><td><span class="post-type type-shot">Shot</span></td><td><span class="metric-val">5.2K</span></td><td><span class="metric-val">348</span></td><td><span class="metric-val">141</span></td><td><span class="metric-val">28</span></td></tr>
-        </tbody>
-      </table>
     </div>
   </div>
 </div>

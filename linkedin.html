@@ -340,29 +340,7 @@
       </div>
     </div>
 
-    <!-- Impressions + reach chart -->
-    <div class="two-col">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Impressions & reach</div>
-            <div class="chart-subtitle" id="imp-subtitle">Daily performance · last 30 days</div>
-          </div>
-          <div class="chart-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#045CFC"></div>Impressions</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#9563FF"></div>Reach</div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:8px;text-align:center">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20L9 13L14 16.5L19.5 9L25 13" stroke-linecap="round" stroke-linejoin="round"/><line x1="2.5" y1="22" x2="25.5" y2="22" stroke-linecap="round"/></svg>
-          <div style="font-size:12px;font-weight:500;color:var(--ink)">No trend data yet</div>
-          <div style="font-size:11px;color:var(--ink-faint)">Upload more reports to see trends over time</div>
-          <a href="upload.html" style="font-size:11px;color:var(--blue);text-decoration:none;font-weight:500;margin-top:4px">Upload a report →</a>
-        </div>
-      </div>
-
-      <!-- Engagement breakdown -->
-      <div class="chart-card">
+    <div class="chart-card">
         <div class="chart-title">Engagement breakdown</div>
         <div class="chart-subtitle" style="margin-bottom:0">What people did with your content</div>
         <div class="engage-grid">
@@ -398,36 +376,8 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Follower growth chart + donut -->
-    <div class="two-col" style="margin-bottom:20px">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Follower growth</div>
-            <div class="chart-subtitle">New followers per week</div>
-          </div>
-          <div class="growth-row">
-            <div class="growth-stat">
-              <div class="growth-num" id="follower-total">—</div>
-              <div class="growth-lbl">Total followers</div>
-            </div>
-            <div class="growth-stat">
-              <div class="growth-num" id="follower-period" style="color:var(--green)">—</div>
-              <div class="growth-lbl">This period</div>
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:8px;text-align:center">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20L9 13L14 16.5L19.5 9L25 13" stroke-linecap="round" stroke-linejoin="round"/><line x1="2.5" y1="22" x2="25.5" y2="22" stroke-linecap="round"/></svg>
-          <div style="font-size:12px;font-weight:500;color:var(--ink)">No trend data yet</div>
-          <div style="font-size:11px;color:var(--ink-faint)">Upload more reports to see trends over time</div>
-          <a href="upload.html" style="font-size:11px;color:var(--blue);text-decoration:none;font-weight:500;margin-top:4px">Upload a report →</a>
-        </div>
-      </div>
-
-      <!-- Engagement rate donut -->
+    <!-- Engagement rate donut -->
       <div class="chart-card" style="display:flex;flex-direction:column">
         <div class="chart-title">Engagement rate</div>
         <div class="chart-subtitle" style="margin-bottom:16px">vs previous period</div>
@@ -453,77 +403,13 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Top posts -->
-    <div class="posts-card">
-      <div class="section-header">
-        <div>
-          <div class="section-title">Top performing posts</div>
-          <div class="section-sub">Ranked by impressions · this period</div>
-        </div>
-        <span class="see-all">See all posts →</span>
+    <div class="chart-card" style="margin-bottom:20px">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:8px;text-align:center">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="20" height="22" rx="2"/><path d="M9 9h10M9 14h10M9 19h6"/></svg>
+        <div style="font-size:13px;font-weight:500;color:var(--ink)">Post-level data isn't available yet</div>
+        <div style="font-size:12px;color:var(--ink-faint);max-width:340px">This section will populate when individual post tracking is added.</div>
       </div>
-      <table class="posts-table">
-        <thead>
-          <tr>
-            <th style="width:36px">#</th>
-            <th>Post</th>
-            <th>Type</th>
-            <th style="text-align:right">Impressions</th>
-            <th style="text-align:right">Eng. rate</th>
-            <th style="text-align:right">Clicks</th>
-            <th style="text-align:right">Reactions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style="color:var(--ink-faint);font-size:11px">01</td>
-            <td><div class="post-title">How we approach design systems at scale — lessons from 5 years of product work</div><div style="font-size:10px;color:var(--ink-faint);margin-top:2px">Mar 18, 2026</div></td>
-            <td><span class="post-type type-article">Article</span></td>
-            <td><span class="metric-val">18.4K</span></td>
-            <td><span style="color:var(--green);font-weight:500">7.8%</span></td>
-            <td><span class="metric-val">842</span></td>
-            <td><span class="metric-val">621</span></td>
-          </tr>
-          <tr>
-            <td style="color:var(--ink-faint);font-size:11px">02</td>
-            <td><div class="post-title">Starbase Deep Space — AI in Fintech, April 24 in Coimbra. Come find us.</div><div style="font-size:10px;color:var(--ink-faint);margin-top:2px">Mar 12, 2026</div></td>
-            <td><span class="post-type type-image">Image</span></td>
-            <td><span class="metric-val">14.2K</span></td>
-            <td><span style="color:var(--green);font-weight:500">6.3%</span></td>
-            <td><span class="metric-val">534</span></td>
-            <td><span class="metric-val">448</span></td>
-          </tr>
-          <tr>
-            <td style="color:var(--ink-faint);font-size:11px">03</td>
-            <td><div class="post-title">We're hiring — join the team that builds the future of Web3 products</div><div style="font-size:10px;color:var(--ink-faint);margin-top:2px">Mar 8, 2026</div></td>
-            <td><span class="post-type type-text">Text</span></td>
-            <td><span class="metric-val">11.8K</span></td>
-            <td><span style="color:var(--green);font-weight:500">5.9%</span></td>
-            <td><span class="metric-val">389</span></td>
-            <td><span class="metric-val">312</span></td>
-          </tr>
-          <tr>
-            <td style="color:var(--ink-faint);font-size:11px">04</td>
-            <td><div class="post-title">SubMonthly #12 — what we shipped, learned, and read this month</div><div style="font-size:10px;color:var(--ink-faint);margin-top:2px">Mar 1, 2026</div></td>
-            <td><span class="post-type type-article">Article</span></td>
-            <td><span class="metric-val">9.3K</span></td>
-            <td><span style="color:var(--ink-faint);font-weight:500">4.1%</span></td>
-            <td><span class="metric-val">271</span></td>
-            <td><span class="metric-val">198</span></td>
-          </tr>
-          <tr>
-            <td style="color:var(--ink-faint);font-size:11px">05</td>
-            <td><div class="post-title">Behind the Reveel case study — designing for crypto payments UX</div><div style="font-size:10px;color:var(--ink-faint);margin-top:2px">Feb 28, 2026</div></td>
-            <td><span class="post-type type-video">Video</span></td>
-            <td><span class="metric-val">8.7K</span></td>
-            <td><span style="color:var(--green);font-weight:500">5.4%</span></td>
-            <td><span class="metric-val">244</span></td>
-            <td><span class="metric-val">187</span></td>
-          </tr>
-        </tbody>
-      </table>
     </div>
 
     <!-- Report history -->

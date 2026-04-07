@@ -242,23 +242,7 @@
       </div>
     </div>
 
-    <div class="two-col">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Sessions & unique visitors</div><div class="chart-subtitle" id="imp-subtitle">Daily performance · last 30 days</div></div>
-          <div class="chart-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#1B9A6A"></div>Sessions</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#045CFC"></div>Unique visitors</div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:8px;text-align:center">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20L9 13L14 16.5L19.5 9L25 13" stroke-linecap="round" stroke-linejoin="round"/><line x1="2.5" y1="22" x2="25.5" y2="22" stroke-linecap="round"/></svg>
-          <div style="font-size:12px;font-weight:500;color:var(--ink)">No trend data yet</div>
-          <div style="font-size:11px;color:var(--ink-faint)">Upload more reports to see trends over time</div>
-          <a href="upload.html" style="font-size:11px;color:var(--blue);text-decoration:none;font-weight:500;margin-top:4px">Upload a report →</a>
-        </div>
-      </div>
-      <div class="chart-card">
+    <div class="chart-card">
         <div class="chart-title">Traffic breakdown</div>
         <div class="chart-subtitle" style="margin-bottom:0">Sessions by acquisition channel</div>
         <div class="engage-grid">
@@ -270,25 +254,8 @@
           <div class="engage-item"><div class="engage-label">Paid</div><div class="engage-value" id="eng-paid">—</div><div class="engage-delta down" id="eng-paid-d"></div></div>
         </div>
       </div>
-    </div>
 
-    <div class="two-col" style="margin-bottom:20px">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Weekly sessions trend</div><div class="chart-subtitle">Sessions per week</div></div>
-          <div style="display:flex;align-items:center;gap:24px;margin-bottom:18px">
-            <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--indigo)" id="follower-total">—</div><div style="font-size:10px;color:var(--ink-faint);margin-top:1px">This period</div></div>
-            <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--green)" id="follower-period">—</div><div style="font-size:10px;color:var(--ink-faint);margin-top:1px">vs prev period</div></div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:8px;text-align:center">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20L9 13L14 16.5L19.5 9L25 13" stroke-linecap="round" stroke-linejoin="round"/><line x1="2.5" y1="22" x2="25.5" y2="22" stroke-linecap="round"/></svg>
-          <div style="font-size:12px;font-weight:500;color:var(--ink)">No trend data yet</div>
-          <div style="font-size:11px;color:var(--ink-faint)">Upload more reports to see trends over time</div>
-          <a href="upload.html" style="font-size:11px;color:var(--blue);text-decoration:none;font-weight:500;margin-top:4px">Upload a report →</a>
-        </div>
-      </div>
-      <div class="chart-card" style="display:flex;flex-direction:column">
+    <div class="chart-card" style="display:flex;flex-direction:column">
         <div class="chart-title">Bounce rate</div>
         <div class="chart-subtitle" style="margin-bottom:16px">vs previous period · lower is better</div>
         <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:28px">
@@ -307,31 +274,13 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Traffic sources table (replaces top posts) -->
-    <div class="sources-card">
-      <div class="section-header">
-        <div><div class="section-title">Social traffic sources</div><div class="section-sub">Referrals from social channels · this period</div></div>
-        <span class="see-all">Full report →</span>
+    <div class="chart-card" style="margin-bottom:20px">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:8px;text-align:center">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="20" height="22" rx="2"/><path d="M9 9h10M9 14h10M9 19h6"/></svg>
+        <div style="font-size:13px;font-weight:500;color:var(--ink)">Post-level data isn't available yet</div>
+        <div style="font-size:12px;color:var(--ink-faint);max-width:340px">This section will populate when individual post tracking is added.</div>
       </div>
-      <table class="sources-table">
-        <thead><tr>
-          <th>Source</th>
-          <th style="text-align:right">Sessions</th>
-          <th style="text-align:right">Unique visitors</th>
-          <th style="text-align:right">Avg. duration</th>
-          <th style="text-align:right">Bounce rate</th>
-          <th style="min-width:120px">Share of social</th>
-        </tr></thead>
-        <tbody>
-          <tr><td><span class="source-badge source-linkedin">● LinkedIn</span></td><td><span class="metric-val">1,840</span></td><td><span class="metric-val">1,420</span></td><td style="color:var(--ink-light)">3:12</td><td><span style="color:var(--green);font-weight:500">38.4%</span></td><td><div class="bar-wrap"><div class="bar-track"><div class="bar-fill" style="width:43%;background:#045CFC"></div></div><span style="font-size:11px;color:var(--ink-light)">43%</span></div></td></tr>
-          <tr><td><span class="source-badge source-twitter">● Twitter / X</span></td><td><span class="metric-val">941</span></td><td><span class="metric-val">741</span></td><td style="color:var(--ink-light)">2:48</td><td><span style="color:var(--ink-faint);font-weight:500">44.1%</span></td><td><div class="bar-wrap"><div class="bar-track"><div class="bar-fill" style="width:22%;background:#403F4C"></div></div><span style="font-size:11px;color:var(--ink-light)">22%</span></div></td></tr>
-          <tr><td><span class="source-badge source-bluesky">● Bluesky</span></td><td><span class="metric-val">612</span></td><td><span class="metric-val">498</span></td><td style="color:var(--ink-light)">2:31</td><td><span style="color:var(--ink-faint);font-weight:500">46.2%</span></td><td><div class="bar-wrap"><div class="bar-track"><div class="bar-fill" style="width:15%;background:#9563FF"></div></div><span style="font-size:11px;color:var(--ink-light)">15%</span></div></td></tr>
-          <tr><td><span class="source-badge source-youtube">● YouTube</span></td><td><span class="metric-val">484</span></td><td><span class="metric-val">401</span></td><td style="color:var(--ink-light)">4:02</td><td><span style="color:var(--green);font-weight:500">31.8%</span></td><td><div class="bar-wrap"><div class="bar-track"><div class="bar-fill" style="width:11%;background:#D14040"></div></div><span style="font-size:11px;color:var(--ink-light)">11%</span></div></td></tr>
-          <tr><td><span class="source-badge source-dribbble">● Dribbble</span></td><td><span class="metric-val">333</span></td><td><span class="metric-val">281</span></td><td style="color:var(--ink-light)">2:14</td><td><span style="color:var(--red);font-weight:500">52.1%</span></td><td><div class="bar-wrap"><div class="bar-track"><div class="bar-fill" style="width:8%;background:#F3809C"></div></div><span style="font-size:11px;color:var(--ink-light)">8%</span></div></td></tr>
-        </tbody>
-      </table>
     </div>
   </div>
 </div>

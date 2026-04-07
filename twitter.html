@@ -269,26 +269,7 @@
       </div>
     </div>
 
-    <div class="two-col">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Impressions & engagements</div>
-            <div class="chart-subtitle" id="imp-subtitle">Daily performance · last 30 days</div>
-          </div>
-          <div class="chart-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#403F4C"></div>Impressions</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#9563FF"></div>Engagements</div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:8px;text-align:center">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20L9 13L14 16.5L19.5 9L25 13" stroke-linecap="round" stroke-linejoin="round"/><line x1="2.5" y1="22" x2="25.5" y2="22" stroke-linecap="round"/></svg>
-          <div style="font-size:12px;font-weight:500;color:var(--ink)">No trend data yet</div>
-          <div style="font-size:11px;color:var(--ink-faint)">Upload more reports to see trends over time</div>
-          <a href="upload.html" style="font-size:11px;color:var(--blue);text-decoration:none;font-weight:500;margin-top:4px">Upload a report →</a>
-        </div>
-      </div>
-      <div class="chart-card">
+    <div class="chart-card">
         <div class="chart-title">Engagement breakdown</div>
         <div class="chart-subtitle" style="margin-bottom:0">What people did with your tweets</div>
         <div class="engage-grid">
@@ -300,28 +281,8 @@
           <div class="engage-item"><div class="engage-label">Profile visits</div><div class="engage-value" id="eng-profile">—</div><div class="engage-delta" id="eng-profile-d"></div></div>
         </div>
       </div>
-    </div>
 
-    <div class="two-col" style="margin-bottom:20px">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">Follower growth</div>
-            <div class="chart-subtitle">New followers per week</div>
-          </div>
-          <div class="growth-row">
-            <div class="growth-stat"><div class="growth-num" id="follower-total">—</div><div class="growth-lbl">Total followers</div></div>
-            <div class="growth-stat"><div class="growth-num" id="follower-period" style="color:var(--green)">—</div><div class="growth-lbl">This period</div></div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:8px;text-align:center">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20L9 13L14 16.5L19.5 9L25 13" stroke-linecap="round" stroke-linejoin="round"/><line x1="2.5" y1="22" x2="25.5" y2="22" stroke-linecap="round"/></svg>
-          <div style="font-size:12px;font-weight:500;color:var(--ink)">No trend data yet</div>
-          <div style="font-size:11px;color:var(--ink-faint)">Upload more reports to see trends over time</div>
-          <a href="upload.html" style="font-size:11px;color:var(--blue);text-decoration:none;font-weight:500;margin-top:4px">Upload a report →</a>
-        </div>
-      </div>
-      <div class="chart-card" style="display:flex;flex-direction:column">
+    <div class="chart-card" style="display:flex;flex-direction:column">
         <div class="chart-title">Engagement rate</div>
         <div class="chart-subtitle" style="margin-bottom:16px">vs previous period</div>
         <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:28px">
@@ -340,27 +301,13 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="posts-card">
-      <div class="section-header">
-        <div><div class="section-title">Top performing tweets</div><div class="section-sub">Ranked by impressions · this period</div></div>
-        <span class="see-all">See all tweets →</span>
+    <div class="chart-card" style="margin-bottom:20px">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:8px;text-align:center">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="20" height="22" rx="2"/><path d="M9 9h10M9 14h10M9 19h6"/></svg>
+        <div style="font-size:13px;font-weight:500;color:var(--ink)">Post-level data isn't available yet</div>
+        <div style="font-size:12px;color:var(--ink-faint);max-width:340px">This section will populate when individual post tracking is added.</div>
       </div>
-      <table class="posts-table">
-        <thead><tr>
-          <th style="width:36px">#</th><th>Tweet</th><th>Type</th>
-          <th style="text-align:right">Impressions</th><th style="text-align:right">Eng. rate</th>
-          <th style="text-align:right">Reposts</th><th style="text-align:right">Likes</th>
-        </tr></thead>
-        <tbody>
-          <tr><td style="color:var(--ink-faint);font-size:11px">01</td><td><div class="post-title">The best design decisions are invisible. A thread on what we've learned building 40+ products.</div><div style="font-size:10px;color:var(--ink-faint);margin-top:2px">Mar 19, 2026</div></td><td><span class="post-type type-thread">Thread</span></td><td><span class="metric-val">24.1K</span></td><td><span style="color:var(--green);font-weight:500">6.4%</span></td><td><span class="metric-val">487</span></td><td><span class="metric-val">1,102</span></td></tr>
-          <tr><td style="color:var(--ink-faint);font-size:11px">02</td><td><div class="post-title">Excited to announce we're at Starbase Deep Space next month — come talk AI &amp; fintech with us</div><div style="font-size:10px;color:var(--ink-faint);margin-top:2px">Mar 14, 2026</div></td><td><span class="post-type type-image">Image</span></td><td><span class="metric-val">18.7K</span></td><td><span style="color:var(--green);font-weight:500">5.1%</span></td><td><span class="metric-val">312</span></td><td><span class="metric-val">841</span></td></tr>
-          <tr><td style="color:var(--ink-faint);font-size:11px">03</td><td><div class="post-title">We're hiring a senior product designer. Remote-first, great team, meaningful work.</div><div style="font-size:10px;color:var(--ink-faint);margin-top:2px">Mar 9, 2026</div></td><td><span class="post-type type-text">Text</span></td><td><span class="metric-val">15.3K</span></td><td><span style="color:var(--green);font-weight:500">4.8%</span></td><td><span class="metric-val">241</span></td><td><span class="metric-val">612</span></td></tr>
-          <tr><td style="color:var(--ink-faint);font-size:11px">04</td><td><div class="post-title">SubMonthly #12 is out — what we shipped, read, and learned in February</div><div style="font-size:10px;color:var(--ink-faint);margin-top:2px">Mar 2, 2026</div></td><td><span class="post-type type-text">Text</span></td><td><span class="metric-val">11.2K</span></td><td><span style="color:var(--ink-faint);font-weight:500">3.4%</span></td><td><span class="metric-val">188</span></td><td><span class="metric-val">402</span></td></tr>
-          <tr><td style="color:var(--ink-faint);font-size:11px">05</td><td><div class="post-title">New case study: how we redesigned Reveel's crypto payment flow for clarity at scale</div><div style="font-size:10px;color:var(--ink-faint);margin-top:2px">Feb 27, 2026</div></td><td><span class="post-type type-image">Image</span></td><td><span class="metric-val">9.8K</span></td><td><span style="color:var(--green);font-weight:500">4.1%</span></td><td><span class="metric-val">154</span></td><td><span class="metric-val">361</span></td></tr>
-        </tbody>
-      </table>
     </div>
   </div>
 </div>
