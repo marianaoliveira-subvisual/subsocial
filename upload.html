@@ -870,106 +870,51 @@ function _showXlsxError() {
 }
 
 function mapXlsxRows(rows, platform) {
-  const result = {};
-  if (!rows || rows.length < 1) return result;
-  const meta = PLATFORM_META[platform];
-  if (!meta) return result;
-
-  // ── Locate the header row ─────────────────────────────────────────────────
-  // Some exports (e.g. LinkedIn) prepend a description row with only one
-  // non-empty cell before the real column headers. Detect and skip it.
-  function nonEmpty(row) {
-    return (row || []).filter(function(c) {
-      return c !== null && c !== undefined && String(c).trim() !== '';
-    });
+  // Find the header row — it's the first row where the first cell is 'data'
+  let headerIdx = -1;
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i] && rows[i][0] && String(rows[i][0]).trim().toLowerCase() === 'data') {
+      headerIdx = i;
+      break;
+    }
   }
-  var headerRowIdx = nonEmpty(rows[0]).length <= 1 ? 1 : 0;
-  var headerRow = (rows[headerRowIdx] || []).map(function(h) {
-    return String(h || '').toLowerCase().trim();
-  });
+  if (headerIdx === -1) return {};
 
-  // ── Collect data rows (everything after the header row) ───────────────────
-  // Keep only rows that have at least one numeric value (skip blank / footer rows).
-  var dataRows = rows.slice(headerRowIdx + 1).filter(function(row) {
-    return row && row.some(function(c) {
-      if (c === null || c === undefined) return false;
-      return !isNaN(parseFloat(String(c).replace(/,/g, '').replace(/%/g, '')));
-    });
-  });
+  const headers = rows[headerIdx].map(h => h ? String(h).trim().toLowerCase() : '');
+  const dataRows = rows.slice(headerIdx + 1).filter(r => r && r[0]); // skip empty rows
 
-  // ── Tabular path (header row found with multiple columns) ─────────────────
-  if (headerRow.length > 1 && dataRows.length > 0) {
-    var isTimeSeries = dataRows.length > 1;
+  if (dataRows.length === 0) return {};
 
-    meta.fields.forEach(function(f) {
-      var aliases = METRIC_ALIASES[f.id] || [f.id];
-      for (var i = 0; i < aliases.length; i++) {
-        var al = aliases[i].toLowerCase().trim();
-        var idx = -1;
-        for (var j = 0; j < headerRow.length; j++) {
-          if (headerRow[j] === al) { idx = j; break; } // exact match only
-        }
-        if (idx === -1) continue;
-
-        var isRate = (f.id === 'engrate' || f.id === 'ctr' || f.id === 'bounce');
-
-        if (isTimeSeries) {
-          // Collect all numeric values for this column across every daily row
-          var nums = [];
-          dataRows.forEach(function(row) {
-            var cell = row[idx];
-            if (cell === null || cell === undefined) return;
-            var n = parseFloat(String(cell).replace(/,/g, '').replace(/%/g, ''));
-            if (!isNaN(n)) nums.push(n);
-          });
-          if (nums.length === 0) continue;
-
-          var out;
-          if (isRate) {
-            // Average the daily rates; LinkedIn exports as decimal (0.042) — convert to %
-            var avg = nums.reduce(function(a, b) { return a + b; }, 0) / nums.length;
-            var allDecimal = nums.every(function(n) { return n < 1; });
-            out = (allDecimal ? avg * 100 : avg).toFixed(2);
-          } else {
-            // Sum daily counts for the period total
-            out = Math.round(nums.reduce(function(a, b) { return a + b; }, 0)).toString();
-          }
-          if (out) { result[f.id] = out; break; }
-
-        } else {
-          // Single summary row
-          var cell = dataRows[0][idx];
-          if (cell === null || cell === undefined) continue;
-          var v = String(cell).trim().replace(/,/g, '');
-          if (isRate) v = v.replace(/%/g, '');
-          if (v) { result[f.id] = v; break; }
-        }
+  // Map of metric key → column index (first matching alias wins)
+  const colMap = {};
+  for (const [key, aliasList] of Object.entries(METRIC_ALIASES)) {
+    for (let j = 0; j < headers.length; j++) {
+      if (aliasList.map(a => a.toLowerCase().trim()).includes(headers[j])) {
+        if (!(key in colMap)) colMap[key] = j;
+        break;
       }
-    });
+    }
   }
 
-  // ── Key:value fallback (col A = metric name, col B = value) ──────────────
-  if (!Object.keys(result).length) {
-    rows.forEach(function(row) {
-      if (!row || row.length < 2 || row[0] === null) return;
-      var key = String(row[0]).toLowerCase().trim();
-      var val = row[1] !== null && row[1] !== undefined
-        ? String(row[1]).trim().replace(/,/g, '') : '';
-      if (!val) return;
-      meta.fields.forEach(function(f) {
-        if (result[f.id]) return;
-        var aliases = METRIC_ALIASES[f.id] || [f.id];
-        for (var i = 0; i < aliases.length; i++) {
-          var al = aliases[i].toLowerCase().trim();
-          if (key === al) { // exact match only
-            var v = val;
-            if (f.id === 'engrate' || f.id === 'ctr' || f.id === 'bounce') v = v.replace(/%/g, '');
-            if (v) { result[f.id] = v; break; }
-          }
-        }
-      });
-    });
+  // Sum numeric columns; average rate metrics (engrate / ctr / bounce)
+  const result = {};
+  for (const [key, colIdx] of Object.entries(colMap)) {
+    const values = dataRows
+      .map(r => parseFloat(String(r[colIdx] || '').replace(/,/g, '').replace(/%/g, '')))
+      .filter(v => !isNaN(v));
+    if (values.length === 0) continue;
+    if (key === 'engrate' || key === 'ctr' || key === 'bounce') {
+      const avg = values.reduce((a, b) => a + b, 0) / values.length;
+      const allDecimal = values.every(n => n < 1);
+      result[key] = (allDecimal ? avg * 100 : avg).toFixed(2);
+    } else {
+      result[key] = Math.round(values.reduce((a, b) => a + b, 0)).toString();
+    }
   }
+
+  console.log('[mapXlsxRows] headers found:', headers);
+  console.log('[mapXlsxRows] colMap:', colMap);
+  console.log('[mapXlsxRows] result:', result);
 
   return result;
 }
