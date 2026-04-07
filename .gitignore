@@ -6,6 +6,9 @@ netlify.toml
 # Claude Code internals
 .claude/
 
+# Vercel CLI local config (not needed in repo)
+.vercel/
+
 # One-shot patch scripts (build artifacts)
 patch-*.js
 build-pages.js
