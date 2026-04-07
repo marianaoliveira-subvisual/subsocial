@@ -875,11 +875,32 @@ function mapXlsxRows(rows, platform) {
   const meta = PLATFORM_META[platform];
   if (!meta) return result;
 
-  // Try tabular format: row 0 = headers, row 1 = values
-  const headerRow = (rows[0] || []).map(function(h) { return String(h || '').toLowerCase().trim(); });
-  const dataRow   = rows[1] || [];
+  // ── Locate the header row ─────────────────────────────────────────────────
+  // Some exports (e.g. LinkedIn) prepend a description row with only one
+  // non-empty cell before the real column headers. Detect and skip it.
+  function nonEmpty(row) {
+    return (row || []).filter(function(c) {
+      return c !== null && c !== undefined && String(c).trim() !== '';
+    });
+  }
+  var headerRowIdx = nonEmpty(rows[0]).length <= 1 ? 1 : 0;
+  var headerRow = (rows[headerRowIdx] || []).map(function(h) {
+    return String(h || '').toLowerCase().trim();
+  });
 
-  if (headerRow.length > 1) {
+  // ── Collect data rows (everything after the header row) ───────────────────
+  // Keep only rows that have at least one numeric value (skip blank / footer rows).
+  var dataRows = rows.slice(headerRowIdx + 1).filter(function(row) {
+    return row && row.some(function(c) {
+      if (c === null || c === undefined) return false;
+      return !isNaN(parseFloat(String(c).replace(/,/g, '').replace(/%/g, '')));
+    });
+  });
+
+  // ── Tabular path (header row found with multiple columns) ─────────────────
+  if (headerRow.length > 1 && dataRows.length > 0) {
+    var isTimeSeries = dataRows.length > 1;
+
     meta.fields.forEach(function(f) {
       var aliases = METRIC_ALIASES[f.id] || [f.id];
       for (var i = 0; i < aliases.length; i++) {
@@ -888,21 +909,52 @@ function mapXlsxRows(rows, platform) {
         for (var j = 0; j < headerRow.length; j++) {
           if (headerRow[j] === al) { idx = j; break; } // exact match only
         }
-        if (idx !== -1 && dataRow[idx] !== null && dataRow[idx] !== undefined) {
-          var v = String(dataRow[idx]).trim().replace(/,/g, '');
-          if (f.id === 'engrate' || f.id === 'ctr' || f.id === 'bounce') v = v.replace(/%/g, '');
+        if (idx === -1) continue;
+
+        var isRate = (f.id === 'engrate' || f.id === 'ctr' || f.id === 'bounce');
+
+        if (isTimeSeries) {
+          // Collect all numeric values for this column across every daily row
+          var nums = [];
+          dataRows.forEach(function(row) {
+            var cell = row[idx];
+            if (cell === null || cell === undefined) return;
+            var n = parseFloat(String(cell).replace(/,/g, '').replace(/%/g, ''));
+            if (!isNaN(n)) nums.push(n);
+          });
+          if (nums.length === 0) continue;
+
+          var out;
+          if (isRate) {
+            // Average the daily rates; LinkedIn exports as decimal (0.042) — convert to %
+            var avg = nums.reduce(function(a, b) { return a + b; }, 0) / nums.length;
+            var allDecimal = nums.every(function(n) { return n < 1; });
+            out = (allDecimal ? avg * 100 : avg).toFixed(2);
+          } else {
+            // Sum daily counts for the period total
+            out = Math.round(nums.reduce(function(a, b) { return a + b; }, 0)).toString();
+          }
+          if (out) { result[f.id] = out; break; }
+
+        } else {
+          // Single summary row
+          var cell = dataRows[0][idx];
+          if (cell === null || cell === undefined) continue;
+          var v = String(cell).trim().replace(/,/g, '');
+          if (isRate) v = v.replace(/%/g, '');
           if (v) { result[f.id] = v; break; }
         }
       }
     });
   }
 
-  // If tabular didn't map anything, try key:value pairs (col A = label, col B = value)
+  // ── Key:value fallback (col A = metric name, col B = value) ──────────────
   if (!Object.keys(result).length) {
     rows.forEach(function(row) {
       if (!row || row.length < 2 || row[0] === null) return;
       var key = String(row[0]).toLowerCase().trim();
-      var val = row[1] !== null && row[1] !== undefined ? String(row[1]).trim().replace(/,/g, '') : '';
+      var val = row[1] !== null && row[1] !== undefined
+        ? String(row[1]).trim().replace(/,/g, '') : '';
       if (!val) return;
       meta.fields.forEach(function(f) {
         if (result[f.id]) return;
