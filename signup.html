@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script>(function(){var t=localStorage.getItem('sb-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SubSocial · Sign in</title>
+<title>SubSocial · Create account</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap');
@@ -21,13 +21,10 @@
     --surface:#22212d;
     --border:rgba(255,255,255,0.08);
     --border-md:rgba(255,255,255,0.15);
-    --border-light:rgba(255,255,255,0.05);
-    --blue-tint:rgba(4,92,252,0.18);
     --ink:#e0dff0;
     --ink-light:#a8a7b8;
     --ink-faint:#6b6a7c;
   }
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'DM Sans', system-ui, sans-serif;
@@ -69,9 +66,18 @@
     background: rgba(209,64,64,0.07); border: 1px solid rgba(209,64,64,0.2);
     border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 12px; display: none;
   }
+  .success-msg {
+    font-size: 13px; color: var(--green);
+    background: rgba(27,154,106,0.07); border: 1px solid rgba(27,154,106,0.2);
+    border-radius: var(--radius-sm); padding: 14px 16px; margin-top: 12px;
+    line-height: 1.6; display: none;
+  }
+  .success-msg a { color: var(--blue); font-weight: 500; text-decoration: none; }
+  .success-msg a:hover { text-decoration: underline; }
   .hint { font-size: 11px; color: var(--ink-faint); text-align: center; margin-top: 20px; line-height: 1.5; }
+  .hint a { color: var(--blue); text-decoration: none; font-weight: 500; }
+  .hint a:hover { text-decoration: underline; }
 </style>
-  
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -86,23 +92,30 @@
     <span class="logo-text">SubSocial</span>
   </div>
 
-  <h1>Sign in</h1>
+  <h1>Create your account</h1>
   <p class="sub">Internal analytics dashboard · Subvisual</p>
 
-  <form id="auth-form" onsubmit="handleSignIn(event)">
+  <form id="signup-form" onsubmit="handleSignUp(event)">
     <div class="form-group">
       <label for="email">Email</label>
       <input type="email" id="email" required placeholder="you@subvisual.co" autocomplete="email">
     </div>
     <div class="form-group">
       <label for="password">Password</label>
-      <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password">
+      <input type="password" id="password" required placeholder="Min. 6 characters" autocomplete="new-password">
     </div>
-    <button class="btn-primary" id="sign-in-btn" type="submit">Sign in</button>
+    <div class="form-group">
+      <label for="confirm-password">Confirm password</label>
+      <input type="password" id="confirm-password" required placeholder="Re-enter password" autocomplete="new-password">
+    </div>
+    <button class="btn-primary" id="signup-btn" type="submit">Create account</button>
     <div class="error-msg" id="error-msg"></div>
+    <div class="success-msg" id="success-msg">
+      Account created — you can now <a href="supabase-auth.html">sign in →</a>
+    </div>
   </form>
 
-  <p class="hint">Need access? <a href="signup.html" style="color:var(--blue);text-decoration:none;font-weight:500">Request an account →</a></p>
+  <p class="hint">Already have an account? <a href="supabase-auth.html">Sign in →</a></p>
 </div>
 
 <script>
@@ -111,31 +124,48 @@ const _sb = supabase.createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnZHlhaGppcGt4d29zYmJra3FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODMyODEsImV4cCI6MjA5MDQ1OTI4MX0.rB6ePMZjZM5_g9Gq1pxIoNxaFXFKoAaIKfXxSWkigR4'
 );
 
-// Already logged in → skip straight to dashboard
+// Already logged in → go straight to dashboard
 _sb.auth.getSession().then(({ data: { session } }) => {
   if (session) window.location.replace('dashboard.html');
 });
 
-async function handleSignIn(e) {
+async function handleSignUp(e) {
   e.preventDefault();
-  const btn = document.getElementById('sign-in-btn');
-  const errEl = document.getElementById('error-msg');
-  const email = document.getElementById('email').value.trim();
+  const btn      = document.getElementById('signup-btn');
+  const errEl    = document.getElementById('error-msg');
+  const successEl = document.getElementById('success-msg');
+  const email    = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
+  const confirm  = document.getElementById('confirm-password').value;
+
+  errEl.style.display = 'none';
+  successEl.style.display = 'none';
+
+  if (password.length < 6) {
+    errEl.textContent = 'Password must be at least 6 characters.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (password !== confirm) {
+    errEl.textContent = 'Passwords do not match.';
+    errEl.style.display = 'block';
+    return;
+  }
 
   btn.disabled = true;
-  btn.textContent = 'Signing in…';
-  errEl.style.display = 'none';
+  btn.textContent = 'Creating account…';
 
-  const { error } = await _sb.auth.signInWithPassword({ email, password });
+  const { error } = await _sb.auth.signUp({ email, password });
+
+  btn.disabled = false;
+  btn.textContent = 'Create account';
 
   if (error) {
     errEl.textContent = error.message;
     errEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'Sign in';
   } else {
-    window.location.href = 'dashboard.html';
+    document.getElementById('signup-form').querySelector('button').style.display = 'none';
+    successEl.style.display = 'block';
   }
 }
 </script>
