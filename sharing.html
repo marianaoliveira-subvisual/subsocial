@@ -16,616 +16,80 @@
   });
 })();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Subvisual · Sharing & Access</title>
+<title>SubSocial · Members</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap');
-
-  :root {
-    --blue:        #045CFC;
-    --indigo:      #2421AB;
-    --violet:      #9563FF;
-    --pink:        #F3809C;
-    --ink:         #403F4C;
-    --ink-light:   #6B6A77;
-    --ink-faint:   #9E9DA8;
-    --bg:          #F4F4F8;
-    --surface:     #FFFFFF;
-    --border:      rgba(4,92,252,0.10);
-    --border-md:   rgba(4,92,252,0.18);
-    --border-light:rgba(4,92,252,0.07);
-    --blue-tint:   rgba(4,92,252,0.07);
-    --green:       #1B9A6A;
-    --red:         #D14040;
-    --sidebar-w:   220px;
-    --radius:      12px;
-    --radius-sm:   8px;
-  }
-  [data-theme="dark"]{
-    --bg:#18181f;
-    --surface:#22212d;
-    --border:rgba(255,255,255,0.08);
-    --border-md:rgba(255,255,255,0.15);
-    --border-light:rgba(255,255,255,0.05);
-    --blue-tint:rgba(4,92,252,0.18);
-    --ink:#e0dff0;
-    --ink-light:#a8a7b8;
-    --ink-faint:#6b6a7c;
-  }
-
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'DM Sans', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    min-height: 100vh;
-    display: flex;
-    overflow-x: hidden;
-  }
-
-  /* ── Sidebar ── */
-  .sidebar {
-    width: var(--sidebar-w);
-    min-height: 100vh;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0; left: 0;
-    z-index: 100;
-    padding: 0 0 24px;
-  }
-
-  .sidebar-logo {
-    padding: 24px 20px 20px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 8px;
-  }
-
-  .logo-mark {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-  }
-
-  .logo-symbol {
-    width: 32px; height: 32px;
-    background: var(--indigo);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    color: white;
-    font-family: 'Playfair Display', serif;
-    font-size: 18px; font-weight: 700;
-    letter-spacing: -1px;
-  }
-
-  .logo-text {
-    font-family: 'Playfair Display', serif;
-    font-size: 15px; font-weight: 600;
-    color: var(--indigo); letter-spacing: -0.2px;
-  }
-
-  .sidebar-section { padding: 0 12px; margin-bottom: 4px; }
-
-  .sidebar-section-label {
-    font-size: 10px; font-weight: 500;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--ink-faint); padding: 8px 8px 6px;
-  }
-
-  .nav-item {
-    display: flex; align-items: center; gap: 9px;
-    padding: 8px 10px; border-radius: var(--radius-sm);
-    font-size: 13px; font-weight: 400;
-    color: var(--ink-light); cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    text-decoration: none;
-  }
-
-  .nav-item:hover { background: var(--blue-tint); color: var(--blue); }
-  .nav-item.active { background: var(--blue-tint); color: var(--blue); font-weight: 500; }
-  .nav-item .nav-icon { width: 16px; height: 16px; opacity: 0.6; flex-shrink: 0; }
-  .nav-item.active .nav-icon { opacity: 1; }
-
-  .platform-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-
-  .sidebar-footer {
-    margin-top: auto;
-    padding: 16px 20px 0;
-    border-top: 1px solid var(--border);
-  }
-
-  .user-pill { display: flex; align-items: center; gap: 10px; }
-
-  .user-avatar {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: var(--indigo);
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 12px; font-weight: 500; flex-shrink: 0;
-  }
-
-  .user-name { font-size: 13px; font-weight: 500; color: var(--ink); }
-  .user-role-text { font-size: 11px; color: var(--ink-faint); }
-
-  .role-badge {
-    margin-left: auto;
-    font-size: 10px; font-weight: 500;
-    padding: 2px 7px; border-radius: 100px;
-    background: rgba(4,92,252,0.1); color: var(--blue);
-  }
-
-  /* ── Main ── */
-  .main {
-    margin-left: var(--sidebar-w);
-    flex: 1; min-height: 100vh;
-    display: flex; flex-direction: column;
-  }
-
-  /* ── Topbar ── */
-  .topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 28px; height: 56px;
-    display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 50;
-  }
-
-  .topbar-left { display: flex; align-items: center; gap: 16px; }
-
-  .page-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 18px; font-weight: 600;
-    color: var(--indigo); letter-spacing: -0.3px;
-  }
-
-  .topbar-right { display: flex; align-items: center; gap: 8px; }
-
-  /* ── Buttons ── */
-  .btn-primary {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 16px;
-    background: var(--blue); color: white;
-    border: none; border-radius: var(--radius-sm);
-    font-size: 12px; font-weight: 500;
-    cursor: pointer; font-family: inherit;
-    transition: background 0.15s, transform 0.1s;
-  }
-  .btn-primary:hover { background: var(--indigo); }
-  .btn-primary:active { transform: scale(0.98); }
-  .btn-primary:disabled {
-    background: var(--ink-faint); cursor: not-allowed;
-    transform: none;
-  }
-
-  .btn-outline {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 14px;
-    border: 1.5px solid var(--border-md);
-    background: transparent; color: var(--ink-light);
-    border-radius: var(--radius-sm);
-    font-size: 12px; font-weight: 500;
-    cursor: pointer; font-family: inherit;
-    transition: border-color 0.15s, color 0.15s;
-  }
-  .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
-
-  .btn-ghost-red {
-    display: inline-flex; align-items: center;
-    background: none; border: none; cursor: pointer;
-    padding: 5px; border-radius: 6px;
-    color: var(--ink-faint);
-    transition: color 0.15s, background 0.15s;
-  }
-  .btn-ghost-red:hover { color: var(--red); background: rgba(209,64,64,0.07); }
-
-  /* ── Content ── */
-  .content { padding: 28px; flex: 1; max-width: 1100px; }
-
-  /* ── Two-column layout ── */
-  .sharing-grid {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 20px;
-    align-items: start;
-  }
-
-  .sharing-main { display: flex; flex-direction: column; gap: 20px; }
-  .sharing-aside { display: flex; flex-direction: column; gap: 20px; }
-
-  /* ── Cards ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 22px 24px;
-  }
-
-  .card-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-
-  .card-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 15px; font-weight: 600;
-    color: var(--indigo); letter-spacing: -0.2px;
-  }
-
-  .card-subtitle { font-size: 11px; color: var(--ink-faint); }
-
-  .card-divider {
-    height: 1px; background: var(--border-light);
-    margin: 18px -24px;
-  }
-
-  /* ── Member list ── */
-  .member-list { display: flex; flex-direction: column; }
-
-  .member-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border-light);
-    transition: background 0.12s;
-  }
-  .member-row:last-child { border-bottom: none; padding-bottom: 0; }
-  .member-row:first-child { padding-top: 0; }
-
-  .member-avatar {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 13px; font-weight: 500;
-    flex-shrink: 0; letter-spacing: -0.3px;
-  }
-
-  .member-info { flex: 1; min-width: 0; }
-
-  .member-name-row {
-    display: flex; align-items: center; gap: 7px;
-    margin-bottom: 1px;
-  }
-
-  .member-name {
-    font-size: 13px; font-weight: 500;
-    color: var(--ink); white-space: nowrap;
-  }
-
-  .you-tag {
-    font-size: 10px; font-weight: 500;
-    padding: 1px 6px; border-radius: 100px;
-    background: rgba(4,92,252,0.08); color: var(--blue);
-    letter-spacing: 0.02em;
-  }
-
-  .member-email {
-    font-size: 11px; color: var(--ink-faint);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-
-  .member-actions {
-    display: flex; align-items: center; gap: 8px;
-    flex-shrink: 0;
-  }
-
-  /* ── Role select ── */
-  .role-select-wrap { position: relative; }
-
-  .role-select {
-    appearance: none;
-    -webkit-appearance: none;
-    padding: 5px 26px 5px 10px;
-    border-radius: 100px;
-    font-size: 11px; font-weight: 500;
-    font-family: inherit;
-    cursor: pointer;
-    border: 1.5px solid transparent;
-    outline: none;
-    transition: border-color 0.15s, background 0.15s;
-    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236B6A77' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-  }
-
-  .role-select.role-admin {
-    background-color: rgba(4,92,252,0.07);
-    color: var(--blue);
-  }
-  .role-select.role-admin:hover:not(:disabled) { border-color: rgba(4,92,252,0.3); }
-
-  .role-select.role-viewer {
-    background-color: rgba(64,63,76,0.06);
-    color: var(--ink-light);
-  }
-  .role-select.role-viewer:hover:not(:disabled) { border-color: rgba(64,63,76,0.25); }
-
-  .role-select:disabled {
-    opacity: 0.65; cursor: default;
-    background-image: none;
-    padding-right: 10px;
-  }
-
-  /* ── Viewer-mode banner ── */
-  .viewer-notice {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 14px;
-    background: rgba(64,63,76,0.05);
-    border: 1px solid rgba(64,63,76,0.12);
-    border-radius: var(--radius-sm);
-    font-size: 12px; color: var(--ink-light);
-    margin-bottom: 20px;
-  }
-  .viewer-notice svg { flex-shrink: 0; }
-
-  /* Preview toggle */
-  .preview-toggle-wrap {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 12px; color: var(--ink-light);
-  }
-
-  .toggle-switch {
-    position: relative;
-    width: 36px; height: 20px;
-    flex-shrink: 0;
-  }
-  .toggle-switch input { opacity: 0; width: 0; height: 0; }
-  .toggle-track {
-    position: absolute; inset: 0;
-    background: rgba(64,63,76,0.18);
-    border-radius: 100px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .toggle-track::after {
-    content: '';
-    position: absolute;
-    left: 3px; top: 3px;
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    background: white;
-    transition: transform 0.2s;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-  }
-  .toggle-switch input:checked + .toggle-track { background: var(--blue); }
-  .toggle-switch input:checked + .toggle-track::after { transform: translateX(16px); }
-
-  /* ── Invite form ── */
-  .invite-form { display: flex; flex-direction: column; gap: 14px; }
-
-  .form-row { display: flex; gap: 10px; }
-
-  .form-group { display: flex; flex-direction: column; gap: 5px; flex: 1; }
-
-  .form-label {
-    font-size: 11px; font-weight: 500;
-    color: var(--ink-light); letter-spacing: 0.03em;
-  }
-
-  .form-input, .form-select {
-    padding: 8px 12px;
-    border: 1.5px solid var(--border-md);
-    border-radius: var(--radius-sm);
-    font-size: 13px; font-family: inherit;
-    color: var(--ink); background: var(--surface);
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .form-input::placeholder { color: var(--ink-faint); }
-  .form-input:focus, .form-select:focus { border-color: var(--blue); }
-
-  .form-select {
-    appearance: none; -webkit-appearance: none;
-    cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239E9DA8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 30px;
-  }
-
-  .form-footer {
-    display: flex; justify-content: flex-end;
-  }
-
-  /* Pending invites */
-  .pending-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
-
-  .pending-row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 9px 12px;
-    background: var(--bg); border-radius: var(--radius-sm);
-    border: 1px solid var(--border-light);
-  }
-
-  .pending-email { flex: 1; font-size: 12px; color: var(--ink-light); }
-  .pending-role { font-size: 11px; color: var(--ink-faint); }
-
-  .pending-badge {
-    font-size: 10px; font-weight: 500;
-    padding: 2px 7px; border-radius: 100px;
-    background: rgba(255,180,0,0.12); color: #b07800;
-  }
-
-  .btn-revoke {
-    background: none; border: none; cursor: pointer;
-    font-size: 11px; color: var(--ink-faint);
-    padding: 2px 6px; border-radius: 4px;
-    font-family: inherit;
-    transition: color 0.15s, background 0.15s;
-  }
-  .btn-revoke:hover { color: var(--red); background: rgba(209,64,64,0.06); }
-
-  /* ── Share link card ── */
-  .link-toggle-row {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .link-toggle-label { font-size: 13px; font-weight: 500; color: var(--ink); }
-  .link-toggle-sub  { font-size: 11px; color: var(--ink-faint); margin-top: 1px; }
-
-  .link-copy-wrap {
-    display: flex; gap: 8px; align-items: stretch;
-    margin-bottom: 10px;
-  }
-
-  .link-input {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1.5px solid var(--border-md);
-    border-radius: var(--radius-sm);
-    font-size: 11px; font-family: 'DM Sans', monospace;
-    color: var(--ink-light); background: var(--bg);
-    outline: none; cursor: default;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-
-  .btn-copy {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 8px 14px;
-    border: 1.5px solid var(--border-md);
-    background: var(--surface); color: var(--ink-light);
-    border-radius: var(--radius-sm);
-    font-size: 12px; font-weight: 500;
-    cursor: pointer; font-family: inherit;
-    white-space: nowrap;
-    transition: border-color 0.15s, color 0.15s, background 0.15s;
-    flex-shrink: 0;
-  }
-  .btn-copy:hover { border-color: var(--blue); color: var(--blue); }
-  .btn-copy.copied {
-    border-color: var(--green); color: var(--green);
-    background: rgba(27,154,106,0.06);
-  }
-
-  .link-disabled .link-input { opacity: 0.45; }
-  .link-disabled .btn-copy { opacity: 0.45; pointer-events: none; }
-
-  .link-note {
-    font-size: 11px; color: var(--ink-faint);
-    line-height: 1.5;
-  }
-
-  /* ── Roles info card ── */
-  .role-info-list { display: flex; flex-direction: column; gap: 14px; }
-
-  .role-info-item { display: flex; gap: 12px; }
-
-  .role-info-icon {
-    width: 32px; height: 32px; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .role-info-name { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
-  .role-info-desc { font-size: 11px; color: var(--ink-faint); line-height: 1.5; }
-
-  .role-perm-list {
-    list-style: none; margin-top: 5px;
-    display: flex; flex-direction: column; gap: 2px;
-  }
-  .role-perm-list li {
-    font-size: 11px; color: var(--ink-light);
-    display: flex; align-items: center; gap: 5px;
-  }
-  .role-perm-list li::before {
-    content: '';
-    width: 5px; height: 5px;
-    border-radius: 50%; flex-shrink: 0;
-  }
-  .role-perm-list.perms-admin li::before { background: var(--blue); }
-  .role-perm-list.perms-viewer li::before { background: var(--ink-faint); }
-
-  /* ── Toast ── */
-  #toast {
-    position: fixed;
-    bottom: 28px; left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--indigo); color: white;
-    padding: 10px 20px;
-    border-radius: var(--radius-sm);
-    font-size: 13px; font-weight: 500;
-    box-shadow: 0 8px 24px rgba(36,33,171,0.25);
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.2s, transform 0.2s;
-    z-index: 300; white-space: nowrap;
-  }
-  #toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  /* ── Viewer-preview dimming ── */
-  .viewer-mode .admin-only { opacity: 0.25; pointer-events: none; }
-  .viewer-mode .member-row.is-self .admin-only { opacity: 1; pointer-events: none; }
+  :root{--blue:#045CFC;--indigo:#2421AB;--ink:#403F4C;--ink-light:#6B6A77;--ink-faint:#9E9DA8;--bg:#F4F4F8;--surface:#FFFFFF;--border:rgba(4,92,252,0.10);--border-md:rgba(4,92,252,0.18);--blue-tint:rgba(4,92,252,0.07);--green:#1B9A6A;--red:#D14040;--sidebar-w:220px;--radius:12px;--radius-sm:8px;}
+  [data-theme="dark"]{--bg:#18181f;--surface:#22212d;--border:rgba(255,255,255,0.08);--border-md:rgba(255,255,255,0.15);--border-light:rgba(255,255,255,0.05);--blue-tint:rgba(4,92,252,0.18);--ink:#e0dff0;--ink-light:#a8a7b8;--ink-faint:#6b6a7c;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;overflow-x:hidden}
+  .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;padding:0 0 24px}
+  .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border);margin-bottom:8px}
+  .logo-mark{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .logo-symbol{width:32px;height:32px;background:var(--indigo);border-radius:8px;display:flex;align-items:center;justify-content:center}
+  .logo-text{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--indigo);letter-spacing:-0.2px}
+  .sidebar-section{padding:0 12px;margin-bottom:4px}
+  .sidebar-section-label{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);padding:8px 8px 6px}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius-sm);font-size:13px;font-weight:400;color:var(--ink-light);cursor:pointer;transition:background 0.15s,color 0.15s;text-decoration:none}
+  .nav-item:hover{background:var(--blue-tint);color:var(--blue)}
+  .nav-item.active{background:var(--blue-tint);color:var(--blue);font-weight:500}
+  .nav-icon{width:16px;height:16px;opacity:0.6;flex-shrink:0}
+  .nav-item.active .nav-icon{opacity:1}
+  .platform-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .sidebar-footer{margin-top:auto;padding:16px 20px 0;border-top:1px solid var(--border)}
+  .user-pill{display:flex;align-items:center;gap:10px}
+  .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:500;flex-shrink:0}
+  .user-name{font-size:13px;font-weight:500;color:var(--ink)}
+  .user-role{font-size:11px;color:var(--ink-faint)}
+  .role-badge{margin-left:auto;font-size:10px;font-weight:500;padding:2px 7px;border-radius:100px;background:rgba(4,92,252,0.1);color:var(--blue)}
+  .main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;position:sticky;top:0;z-index:50}
+  .page-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--indigo);letter-spacing:-0.3px}
+  .content{padding:28px;flex:1}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .sharing-stack{display:flex;flex-direction:column;gap:18px;max-width:620px}
+  .s-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;animation:fadeUp 0.35s ease both}
+  .s-card:nth-child(2){animation-delay:0.05s}
+  .s-card:nth-child(3){animation-delay:0.1s}
+  .s-card-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--indigo);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+  .s-card-body{font-size:13px;color:var(--ink-light);line-height:1.7}
+  .s-link{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:8px 16px;background:var(--blue);color:white;border-radius:var(--radius-sm);font-size:13px;font-weight:500;text-decoration:none;transition:background 0.15s}
+  .s-link:hover{background:var(--indigo)}
+  .s-steps{margin-top:14px;display:flex;flex-direction:column;gap:8px;padding-left:2px}
+  .s-step{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink-light);line-height:1.5}
+  .s-step-num{width:20px;height:20px;border-radius:50%;background:var(--blue-tint);color:var(--blue);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .user-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid transparent}
+  .user-row-avatar{width:34px;height:34px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:600;flex-shrink:0}
+  .user-row-email{font-size:13px;font-weight:500;color:var(--ink);flex:1}
+  .admin-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:rgba(4,92,252,0.1);color:var(--blue);letter-spacing:0.04em;text-transform:uppercase}
 </style>
-  
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
 </head>
 <body>
 
-<!-- ── Sidebar ── -->
 <aside class="sidebar">
   <div class="sidebar-logo">
     <a class="logo-mark" href="dashboard.html">
-      <div class="logo-symbol"><img src="symbol-white_8x.png" alt="Subvisual" style="width:22px;height:22px;object-fit:contain;display:block;"></div>
+      <div class="logo-symbol"><img src="symbol-white_8x.png" alt="SubSocial" style="width:22px;height:22px;object-fit:contain;display:block;"></div>
       <span class="logo-text">SubSocial</span>
     </a>
   </div>
-
   <div class="sidebar-section">
     <div class="sidebar-section-label">Menu</div>
-    <a class="nav-item" href="dashboard.html">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="1" y="1" width="6" height="6" rx="1.5"/>
-        <rect x="9" y="1" width="6" height="6" rx="1.5"/>
-        <rect x="1" y="9" width="6" height="6" rx="1.5"/>
-        <rect x="9" y="9" width="6" height="6" rx="1.5"/>
-      </svg>
-      Overview
-    </a>
-    <a class="nav-item" href="analytics.html">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M2 12 L5 8 L8 10 L11 5 L14 7"/>
-        <rect x="1" y="13" width="14" height="1" rx="0.5" fill="currentColor" stroke="none"/>
-      </svg>
-      Analytics
-    </a>
-    <a class="nav-item" href="reports.html">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="2" y="3" width="12" height="10" rx="1.5"/>
-        <path d="M5 7h6M5 9.5h4"/>
-      </svg>
-      Reports
-    </a>
+    <a class="nav-item" href="dashboard.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>Overview</a>
+    <a class="nav-item" href="analytics.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12 L5 8 L8 10 L11 5 L14 7"/><rect x="1" y="13" width="14" height="1" rx="0.5" fill="currentColor" stroke="none"/></svg>Analytics</a>
+    <a class="nav-item" href="reports.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 7h6M5 9.5h4"/></svg>Reports</a>
   </div>
-
   <div class="sidebar-section" style="margin-top:8px">
     <div class="sidebar-section-label">Organic</div>
-    <a class="nav-item" href="linkedin.html">
-      <div class="platform-dot" style="background:#045CFC"></div>LinkedIn
-    </a>
-    <a class="nav-item" href="twitter.html">
-      <div class="platform-dot" style="background:#403F4C"></div>Twitter / X
-    </a>
-    <a class="nav-item" href="bluesky.html">
-      <div class="platform-dot" style="background:#9563FF"></div>Bluesky
-    </a>
-    <a class="nav-item" href="youtube.html">
-      <div class="platform-dot" style="background:#D14040"></div>YouTube
-    </a>
-    <a class="nav-item" href="dribbble.html">
-      <div class="platform-dot" style="background:#F3809C"></div>Dribbble
-    </a>
-    <a class="nav-item" href="website.html">
-      <div class="platform-dot" style="background:#1B9A6A"></div>Website
-    </a>
+    <a class="nav-item" href="linkedin.html"><div class="platform-dot" style="background:#045CFC"></div>LinkedIn</a>
+    <a class="nav-item" href="twitter.html"><div class="platform-dot" style="background:#403F4C"></div>Twitter / X</a>
+    <a class="nav-item" href="bluesky.html"><div class="platform-dot" style="background:#9563FF"></div>Bluesky</a>
+    <a class="nav-item" href="youtube.html"><div class="platform-dot" style="background:#D14040"></div>YouTube</a>
+    <a class="nav-item" href="dribbble.html"><div class="platform-dot" style="background:#F3809C"></div>Dribbble</a>
+    <a class="nav-item" href="website.html"><div class="platform-dot" style="background:#1B9A6A"></div>Website</a>
   </div>
   <div class="sidebar-section" style="margin-top:8px">
     <div class="sidebar-section-label">Paid</div>
@@ -633,491 +97,93 @@
     <a class="nav-item" href="twitter-ads.html"><div class="platform-dot" style="background:#1DA1F2"></div>Twitter Ads</a>
     <a class="nav-item" href="google-ads.html"><div class="platform-dot" style="background:#FBBC04"></div>Google Ads</a>
   </div>
-
   <div class="sidebar-section" style="margin-top:8px">
     <div class="sidebar-section-label">Team</div>
-    <a class="nav-item active" href="sharing.html">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="6" cy="5" r="2.5"/>
-        <circle cx="11" cy="5" r="2.5"/>
-        <path d="M1 13c0-2.5 2.5-4 5-4s5 1.5 5 4"/>
-        <path d="M11 9c1.5 0 4 .8 4 4" stroke-dasharray="2 1"/>
-      </svg>
-      Members
-    </a>
-    <a class="nav-item" href="settings.html">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="8" cy="8" r="6"/>
-        <path d="M8 5v2.5l1.5 1.5" stroke-linecap="round"/>
-      </svg>
-      Settings
-    </a>
+    <a class="nav-item active" href="sharing.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2.5"/><circle cx="11" cy="5" r="2.5"/><path d="M1 13c0-2.5 2.5-4 5-4s5 1.5 5 4"/><path d="M11 9c1.5 0 4 .8 4 4" stroke-dasharray="2 1"/></svg>Members</a>
+    <a class="nav-item" href="settings.html"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.1 3.1l1.1 1.1M11.8 11.8l1.1 1.1M3.1 12.9l1.1-1.1M11.8 4.2l1.1-1.1"/></svg>Settings</a>
   </div>
-
   <div class="sidebar-footer">
     <div class="user-pill">
       <div class="user-avatar">M</div>
-      <div>
-        <div class="user-name">Mariana</div>
-        <div class="user-role-text">Social Media Manager</div>
-      </div>
+      <div><div class="user-name">Mariana</div><div class="user-role">Social Media Manager</div></div>
       <span class="role-badge">Admin</span>
     </div>
     <button onclick="window._sb.auth.signOut().then(function(){location.replace('supabase-auth.html')})" style="margin-top:10px;background:none;border:none;font-family:inherit;font-size:11px;color:var(--ink-faint);cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 6H1M4 3l-3 3 3 3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 1h5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5" stroke-linecap="round"/></svg>Sign out</button>
   </div>
 </aside>
 
-<!-- ── Main ── -->
 <div class="main">
-
   <header class="topbar">
-    <div class="topbar-left">
-      <span class="page-title">Sharing & Access</span>
-    </div>
-    <div class="topbar-right">
-      <!-- Preview as Viewer toggle -->
-      <div class="preview-toggle-wrap">
-        <span style="font-size:12px;color:var(--ink-faint)">Preview as Viewer</span>
-        <label class="toggle-switch" title="See what a Viewer sees">
-          <input type="checkbox" id="viewer-preview-toggle">
-          <span class="toggle-track"></span>
-        </label>
-      </div>
-    </div>
+    <span class="page-title">Members</span>
   </header>
-
   <div class="content">
-    <div class="sharing-grid">
+    <div class="sharing-stack">
 
-      <!-- ── Left column ── -->
-      <div class="sharing-main">
-
-        <!-- Viewer notice (hidden in admin mode) -->
-        <div class="viewer-notice" id="viewer-notice" style="display:none">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="7" cy="7" r="6"/>
-            <path d="M7 6v4M7 4.5v.5" stroke-linecap="round"/>
-          </svg>
-          You're previewing what a <strong style="color:var(--ink);margin:0 3px">Viewer</strong> sees — role changes and removals are disabled.
+      <!-- How access works -->
+      <div class="s-card">
+        <div class="s-card-title">How access works</div>
+        <div class="s-card-body">
+          Access to SubSocial is managed directly in <strong style="color:var(--ink)">Supabase Authentication</strong>. Each team member signs in with their own email and password — there are no in-app invite flows or role assignments here.
+          <br><br>
+          To invite a new team member, go to the Supabase dashboard and use the built-in invite function. They'll receive a login link by email and can set their own password on first sign-in.
         </div>
+        <a class="s-link" href="https://supabase.com/dashboard/project/bgdyahjipkxwosbbkkqd/auth/users" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="11" height="11" rx="2"/><path d="M4.5 6.5h4M6.5 4.5v4" stroke-linecap="round"/></svg>
+          Open Supabase Auth dashboard →
+        </a>
+      </div>
 
-        <!-- ── Team members card ── -->
-        <div class="card" id="members-card">
-          <div class="card-header">
-            <div>
-              <div class="card-title">Team members</div>
-            </div>
-            <span class="card-subtitle" id="member-count">5 members</span>
+      <!-- How to invite -->
+      <div class="s-card">
+        <div class="s-card-title">Inviting a team member</div>
+        <div class="s-steps">
+          <div class="s-step">
+            <div class="s-step-num">1</div>
+            <div>Open the <a href="https://supabase.com/dashboard/project/bgdyahjipkxwosbbkkqd/auth/users" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:none;font-weight:500">Supabase Auth → Users</a> page.</div>
           </div>
-
-          <div class="member-list" id="member-list">
-
-            <!-- Mariana — current user, Admin, not removable -->
-            <div class="member-row is-self" data-id="mariana">
-              <div class="member-avatar" style="background:var(--indigo)">M</div>
-              <div class="member-info">
-                <div class="member-name-row">
-                  <span class="member-name">Mariana Oliveira</span>
-                  <span class="you-tag">you</span>
-                </div>
-                <div class="member-email">mariana@subvisual.co</div>
-              </div>
-              <div class="member-actions">
-                <div class="role-select-wrap">
-                  <select class="role-select role-admin" disabled title="You cannot change your own role">
-                    <option value="admin" selected>Admin</option>
-                    <option value="viewer">Viewer</option>
-                  </select>
-                </div>
-                <!-- No remove button for self -->
-              </div>
-            </div>
-
-            <!-- João — Admin -->
-            <div class="member-row" data-id="joao">
-              <div class="member-avatar" style="background:var(--blue)">J</div>
-              <div class="member-info">
-                <div class="member-name-row">
-                  <span class="member-name">João Ferreira</span>
-                </div>
-                <div class="member-email">joao@subvisual.co</div>
-              </div>
-              <div class="member-actions">
-                <div class="role-select-wrap admin-only">
-                  <select class="role-select role-admin" data-member="joao" onchange="handleRoleChange(this)">
-                    <option value="admin" selected>Admin</option>
-                    <option value="viewer">Viewer</option>
-                  </select>
-                </div>
-                <button class="btn-ghost-red admin-only" onclick="removeMember(this, 'João Ferreira')" title="Remove member">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M2 3.5h10M5.5 3.5V2.5a1 1 0 011-1h1a1 1 0 011 1v1M5.5 6v4.5M8.5 6v4.5M3 3.5l.7 7.2A1 1 0 004.7 12h4.6a1 1 0 001-.93L11 3.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <!-- Ana — Viewer -->
-            <div class="member-row" data-id="ana">
-              <div class="member-avatar" style="background:var(--violet)">A</div>
-              <div class="member-info">
-                <div class="member-name-row">
-                  <span class="member-name">Ana Costa</span>
-                </div>
-                <div class="member-email">ana@subvisual.co</div>
-              </div>
-              <div class="member-actions">
-                <div class="role-select-wrap admin-only">
-                  <select class="role-select role-viewer" data-member="ana" onchange="handleRoleChange(this)">
-                    <option value="admin">Admin</option>
-                    <option value="viewer" selected>Viewer</option>
-                  </select>
-                </div>
-                <button class="btn-ghost-red admin-only" onclick="removeMember(this, 'Ana Costa')" title="Remove member">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M2 3.5h10M5.5 3.5V2.5a1 1 0 011-1h1a1 1 0 011 1v1M5.5 6v4.5M8.5 6v4.5M3 3.5l.7 7.2A1 1 0 004.7 12h4.6a1 1 0 001-.93L11 3.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <!-- Ricardo — Viewer -->
-            <div class="member-row" data-id="ricardo">
-              <div class="member-avatar" style="background:#1B9A6A">R</div>
-              <div class="member-info">
-                <div class="member-name-row">
-                  <span class="member-name">Ricardo Santos</span>
-                </div>
-                <div class="member-email">ricardo@subvisual.co</div>
-              </div>
-              <div class="member-actions">
-                <div class="role-select-wrap admin-only">
-                  <select class="role-select role-viewer" data-member="ricardo" onchange="handleRoleChange(this)">
-                    <option value="admin">Admin</option>
-                    <option value="viewer" selected>Viewer</option>
-                  </select>
-                </div>
-                <button class="btn-ghost-red admin-only" onclick="removeMember(this, 'Ricardo Santos')" title="Remove member">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M2 3.5h10M5.5 3.5V2.5a1 1 0 011-1h1a1 1 0 011 1v1M5.5 6v4.5M8.5 6v4.5M3 3.5l.7 7.2A1 1 0 004.7 12h4.6a1 1 0 001-.93L11 3.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <!-- Sofia — Viewer -->
-            <div class="member-row" data-id="sofia">
-              <div class="member-avatar" style="background:#F3809C">S</div>
-              <div class="member-info">
-                <div class="member-name-row">
-                  <span class="member-name">Sofia Mendes</span>
-                </div>
-                <div class="member-email">sofia@subvisual.co</div>
-              </div>
-              <div class="member-actions">
-                <div class="role-select-wrap admin-only">
-                  <select class="role-select role-viewer" data-member="sofia" onchange="handleRoleChange(this)">
-                    <option value="admin">Admin</option>
-                    <option value="viewer" selected>Viewer</option>
-                  </select>
-                </div>
-                <button class="btn-ghost-red admin-only" onclick="removeMember(this, 'Sofia Mendes')" title="Remove member">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M2 3.5h10M5.5 3.5V2.5a1 1 0 011-1h1a1 1 0 011 1v1M5.5 6v4.5M8.5 6v4.5M3 3.5l.7 7.2A1 1 0 004.7 12h4.6a1 1 0 001-.93L11 3.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-          </div><!-- end member-list -->
-        </div>
-
-        <!-- ── Invite card ── -->
-        <div class="card admin-only" id="invite-card">
-          <div class="card-header" style="margin-bottom:18px">
-            <div class="card-title">Invite someone</div>
+          <div class="s-step">
+            <div class="s-step-num">2</div>
+            <div>Click <strong style="color:var(--ink)">Invite user</strong> and enter their email address.</div>
           </div>
-
-          <form class="invite-form" onsubmit="handleInvite(event)">
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label" for="invite-name">Name</label>
-                <input class="form-input" id="invite-name" type="text" placeholder="Full name" autocomplete="off">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="invite-email">Email</label>
-                <input class="form-input" id="invite-email" type="email" placeholder="name@company.com" autocomplete="off">
-              </div>
-              <div class="form-group" style="flex:0 0 120px">
-                <label class="form-label" for="invite-role">Role</label>
-                <select class="form-select" id="invite-role">
-                  <option value="viewer" selected>Viewer</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-footer">
-              <button class="btn-primary" type="submit">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M1 6l4 4 6-7" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Send invite
-              </button>
-            </div>
-          </form>
-
-          <!-- Pending invites -->
-          <div id="pending-section" style="margin-top:18px;display:none">
-            <div class="card-divider" style="margin-top:0;margin-bottom:14px"></div>
-            <div style="font-size:11px;font-weight:500;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Pending invites</div>
-            <div class="pending-list" id="pending-list"></div>
+          <div class="s-step">
+            <div class="s-step-num">3</div>
+            <div>They'll receive a magic link by email. On first sign-in they can set their password.</div>
+          </div>
+          <div class="s-step">
+            <div class="s-step-num">4</div>
+            <div>They'll land on SubSocial at <strong style="color:var(--ink)">subsocial-iota.vercel.app</strong> and have full access.</div>
           </div>
         </div>
+      </div>
 
-      </div><!-- end sharing-main -->
-
-      <!-- ── Right column ── -->
-      <div class="sharing-aside">
-
-        <!-- ── Shareable link card ── -->
-        <div class="card">
-          <div class="link-toggle-row">
-            <div>
-              <div class="card-title" style="margin-bottom:2px">Shareable link</div>
-              <div class="link-toggle-sub">Read-only access for anyone with the link</div>
-            </div>
-            <label class="toggle-switch admin-only" title="Enable or disable link sharing">
-              <input type="checkbox" id="link-toggle" checked onchange="toggleLink(this)">
-              <span class="toggle-track"></span>
-            </label>
-          </div>
-
-          <div id="link-area" class="link-copy-wrap">
-            <input class="link-input" id="link-input" type="text"
-              value="https://subsocial.subvisual.co/view/a3fk92"
-              readonly>
-            <button class="btn-copy" id="copy-btn" onclick="copyLink()">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="4" y="4" width="7" height="7" rx="1.5"/>
-                <path d="M8 4V2.5A1.5 1.5 0 006.5 1H2.5A1.5 1.5 0 001 2.5v4A1.5 1.5 0 002.5 8H4"/>
-              </svg>
-              Copy
-            </button>
-          </div>
-
-          <p class="link-note">
-            Anyone with this link can view all dashboard data in read-only mode. They cannot upload reports or change settings.
-          </p>
-
-          <div class="card-divider"></div>
-
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <span style="font-size:12px;color:var(--ink-light)">Regenerate link</span>
-            <button class="btn-outline admin-only" style="font-size:11px;padding:5px 10px" onclick="regenerateLink()">
-              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M1.5 5.5A4 4 0 109.5 5.5" stroke-linecap="round"/>
-                <path d="M9.5 2.5v3h-3" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Regenerate
-            </button>
-          </div>
+      <!-- Current users -->
+      <div class="s-card">
+        <div class="s-card-title">Signed-in account</div>
+        <div id="user-list">
+          <div style="font-size:12px;color:var(--ink-faint);padding:8px 0">Loading…</div>
         </div>
+      </div>
 
-        <!-- ── Roles info card ── -->
-        <div class="card">
-          <div class="card-title" style="margin-bottom:16px">Roles explained</div>
-          <div class="role-info-list">
-
-            <div class="role-info-item">
-              <div class="role-info-icon" style="background:rgba(4,92,252,0.08)">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#045CFC" stroke-width="1.5">
-                  <circle cx="7" cy="4.5" r="2.5"/>
-                  <path d="M1.5 12c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke-linecap="round"/>
-                  <path d="M9.5 6.5l1 1 2-2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </div>
-              <div>
-                <div class="role-info-name">Admin</div>
-                <ul class="role-perm-list perms-admin">
-                  <li>View all dashboards & reports</li>
-                  <li>Upload and manage reports</li>
-                  <li>Invite and remove members</li>
-                  <li>Change member roles</li>
-                  <li>Manage shareable link</li>
-                </ul>
-              </div>
-            </div>
-
-            <div style="height:1px;background:var(--border-light)"></div>
-
-            <div class="role-info-item">
-              <div class="role-info-icon" style="background:rgba(64,63,76,0.06)">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6B6A77" stroke-width="1.5">
-                  <circle cx="7" cy="4.5" r="2.5"/>
-                  <path d="M1.5 12c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <div>
-                <div class="role-info-name">Viewer</div>
-                <ul class="role-perm-list perms-viewer">
-                  <li>View all dashboards & reports</li>
-                  <li>Cannot upload or edit data</li>
-                  <li>Cannot manage members</li>
-                  <li>Cannot access sharing settings</li>
-                </ul>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-      </div><!-- end sharing-aside -->
-    </div><!-- end sharing-grid -->
-  </div><!-- end content -->
-</div><!-- end main -->
-
-<!-- Toast -->
-<div id="toast"></div>
+    </div>
+  </div>
+</div>
 
 <script>
-// ── Toast ──
-function showToast(msg, duration = 2200) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), duration);
-}
+window._onAuthReady = async function(session) {
+  let email = session.user.email || '';
+  try {
+    const { data: { user } } = await window._sb.auth.getUser();
+    if (user && user.email) email = user.email;
+  } catch(e) {}
 
-// ── Role change ──
-function handleRoleChange(select) {
-  const val = select.value;
-  select.className = 'role-select ' + (val === 'admin' ? 'role-admin' : 'role-viewer');
-  const name = select.closest('.member-row').querySelector('.member-name').textContent;
-  showToast(`${name} is now ${val === 'admin' ? 'an Admin' : 'a Viewer'}`);
-}
-
-// ── Remove member ──
-function removeMember(btn, name) {
-  const row = btn.closest('.member-row');
-  row.style.transition = 'opacity 0.25s, transform 0.25s';
-  row.style.opacity = '0';
-  row.style.transform = 'translateX(8px)';
-  setTimeout(() => {
-    row.remove();
-    updateMemberCount();
-    showToast(`${name} removed`);
-  }, 250);
-}
-
-function updateMemberCount() {
-  const count = document.querySelectorAll('#member-list .member-row').length;
-  document.getElementById('member-count').textContent = `${count} member${count !== 1 ? 's' : ''}`;
-}
-
-// ── Invite ──
-const pendingInvites = [];
-
-function handleInvite(e) {
-  e.preventDefault();
-  const name  = document.getElementById('invite-name').value.trim();
-  const email = document.getElementById('invite-email').value.trim();
-  const role  = document.getElementById('invite-role').value;
-
-  if (!name || !email) {
-    showToast('Please fill in name and email');
-    return;
-  }
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    showToast('Please enter a valid email address');
-    return;
-  }
-
-  // Add to pending list
-  const invite = { name, email, role };
-  pendingInvites.push(invite);
-  renderPendingInvites();
-
-  // Clear form
-  document.getElementById('invite-name').value = '';
-  document.getElementById('invite-email').value = '';
-  document.getElementById('invite-role').value = 'viewer';
-
-  showToast(`Invite sent to ${name}`);
-}
-
-function renderPendingInvites() {
-  const section = document.getElementById('pending-section');
-  const list    = document.getElementById('pending-list');
-  section.style.display = pendingInvites.length ? '' : 'none';
-
-  list.innerHTML = pendingInvites.map((inv, i) => `
-    <div class="pending-row" id="pending-${i}">
-      <div style="width:28px;height:28px;border-radius:50%;background:var(--bg);border:1.5px dashed var(--border-md);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ink-faint);flex-shrink:0">
-        ${inv.name.charAt(0).toUpperCase()}
-      </div>
-      <div class="pending-email">${inv.name} · ${inv.email}</div>
-      <span class="pending-role">${inv.role === 'admin' ? 'Admin' : 'Viewer'}</span>
-      <span class="pending-badge">Pending</span>
-      <button class="btn-revoke" onclick="revokeInvite(${i})">Revoke</button>
-    </div>
-  `).join('');
-}
-
-function revokeInvite(i) {
-  const name = pendingInvites[i].name;
-  pendingInvites.splice(i, 1);
-  renderPendingInvites();
-  showToast(`Invite for ${name} revoked`);
-}
-
-// ── Shareable link ──
-function toggleLink(cb) {
-  const area = document.getElementById('link-area');
-  if (!cb.checked) {
-    area.classList.add('link-disabled');
-    showToast('Link sharing disabled');
-  } else {
-    area.classList.remove('link-disabled');
-    showToast('Link sharing enabled');
-  }
-}
-
-function copyLink() {
-  const val = document.getElementById('link-input').value;
-  const btn  = document.getElementById('copy-btn');
-  navigator.clipboard.writeText(val).catch(() => {});
-  btn.classList.add('copied');
-  btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6l4 4 6-7" stroke-linecap="round" stroke-linejoin="round"/></svg> Copied!`;
-  setTimeout(() => {
-    btn.classList.remove('copied');
-    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="7" height="7" rx="1.5"/><path d="M8 4V2.5A1.5 1.5 0 006.5 1H2.5A1.5 1.5 0 001 2.5v4A1.5 1.5 0 002.5 8H4"/></svg> Copy`;
-  }, 2000);
-}
-
-function regenerateLink() {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  const token = Array.from({length: 8}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  document.getElementById('link-input').value = `https://subsocial.subvisual.co/view/${token}`;
-  showToast('Link regenerated — old link is now invalid');
-}
-
-// ── Viewer preview toggle ──
-document.getElementById('viewer-preview-toggle').addEventListener('change', function() {
-  const membersCard = document.getElementById('members-card');
-  const inviteCard  = document.getElementById('invite-card');
-  const notice      = document.getElementById('viewer-notice');
-
-  if (this.checked) {
-    membersCard.classList.add('viewer-mode');
-    inviteCard.classList.add('viewer-mode');
-    notice.style.display = 'flex';
-  } else {
-    membersCard.classList.remove('viewer-mode');
-    inviteCard.classList.remove('viewer-mode');
-    notice.style.display = 'none';
-  }
-});
+  const initial = email ? email[0].toUpperCase() : '?';
+  document.getElementById('user-list').innerHTML =
+    '<div class="user-row">' +
+      '<div class="user-row-avatar">' + initial + '</div>' +
+      '<div class="user-row-email">' + email + '</div>' +
+      '<span class="admin-badge">Admin</span>' +
+    '</div>';
+};
 </script>
 </body>
 </html>
