@@ -191,7 +191,7 @@
         <div class="user-name">Mariana</div>
         <div class="user-role">Social Media Manager</div>
       </div>
-      <span class="role-badge">Admin</span>
+      <span class="role-badge" id="sb-badge" style="display:none">Admin</span>
     </div>
     <button onclick="window._sb.auth.signOut().then(function(){location.replace('supabase-auth.html')})" style="margin-top:10px;background:none;border:none;font-family:inherit;font-size:11px;color:var(--ink-faint);cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 6H1M4 3l-3 3 3 3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 1h5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5" stroke-linecap="round"/></svg>Sign out</button>
   </div>
@@ -397,7 +397,22 @@ function _showNotice(){let e=document.getElementById('_pnotice');if(!e){e=docume
 function _hideNotice(){const e=document.getElementById('_pnotice');if(e)e.style.display='none';}
 async function _deleteReport(id,btn){if(!confirm('Delete this report? This cannot be undone.'))return;btn.disabled=true;const{data,error}=await window._sb.from('reports').delete().eq('id',id).select();if(error){console.error('[SubSocial] Delete failed',{code:error.code,msg:error.message,hint:error.hint,details:error.details});_toast('Delete failed: '+(error.message||error.code||'RLS policy may be blocking deletes'));btn.disabled=false;return;}console.log('[SubSocial] Deleted report',id,'rows returned:',data&&data.length);const item=btn.closest('.history-item');if(item)item.remove();_toast('Report deleted.');setRange('30');}
 function _toast(msg){let t=document.getElementById('_toast');if(!t){t=document.createElement('div');t.id='_toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#403F4C;color:white;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.25s;pointer-events:none';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';clearTimeout(t._timer);t._timer=setTimeout(()=>{t.style.opacity='0';},2500);}
-window._onAuthReady=function(){setRange(localStorage.getItem('sb-default-period')||'30');};
+window._onAuthReady=function(session){_updateSidebarUser(session);setRange(localStorage.getItem('sb-default-period')||'30');};
+
+function _updateSidebarUser(session){
+  var u=session&&session.user;
+  if(!u)return;
+  var email=u.email||'';
+  var initial=email.charAt(0).toUpperCase()||'?';
+  var av=document.querySelector('.user-avatar');
+  var nm=document.querySelector('.user-name');
+  var rl=document.querySelector('.user-role');
+  var bd=document.getElementById('sb-badge');
+  if(av)av.textContent=initial;
+  if(nm)nm.textContent=email;
+  if(rl)rl.textContent='Team member';
+  if(bd)bd.style.display=(email==='mariana.oliveira@subvisual.co')?'':'none';
+}
 </script>
 </body>
 </html>

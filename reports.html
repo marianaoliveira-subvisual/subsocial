@@ -142,7 +142,7 @@ function showToast(msg){
     <div class="user-pill">
       <div class="user-avatar">M</div>
       <div><div class="user-name">Mariana</div><div class="user-role">Social Media Manager</div></div>
-      <span class="role-badge">Admin</span>
+      <span class="role-badge" id="sb-badge" style="display:none">Admin</span>
     </div>
     <button onclick="window._sb.auth.signOut().then(function(){location.replace('supabase-auth.html')})" style="margin-top:10px;background:none;border:none;font-family:inherit;font-size:11px;color:var(--ink-faint);cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 6H1M4 3l-3 3 3 3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 1h5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5" stroke-linecap="round"/></svg>Sign out</button>
   </div>
@@ -165,7 +165,7 @@ let ALL=[];
 function fmtDate(d){return d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';}
 function fmtNum(n){if(!n||isNaN(+n))return'—';n=+n;if(n>=1e6)return(n/1e6).toFixed(1).replace(/\.0$/,'')+'M';if(n>=1e3)return(n/1e3).toFixed(1).replace(/\.0$/,'')+'K';return n.toLocaleString();}
 
-window._onAuthReady=async function(){
+window._onAuthReady=async function(session){_updateSidebarUser(session);
   try{
     const {data,error}=await window._sb.from('reports').select('id,period_start,period_end,source,created_at,platforms(slug,label,color),metrics(key,value)').order('created_at',{ascending:false});
     if(error||!data||!data.length){showEmpty();return;}
@@ -206,6 +206,21 @@ function renderReports(slug){
       <table class="reports-table"><thead><tr><th>Platform</th><th>Period</th><th>Source</th><th>Summary</th><th>Uploaded</th><th></th><th></th></tr></thead>
       <tbody>${rows}</tbody></table>
     </div>`;
+}
+
+function _updateSidebarUser(session){
+  var u=session&&session.user;
+  if(!u)return;
+  var email=u.email||'';
+  var initial=email.charAt(0).toUpperCase()||'?';
+  var av=document.querySelector('.user-avatar');
+  var nm=document.querySelector('.user-name');
+  var rl=document.querySelector('.user-role');
+  var bd=document.getElementById('sb-badge');
+  if(av)av.textContent=initial;
+  if(nm)nm.textContent=email;
+  if(rl)rl.textContent='Team member';
+  if(bd)bd.style.display=(email==='mariana.oliveira@subvisual.co')?'':'none';
 }
 </script>
 </body>
