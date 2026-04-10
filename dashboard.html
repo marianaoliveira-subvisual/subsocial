@@ -178,7 +178,8 @@
   .user-pill {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    min-width: 0;
   }
 
   .user-avatar {
@@ -195,11 +196,11 @@
     flex-shrink: 0;
   }
 
-  .user-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .user-name { font-size: 12px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
   .user-role { font-size: 11px; color: var(--ink-faint); }
 
   .role-badge {
-    margin-left: auto;
+    flex-shrink: 0;
     font-size: 10px;
     font-weight: 500;
     padding: 2px 7px;
@@ -989,7 +990,7 @@
   <div class="sidebar-footer">
     <div class="user-pill">
       <div class="user-avatar">M</div>
-      <div>
+      <div style="min-width:0;overflow:hidden;flex:1">
         <div class="user-name">Mariana</div>
         <div class="user-role">Social Media Manager</div>
       </div>
