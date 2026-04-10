@@ -155,17 +155,29 @@ async function handleSignUp(e) {
   btn.disabled = true;
   btn.textContent = 'Creating account…';
 
-  const { error } = await _sb.auth.signUp({ email, password });
+  const { error: signUpError } = await _sb.auth.signUp({ email, password });
+
+  if (signUpError) {
+    btn.disabled = false;
+    btn.textContent = 'Create account';
+    errEl.textContent = signUpError.message;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Immediately sign in to confirm the session — bypasses email confirmation wall
+  btn.textContent = 'Signing in…';
+  const { error: signInError } = await _sb.auth.signInWithPassword({ email, password });
 
   btn.disabled = false;
   btn.textContent = 'Create account';
 
-  if (error) {
-    errEl.textContent = error.message;
-    errEl.style.display = 'block';
-  } else {
+  if (signInError) {
+    // Sign-up succeeded but auto-login failed — show success with manual sign-in link
     document.getElementById('signup-form').querySelector('button').style.display = 'none';
     successEl.style.display = 'block';
+  } else {
+    window.location.href = 'dashboard.html';
   }
 }
 </script>
