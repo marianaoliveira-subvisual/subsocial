@@ -322,6 +322,7 @@
           <button class="video-sort-btn" data-field="shares" data-label="Shares">Shares</button>
           <button class="video-sort-btn" data-field="dislikes" data-label="Dislikes">Dislikes</button>
           <button class="video-sort-btn" data-field="engRate" data-label="Eng. rate">Eng. rate</button>
+          <button class="video-sort-btn" data-field="minDate" data-label="Date">Date</button>
         </div>
       </div>
       <table class="video-table">
@@ -351,7 +352,7 @@ const chartDefaults={responsive:true,maintainAspectRatio:false,interaction:{mode
 let engChart=new Chart(document.getElementById('engRateChart').getContext('2d'),{type:'doughnut',data:{labels:['This period','Remaining'],datasets:[{data:[0,100],backgroundColor:['#D14040','rgba(209,64,64,0.08)'],borderWidth:0,hoverOffset:2}]},options:{cutout:'78%',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{enabled:false}}}});
 
 async function _fetchWindsorYT(dateFrom,dateTo){
-  const URL='https://connectors.windsor.ai/youtube?api_key=a477ac1cdd0416e8c8835c6691dd8eb05673&date_from='+dateFrom+'&date_to='+dateTo+'&fields=video,video_title,views,comments,dislikes,likes,shares,subscriber_count,view_count';
+  const URL='https://connectors.windsor.ai/youtube?api_key=a477ac1cdd0416e8c8835c6691dd8eb05673&date_from='+dateFrom+'&date_to='+dateTo+'&fields=video,video_title,date,views,comments,dislikes,likes,shares,subscriber_count,view_count';
   const res=await fetch(URL);
   const json=await res.json();
   const rows=(json.data||[]).filter(r=>r&&typeof r==='object');
@@ -359,12 +360,14 @@ async function _fetchWindsorYT(dateFrom,dateTo){
   let views=0,likes=0,comments=0,shares=0,dislikes=0,subscriberCount=0;
   rows.forEach(function(r){
     const name=r.video_title||r.video||'Unknown';
-    if(!vmap[name])vmap[name]={name,views:0,likes:0,comments:0,shares:0,dislikes:0};
+    if(!vmap[name])vmap[name]={name,views:0,likes:0,comments:0,shares:0,dislikes:0,minDate:r.date||'',maxDate:r.date||''};
     vmap[name].views+=+(r.views||0);
     vmap[name].likes+=+(r.likes||0);
     vmap[name].comments+=+(r.comments||0);
     vmap[name].shares+=+(r.shares||0);
     vmap[name].dislikes+=+(r.dislikes||0);
+    if(r.date&&(!vmap[name].minDate||r.date<vmap[name].minDate))vmap[name].minDate=r.date;
+    if(r.date&&r.date>vmap[name].maxDate)vmap[name].maxDate=r.date;
     views+=+(r.views||0);
     likes+=+(r.likes||0);
     comments+=+(r.comments||0);
@@ -410,8 +413,13 @@ const VIDEO_PAGE_SIZE=10;
 
 function _sortedVideos(){
   return[..._allVideos].sort(function(a,b){
-    const av=a[_videoSort.field]||0,bv=b[_videoSort.field]||0;
-    return _videoSort.dir==='desc'?bv-av:av-bv;
+    const f=_videoSort.field,dir=_videoSort.dir;
+    if(f==='minDate'){
+      const av=a.minDate||'',bv=b.minDate||'';
+      return dir==='desc'?bv.localeCompare(av):av.localeCompare(bv);
+    }
+    const av=a[f]||0,bv=b[f]||0;
+    return dir==='desc'?bv-av:av-bv;
   });
 }
 
