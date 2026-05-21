@@ -569,16 +569,26 @@ function _empty(){document.querySelector('.content').innerHTML='<div style="disp
 async function _fetchPeriod(slug,days,fromDate,toDate){
   const{data:pl}=await window._sb.from('platforms').select('id').eq('slug',slug).single();
   if(!pl)return null;
-  const{data:rs,error:_rsErr}=await window._sb.from('reports')
-    .select('id,period_start,period_end,source,created_at')
-    .eq('platform_id',pl.id).order('period_end',{ascending:false}).limit(20);
+  let rs,_rsErr;
+  if(fromDate&&toDate){
+    // Filter at DB level: reports whose period overlaps [fromDate, toDate]
+    ({data:rs,error:_rsErr}=await window._sb.from('reports')
+      .select('id,period_start,period_end,source,created_at')
+      .eq('platform_id',pl.id)
+      .lte('period_start',toDate)
+      .gte('period_end',fromDate)
+      .order('period_end',{ascending:false}));
+  }else{
+    ({data:rs,error:_rsErr}=await window._sb.from('reports')
+      .select('id,period_start,period_end,source,created_at')
+      .eq('platform_id',pl.id).order('period_end',{ascending:false}).limit(20));
+  }
   console.log('[fetch] reports for slug='+slug+':', rs, 'error:', _rsErr);
   if(!rs||!rs.length)return null;
   let curr,prev;
   if(fromDate&&toDate){
-    const f=new Date(fromDate),t=new Date(toDate);
-    curr=rs.find(r=>new Date(r.period_start)<=t&&new Date(r.period_end)>=f)||rs[0];
-    const i=rs.indexOf(curr);prev=rs[i+1]||null;
+    curr=rs[0]||null;
+    prev=rs[1]||null;
   }else{
     const score=r=>Math.abs((new Date(r.period_end)-new Date(r.period_start))/86400000-days);
     curr=[...rs].sort((a,b)=>score(a)-score(b))[0]||null;
