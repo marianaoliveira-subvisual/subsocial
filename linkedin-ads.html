@@ -142,6 +142,14 @@
   .history-del-btn:hover{color:var(--red);background:rgba(209,64,64,0.08)}
   .history-del-btn:disabled{opacity:0.4;cursor:default}
   @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .campaign-table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:20px;animation:fadeUp 0.4s ease both;animation-delay:0.3s}
+  .campaign-table{width:100%;border-collapse:collapse;font-size:13px}
+  .campaign-table th{text-align:left;font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:var(--ink-faint);padding:0 0 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+  .campaign-table td{padding:12px 0;border-bottom:1px solid var(--border-light);vertical-align:middle}
+  .campaign-table td:not(:first-child){text-align:right;font-family:'Playfair Display',serif;color:var(--indigo);font-size:14px;font-weight:600}
+  .campaign-table tr:last-child td{border-bottom:none}
+  .campaign-name{font-size:13px;font-weight:500;color:var(--ink);max-width:360px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .campaign-table tbody tr:hover td{background:var(--blue-tint)}
 </style>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -273,46 +281,30 @@
       </div>
     </div>
 
-    <!-- Trend chart (empty state) + Engagement breakdown -->
-    <div class="two-col">
-      <div class="chart-card">
-        <div class="chart-title">Performance trend</div>
-        <div class="chart-subtitle">Impressions &amp; clicks over time</div>
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;gap:8px;text-align:center">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20L9 13L14 16.5L19.5 9L25 13"/><line x1="2.5" y1="22" x2="25.5" y2="22" stroke-linecap="round"/></svg>
-          <div style="font-size:12px;font-weight:500;color:var(--ink)">No trend data yet</div>
-          <div style="font-size:11px;color:var(--ink-faint)">Upload more reports to see trends over time</div>
-          <a href="upload.html" style="font-size:11px;color:var(--blue);text-decoration:none;font-weight:500;margin-top:4px">Upload a report →</a>
+    <!-- Campaign breakdown table -->
+    <div class="campaign-table-card">
+      <div class="section-header">
+        <div>
+          <div class="chart-title">Campaign breakdown</div>
+          <div class="chart-subtitle">Performance by campaign for the selected period</div>
         </div>
       </div>
-
-      <!-- Engagement / conversion breakdown -->
-      <div class="chart-card">
-        <div class="chart-title">Performance breakdown</div>
-        <div class="chart-subtitle" style="margin-bottom:0">Key efficiency metrics</div>
-        <div class="engage-grid">
-          <div class="engage-item">
-            <div class="engage-label">CPC</div>
-            <div class="engage-value" id="eng-cpc">—</div>
-            <div class="engage-delta" id="eng-cpc-d"></div>
-          </div>
-          <div class="engage-item">
-            <div class="engage-label">CPM</div>
-            <div class="engage-value" id="eng-cpm">—</div>
-            <div class="engage-delta" id="eng-cpm-d"></div>
-          </div>
-          <div class="engage-item">
-            <div class="engage-label">Conv. rate</div>
-            <div class="engage-value" id="eng-conversion_rate">—</div>
-            <div class="engage-delta" id="eng-conversion_rate-d"></div>
-          </div>
-          <div class="engage-item">
-            <div class="engage-label">Leads</div>
-            <div class="engage-value" id="eng-leads">—</div>
-            <div class="engage-delta" id="eng-leads-d"></div>
-          </div>
-        </div>
-      </div>
+      <table class="campaign-table">
+        <thead>
+          <tr>
+            <th>Campaign</th>
+            <th style="text-align:right">Impressions</th>
+            <th style="text-align:right">Clicks</th>
+            <th style="text-align:right">CTR</th>
+            <th style="text-align:right">Spend</th>
+            <th style="text-align:right">CPC</th>
+            <th style="text-align:right">CPM</th>
+          </tr>
+        </thead>
+        <tbody id="campaign-tbody">
+          <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--ink-faint);font-size:12px">Loading...</td></tr>
+        </tbody>
+      </table>
     </div>
 
 
@@ -320,23 +312,33 @@
 </div>
 
 <script>
-// ── Windsor Ads live data ──
-
 async function _fetchWindsorAds(dateFrom,dateTo){
   const URL='https://connectors.windsor.ai/linkedin?api_key=a477ac1cdd0416e8c8835c6691dd8eb05673&date_from='+dateFrom+'&date_to='+dateTo+'&fields=approximate_unique_impressions,ctr,cpc,impressions,engagement_rate,clicks,spend,campaign,campaign_start_date';
   const res=await fetch(URL);
   const json=await res.json();
   const rows=(json.data||[]).filter(r=>r&&typeof r==='object');
-  let impressions=0,clicks=0,spend=0;
+  const cmap={};
+  let totImp=0,totClicks=0,totSpend=0;
   rows.forEach(function(r){
-    impressions+=+(r.impressions||0);
-    clicks+=+(r.clicks||0);
-    spend+=+(r.spend||0);
+    const name=r.campaign||'Unknown';
+    if(!cmap[name])cmap[name]={name,impressions:0,clicks:0,spend:0};
+    cmap[name].impressions+=+(r.impressions||0);
+    cmap[name].clicks+=+(r.clicks||0);
+    cmap[name].spend+=+(r.spend||0);
+    totImp+=+(r.impressions||0);
+    totClicks+=+(r.clicks||0);
+    totSpend+=+(r.spend||0);
   });
-  const ctr=impressions>0?(clicks/impressions*100):0;
-  const cpc=clicks>0?(spend/clicks):0;
-  const cpm=impressions>0?(spend/impressions*1000):0;
-  return{impressions,clicks,spend,ctr,cpc,cpm,hasData:rows.length>0};
+  const campaigns=Object.values(cmap).map(function(c){
+    c.ctr=c.impressions>0?(c.clicks/c.impressions*100):0;
+    c.cpc=c.clicks>0?(c.spend/c.clicks):0;
+    c.cpm=c.impressions>0?(c.spend/c.impressions*1000):0;
+    return c;
+  }).sort(function(a,b){return b.spend-a.spend;});
+  const ctr=totImp>0?(totClicks/totImp*100):0;
+  const cpc=totClicks>0?(totSpend/totClicks):0;
+  const cpm=totImp>0?(totSpend/totImp*1000):0;
+  return{impressions:totImp,clicks:totClicks,spend:totSpend,ctr,cpc,cpm,campaigns,hasData:rows.length>0};
 }
 
 function _isoDate(d){return d.toISOString().slice(0,10);}
@@ -349,20 +351,42 @@ function _prevPeriod(fromStr,toStr){
   return{from:_isoDate(prevFrom),to:_isoDate(prevTo)};
 }
 
+function _escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function _renderCampaigns(campaigns){
+  const tbody=document.getElementById('campaign-tbody');
+  if(!tbody)return;
+  if(!campaigns||!campaigns.length){
+    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--ink-faint);font-size:12px">No campaign data available</td></tr>';
+    return;
+  }
+  tbody.innerHTML=campaigns.map(function(c){
+    return '<tr>'+
+      '<td><div class="campaign-name">'+_escHtml(c.name)+'</div></td>'+
+      '<td>'+_fmtNum(c.impressions)+'</td>'+
+      '<td>'+_fmtNum(c.clicks)+'</td>'+
+      '<td>'+(c.ctr>0?c.ctr.toFixed(2)+'%':'—')+'</td>'+
+      '<td>'+(c.spend>0?'€'+c.spend.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0}):'—')+'</td>'+
+      '<td>'+(c.cpc>0?'€'+c.cpc.toFixed(2):'—')+'</td>'+
+      '<td>'+(c.cpm>0?'€'+c.cpm.toFixed(2):'—')+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
 let _currentFrom=null,_currentTo=null;
 async function _loadRange(dateFrom,dateTo){
   _currentFrom=dateFrom;_currentTo=dateTo;
   try{
     const prev=_prevPeriod(dateFrom,dateTo);
     const[m,pm]=await Promise.all([_fetchWindsorAds(dateFrom,dateTo),_fetchWindsorAds(prev.from,prev.to)]);
-    if(!m.hasData){_toast('No data returned for this period.');return;}
+    if(!m.hasData){_toast('No data returned for this period.');_renderCampaigns([]);return;}
     const _fmtLbl=s=>new Date(s+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
     document.getElementById('date-label').textContent=_fmtLbl(dateFrom)+' – '+_fmtLbl(dateTo);
     const cf=document.getElementById('custom-from'),ct=document.getElementById('custom-to');
     if(cf)cf.value=dateFrom;if(ct)ct.value=dateTo;
     _kpi('imp',m.impressions,pm.hasData?pm.impressions:null,true);
     _kpi('clicks',m.clicks,pm.hasData?pm.clicks:null,false);
-    var e,de;
+    var e;
     e=document.getElementById('kpi-ctr-val');if(e)e.textContent=m.ctr.toFixed(2)+'%';
     if(pm.hasData){
       const up=m.ctr>=pm.ctr;
@@ -384,16 +408,7 @@ async function _loadRange(dateFrom,dateTo){
     e=document.getElementById('kpi-conv-val');if(e)e.textContent='—';
     e=document.getElementById('kpi-conv-delta');if(e){e.textContent='';e.className='stat-delta';}
     e=document.getElementById('kpi-conv-compare');if(e)e.textContent='';
-    e=document.getElementById('eng-cpc');if(e)e.textContent=m.cpc>0?'€'+m.cpc.toFixed(2):'—';
-    de=document.getElementById('eng-cpc-d');
-    if(de){if(pm.hasData&&m.cpc&&pm.cpc){const d=_delta(m.cpc,pm.cpc);if(d){de.textContent=(d.dir==='up'?'↑ +':'↓ ')+d.pct;de.className='engage-delta'+(d.dir==='up'?'':' down');}else de.textContent='';}else de.textContent='';}
-    e=document.getElementById('eng-cpm');if(e)e.textContent=m.cpm>0?'€'+m.cpm.toFixed(2):'—';
-    de=document.getElementById('eng-cpm-d');
-    if(de){if(pm.hasData&&m.cpm&&pm.cpm){const d=_delta(m.cpm,pm.cpm);if(d){de.textContent=(d.dir==='up'?'↑ +':'↓ ')+d.pct;de.className='engage-delta'+(d.dir==='up'?'':' down');}else de.textContent='';}else de.textContent='';}
-    e=document.getElementById('eng-conversion_rate');if(e)e.textContent='—';
-    de=document.getElementById('eng-conversion_rate-d');if(de)de.textContent='';
-    e=document.getElementById('eng-leads');if(e)e.textContent='—';
-    de=document.getElementById('eng-leads-d');if(de)de.textContent='';
+    _renderCampaigns(m.campaigns);
   }catch(err){
     console.error('[Windsor Ads] fetch error',err);
     _toast('Failed to fetch live data.');
