@@ -436,47 +436,6 @@
       </div>
     </div>
 
-    <!-- Report history -->
-    <div class="chart-card" style="animation-delay:0.4s">
-      <div class="section-header">
-        <div>
-          <div class="section-title">Report history</div>
-          <div class="section-sub">All uploaded LinkedIn reports</div>
-        </div>
-        <button class="btn-primary" style="font-size:11px;padding:6px 12px" onclick="location.href='upload.html'">+ Upload new</button>
-      </div>
-      <div class="history-list">
-        <div class="history-item active-report">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#045CFC" stroke-width="1.5"><rect x="2" y="1" width="10" height="12" rx="1.5"/><path d="M4.5 5h5M4.5 7.5h5M4.5 10h3"/></svg>
-          <span class="history-period">Feb 24 – Mar 24, 2026</span>
-          <span class="history-impressions">108.3K impressions</span>
-          <span class="history-date">Uploaded today</span>
-          <span class="history-arrow">Viewing →</span>
-        </div>
-        <div class="history-item">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"><rect x="2" y="1" width="10" height="12" rx="1.5"/><path d="M4.5 5h5M4.5 7.5h5M4.5 10h3"/></svg>
-          <span class="history-period">Jan 24 – Feb 24, 2026</span>
-          <span class="history-impressions">91.6K impressions</span>
-          <span class="history-date">Feb 25, 2026</span>
-          <span class="history-arrow" style="color:var(--blue);cursor:pointer">View →</span>
-        </div>
-        <div class="history-item">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"><rect x="2" y="1" width="10" height="12" rx="1.5"/><path d="M4.5 5h5M4.5 7.5h5M4.5 10h3"/></svg>
-          <span class="history-period">Dec 24 – Jan 24, 2026</span>
-          <span class="history-impressions">84.2K impressions</span>
-          <span class="history-date">Jan 26, 2026</span>
-          <span class="history-arrow" style="color:var(--blue);cursor:pointer">View →</span>
-        </div>
-        <div class="history-item">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"><rect x="2" y="1" width="10" height="12" rx="1.5"/><path d="M4.5 5h5M4.5 7.5h5M4.5 10h3"/></svg>
-          <span class="history-period">Nov 24 – Dec 24, 2025</span>
-          <span class="history-impressions">79.8K impressions</span>
-          <span class="history-date">Dec 26, 2025</span>
-          <span class="history-arrow" style="color:var(--blue);cursor:pointer">View →</span>
-        </div>
-      </div>
-    </div>
-
   </div>
 </div>
 
@@ -518,196 +477,90 @@ let engChart = new Chart(document.getElementById('engRateChart').getContext('2d'
   options:{cutout:'78%',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{enabled:false}}}
 });
 
-// ── setRange ──
-async function setRange(r){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.range==r));
+// ── Windsor live data ──
 
-  let _res;try{_res=await _fetchPeriod('linkedin',+r,null,null);}catch(e){console.error(e);}
-  if(!_res||!_res.curr){_showNotice();return;}_hideNotice();
-  const{rs,curr,prev,m,pm}=_res;
-  console.log('[setRange r='+r+'] m:', m, 'pm:', pm);
-  const _fmt=d=>new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  document.getElementById('date-label').textContent=_fmt(curr.period_start)+' \u2013 '+_fmt(curr.period_end);
-  const _cf=document.getElementById('custom-from'),_ct=document.getElementById('custom-to');if(_cf)_cf.value=curr.period_start;if(_ct)_ct.value=curr.period_end;
-  _kpi('imp',m.impressions,pm.impressions,true);
-  _kpi('reach',m.reach,pm.reach,false);
-  if(m.engrate){const eng=parseFloat(m.engrate),peng=parseFloat(pm.engrate||0);const v=document.getElementById('kpi-engrate-val');if(v)v.textContent=eng.toFixed(1)+'%';if(pm.engrate){const pp=(eng-peng).toFixed(1),up=eng>=peng;const e=document.getElementById('kpi-engrate-delta');if(e){e.textContent=(up?'\u2191 +':'\u2193 ')+Math.abs(pp)+'pp';e.className='stat-delta '+(up?'delta-up':'delta-down');}const c=document.getElementById('kpi-engrate-compare');if(c)c.textContent='vs '+peng.toFixed(1)+'% prev period';}_donut(m.engrate,pm.engrate,false);}
-  _kpi('clicks',m.clicks,pm.clicks,false);
-  if(m.followers){const v=document.getElementById('kpi-followers-val');if(v)v.textContent='+'+_fmtNum(m.followers);const d=_delta(m.followers,pm.followers);if(d){const e=document.getElementById('kpi-followers-delta');if(e){e.textContent=(d.dir==='up'?'\u2191 +':'\u2193 ')+d.pct;e.className='stat-delta '+(d.dir==='up'?'delta-up':'delta-down');}}}
-  const _fp0=document.getElementById('follower-period');if(_fp0&&m.followers)_fp0.textContent='+'+_fmtNum(m.followers);
-  _eng(['reactions','comments','shares','clicks','saves','profile'],m,pm);
-  _history(rs,'#045CFC');
-}
-document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>setRange(btn.dataset.range)));
-['custom-from','custom-to'].forEach(id=>document.getElementById(id).addEventListener('change',async()=>{
-  const from=document.getElementById('custom-from').value,to=document.getElementById('custom-to').value;
-  if(from&&to){
-    let _res;try{_res=await _fetchPeriod('linkedin',null,from,to);}catch(e){console.error(e);}
-    if(!_res||!_res.curr){_showNotice();return;}_hideNotice();
-    const{rs,curr,prev,m,pm}=_res;
-    const _fmt=d=>new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-    document.getElementById('date-label').textContent=_fmt(from)+' \u2013 '+_fmt(to);
-    _kpi('imp',m.impressions,pm.impressions,true);
-    _kpi('reach',m.reach,pm.reach,false);
-    if(m.engrate){const eng=parseFloat(m.engrate),peng=parseFloat(pm.engrate||0);const v=document.getElementById('kpi-engrate-val');if(v)v.textContent=eng.toFixed(1)+'%';if(pm.engrate){const pp=(eng-peng).toFixed(1),up=eng>=peng;const e=document.getElementById('kpi-engrate-delta');if(e){e.textContent=(up?'\u2191 +':'\u2193 ')+Math.abs(pp)+'pp';e.className='stat-delta '+(up?'delta-up':'delta-down');}const c=document.getElementById('kpi-engrate-compare');if(c)c.textContent='vs '+peng.toFixed(1)+'% prev period';}_donut(m.engrate,pm.engrate,false);}
-    _kpi('clicks',m.clicks,pm.clicks,false);
-    if(m.followers){const v=document.getElementById('kpi-followers-val');if(v)v.textContent='+'+_fmtNum(m.followers);const d=_delta(m.followers,pm.followers);if(d){const e=document.getElementById('kpi-followers-delta');if(e){e.textContent=(d.dir==='up'?'\u2191 +':'\u2193 ')+d.pct;e.className='stat-delta '+(d.dir==='up'?'delta-up':'delta-down');}}}
-    const _fp0b=document.getElementById('follower-period');if(_fp0b&&m.followers)_fp0b.textContent='+'+_fmtNum(m.followers);
-    _eng(['reactions','comments','shares','clicks','saves','profile'],m,pm);
-    _history(rs,'#045CFC');
-  }
-}));
-
-function _fmtNum(v){if(v===undefined||v===null||v==='')return '—';const n=parseFloat(String(v).replace(/,/g,''));if(isNaN(n))return '—';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString();}
-function _delta(c,p){const cv=parseFloat(String(c).replace(/[^0-9.]/g,'')),pv=parseFloat(String(p).replace(/[^0-9.]/g,''));if(isNaN(cv)||isNaN(pv)||pv===0)return null;return{pct:Math.abs(((cv-pv)/Math.abs(pv)*100)).toFixed(1)+'%',dir:cv>=pv?'up':'down'};}
-function _kpi(dom,val,prev,featured){const v=document.getElementById('kpi-'+dom+'-val');if(v)v.textContent=_fmtNum(val);const e=document.getElementById('kpi-'+dom+'-delta');const c=document.getElementById('kpi-'+dom+'-compare');const d=_delta(val,prev);if(d&&prev){if(e){e.textContent=(d.dir==='up'?'↑ +':'↓ ')+d.pct;e.className='stat-delta '+(featured?(d.dir==='up'?'delta-up-white':'delta-down-white'):(d.dir==='up'?'delta-up':'delta-down'));}if(c)c.textContent='vs '+_fmtNum(prev)+' prev period';}else{if(e){e.textContent='';e.className='stat-delta';}if(c)c.textContent='';}}
-function _eng(keys,m,pm){keys.forEach(k=>{const e=document.getElementById('eng-'+k);if(e)e.textContent=m[k]?_fmtNum(m[k]):'—';const de=document.getElementById('eng-'+k+'-d');if(de){if(m[k]&&pm[k]){const d=_delta(m[k],pm[k]);if(d){de.textContent=(d.dir==='up'?'↑ +':'↓ ')+d.pct;de.className='engage-delta'+(d.dir==='up'?'':' down');}else de.textContent='';}else de.textContent='';}});}
-function _donut(curr,prev,invert){const c=parseFloat(curr),p=parseFloat(prev||0);if(isNaN(c))return;const pp=Math.abs(c-p).toFixed(1),ok=invert?(c<p):(c>=p);['donut-val','donut-val-2'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=c.toFixed(1)+'%';});const pe=document.getElementById('donut-prev');if(pe)pe.textContent=p.toFixed(1)+'%';const de=document.getElementById('donut-delta');if(de){de.textContent=(ok?'↑ +':'↓ ')+pp+'pp';de.style.background=ok?'rgba(27,154,106,0.1)':'rgba(209,64,64,0.1)';de.style.color=ok?'var(--green)':'var(--red)';}if(typeof engChart!=='undefined'&&engChart){engChart.data.datasets[0].data=[c,100-c];engChart.update('active');}}
-function _history(rs,col){const hl=document.querySelector('.history-list');if(!hl)return;const f=d=>new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});const age=d=>{const diff=Math.floor((Date.now()-new Date(d))/86400000);return diff===0?'Uploaded today':diff===1?'Yesterday':f(d);};hl.innerHTML=rs.map((r,i)=>'<div class="history-item '+(i===0?'active-report':'')+'"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="'+(i===0?col:'var(--ink-faint)')+'" stroke-width="1.5"><rect x="2" y="1" width="10" height="12" rx="1.5"/><path d="M4.5 5h5M4.5 7.5h5M4.5 10h3"/></svg><span class="history-period">'+f(r.period_start)+' – '+f(r.period_end)+'</span><span class="history-impressions">'+(r.source==='manual'?'Manual':'CSV')+'</span><span class="history-date">'+age(r.created_at)+'</span><span class="history-arrow" style="color:'+(i===0?'var(--ink-faint)':'var(--blue)')+';">'+(i===0?'Viewing →':'View →')+'</span><button class="history-del-btn" data-rid="'+r.id+'" onclick="_deleteReport(this.dataset.rid,this)" title="Delete report"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3h8M4.5 3V1.5h3V3M3 3l.5 7.5h5L9 3"/><path d="M5 5.5v3M7 5.5v3"/></svg></button></div>').join('');}
-function _empty(){document.querySelector('.content').innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;gap:16px;text-align:center;padding:40px"><svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"><rect x="8" y="6" width="32" height="36" rx="3"/><path d="M16 18h16M16 24h16M16 30h10"/></svg><div style="font-family:"Playfair Display",serif;font-size:20px;font-weight:600;color:var(--indigo)">No reports yet</div><div style="font-size:13px;color:var(--ink-faint);max-width:300px">Upload your first report to see real data here.</div><a href="upload.html" style="display:inline-flex;align-items:center;gap:6px;padding:9px 20px;background:var(--blue);color:white;border-radius:var(--radius-sm);font-size:13px;font-weight:500;text-decoration:none">Upload report →</a></div>';}
-
-async function _fetchPeriod(slug,days,fromDate,toDate){
-  const{data:pl}=await window._sb.from('platforms').select('id').eq('slug',slug).single();
-  if(!pl)return null;
-  // Fetch recent reports for the history panel
-  const{data:rs,error:_rsErr}=await window._sb.from('reports')
-    .select('id,period_start,period_end,source,created_at')
-    .eq('platform_id',pl.id).order('period_end',{ascending:false}).limit(50);
-  console.log('[fetch] reports for slug='+slug+':', rs, 'error:', _rsErr);
-  if(!rs||!rs.length)return null;
-  let curr;
-  if(fromDate&&toDate){
-    // Try to find a match within the already-fetched list first
-    curr=rs.find(r=>r.period_start<=toDate&&r.period_end>=fromDate)||null;
-    // Fall back to a direct DB query if the report is outside the top 50
-    if(!curr){
-      const{data:exact}=await window._sb.from('reports')
-        .select('id,period_start,period_end,source,created_at')
-        .eq('platform_id',pl.id)
-        .lte('period_start',toDate).gte('period_end',fromDate)
-        .order('period_end',{ascending:false}).limit(1);
-      curr=(exact&&exact[0])||null;
-    }
-  }else{
-    const score=r=>Math.abs((new Date(r.period_end)-new Date(r.period_start))/86400000-days);
-    curr=[...rs].sort((a,b)=>score(a)-score(b))[0]||null;
-  }
-  if(!curr)return{rs,curr:null,m:{},pm:{}};
-  // prev: most recent report that ends before curr's period starts
-  const{data:prevRs}=await window._sb.from('reports')
-    .select('id,period_start,period_end,source,created_at')
-    .eq('platform_id',pl.id)
-    .lt('period_end',curr.period_start)
-    .order('period_end',{ascending:false}).limit(1);
-  const prev=(prevRs&&prevRs[0])||null;
-  const[{data:cm,error:_cmErr},{data:pm2}]=await Promise.all([
-    window._sb.from('metrics').select('key,value').eq('report_id',curr.id),
-    prev?window._sb.from('metrics').select('key,value').eq('report_id',prev.id):Promise.resolve({data:[]})
+async function _fetchWindsor(dateFrom,dateTo){
+  const BASE='https://connectors.windsor.ai/linkedin_organic?api_key=a477ac1cdd0416e8c8835c6691dd8eb05673&date_from='+dateFrom+'&date_to='+dateTo+'&fields=';
+  const[r1,r2]=await Promise.all([
+    fetch(BASE+'account_analytics_impression_count,account_analytics_engagement,account_analytics_click_count,account_analytics_like_count,account_analytics_comment_count,organization_follower_count,account_analytics_unique_impressions_count'),
+    fetch(BASE+'account_analytics_click_count,account_analytics_comment_count,account_analytics_engagement,account_analytics_impression_count,account_analytics_like_count,account_analytics_share_count,account_analytics_unique_impressions_count')
   ]);
-  console.log('[fetch] metrics for report '+curr.id+':', cm, 'error:', _cmErr);
-  const m=Object.fromEntries((cm||[]).map(r=>[r.key,r.value]));
-  const pm=Object.fromEntries((pm2||[]).map(r=>[r.key,r.value]));
-  console.log('[fetch] m:', m);
-  return{rs,curr,prev,m,pm};
+  const[j1,j2]=await Promise.all([r1.json(),r2.json()]);
+  const rows1=(j1.data||[]).filter(r=>r&&typeof r==='object');
+  const rows2=(j2.data||[]).filter(r=>r&&typeof r==='object');
+  let impressions=0,clicks=0,likes=0,comments=0,followers=0,uniqueImp=0;
+  rows1.forEach(function(r){
+    impressions+=+(r.account_analytics_impression_count||0);
+    clicks+=+(r.account_analytics_click_count||0);
+    likes+=+(r.account_analytics_like_count||0);
+    comments+=+(r.account_analytics_comment_count||0);
+    followers=Math.max(followers,+(r.organization_follower_count||0));
+    uniqueImp+=+(r.account_analytics_unique_impressions_count||0);
+  });
+  let shares=0;
+  rows2.forEach(function(r){shares+=+(r.account_analytics_share_count||0);});
+  const totalEng=likes+comments+clicks+shares;
+  const engRate=impressions>0?(totalEng/impressions*100):((rows1[0]||rows2[0]||{}).account_analytics_engagement||0)*100;
+  return{impressions,clicks,likes,comments,followers,uniqueImp,shares,engRate,hasData:rows1.length>0||rows2.length>0};
 }
-function _showNotice(){
-  let e=document.getElementById('_pnotice');
-  if(!e){e=document.createElement('div');e.id='_pnotice';
-    e.innerHTML='No report found for this period. <a href="upload.html" style="color:var(--blue);font-weight:500;text-decoration:none;margin-left:2px">Upload one →</a>';
-    e.style.cssText='margin-bottom:16px;padding:10px 16px;background:rgba(4,92,252,0.05);border:1px solid rgba(4,92,252,0.12);border-radius:8px;font-size:12px;color:var(--ink-light);display:flex;align-items:center;gap:6px';
-    document.querySelector('.content').prepend(e);}
-  e.style.display='flex';
-}
-function _hideNotice(){const e=document.getElementById('_pnotice');if(e)e.style.display='none';}
-async function _deleteReport(id,btn){if(!confirm('Delete this report? This cannot be undone.'))return;btn.disabled=true;const{data,error}=await window._sb.from('reports').delete().eq('id',id).select();if(error){console.error('[SubSocial] Delete failed',{code:error.code,msg:error.message,hint:error.hint,details:error.details});_toast('Delete failed: '+(error.message||error.code||'RLS policy may be blocking deletes'));btn.disabled=false;return;}
-console.log('[SubSocial] Deleted report',id,'rows returned:',data&&data.length);const item=btn.closest('.history-item');if(item)item.remove();_toast('Report deleted.');setRange('30');}
-function _toast(msg){let t=document.getElementById('_toast');if(!t){t=document.createElement('div');t.id='_toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#403F4C;color:white;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.25s;pointer-events:none';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';clearTimeout(t._timer);t._timer=setTimeout(()=>{t.style.opacity='0';},2500);}
-window._onAuthReady=function(session){_updateSidebarUser(session);
-  // Hide upload entry-points for viewers
-  if((window._userRole||localStorage.getItem('sb-role')||'viewer')!=='admin'){
-    document.querySelectorAll('a[href="upload.html"],button[onclick*="upload.html"]').forEach(function(el){
-      el.style.display='none';
-    });
-  }setRange(localStorage.getItem('sb-default-period')||'30');};
 
-async function _fetchWindsorLive(){
+function _isoDate(d){return d.toISOString().slice(0,10);}
+
+function _prevPeriod(fromStr,toStr){
+  const f=new Date(fromStr+'T00:00:00'),t=new Date(toStr+'T00:00:00');
+  const days=Math.round((t-f)/86400000);
+  const prevTo=new Date(f);prevTo.setDate(prevTo.getDate()-1);
+  const prevFrom=new Date(prevTo);prevFrom.setDate(prevFrom.getDate()-days);
+  return{from:_isoDate(prevFrom),to:_isoDate(prevTo)};
+}
+
+let _currentFrom=null,_currentTo=null;
+async function _loadRange(dateFrom,dateTo){
+  _currentFrom=dateFrom;_currentTo=dateTo;
   const btn=document.getElementById('btn-sync-live');
   const SYNC_SVG='<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 2v3h-3"/><path d="M1.5 10V7h3"/><path d="M1.85 4.5a4.5 4.5 0 0 1 7.8-.5"/><path d="M10.15 7.5a4.5 4.5 0 0 1-7.8.5"/></svg>';
   if(btn){btn.disabled=true;btn.innerHTML=SYNC_SVG+' Syncing…';}
   try{
-    // Fetch both endpoints in parallel
-    const BASE='https://connectors.windsor.ai/linkedin_organic?api_key=a477ac1cdd0416e8c8835c6691dd8eb05673&date_from=2026-01-01&date_to=2026-05-20&fields=';
-    const [r1,r2]=await Promise.all([
-      fetch(BASE+'account_analytics_impression_count,account_analytics_engagement,account_analytics_click_count,account_analytics_like_count,account_analytics_comment_count,organization_follower_count,account_analytics_unique_impressions_count'),
-      fetch(BASE+'account_analytics_click_count,account_analytics_comment_count,account_analytics_engagement,account_analytics_impression_count,account_analytics_like_count,account_analytics_share_count,account_analytics_unique_impressions_count')
-    ]);
-    const [j1,j2]=await Promise.all([r1.json(),r2.json()]);
-    const rows1=(j1.data||[]).filter(r=>r&&typeof r==='object');
-    const rows2=(j2.data||[]).filter(r=>r&&typeof r==='object');
-    if(!rows1.length&&!rows2.length){_toast('No live data returned.');return;}
-    // Aggregate from endpoint 1 (has followers)
-    let impressions=0,clicks=0,likes=0,comments=0,followers=0,uniqueImp=0;
-    rows1.forEach(function(r){
-      impressions+=+(r.account_analytics_impression_count||0);
-      clicks+=+(r.account_analytics_click_count||0);
-      likes+=+(r.account_analytics_like_count||0);
-      comments+=+(r.account_analytics_comment_count||0);
-      followers=Math.max(followers,+(r.organization_follower_count||0));
-      uniqueImp+=+(r.account_analytics_unique_impressions_count||0);
-    });
-    // Aggregate shares from endpoint 2
-    let shares=0;
-    rows2.forEach(function(r){shares+=+(r.account_analytics_share_count||0);});
-    // Engagement rate: total interactions / total impressions × 100
-    const totalEng=likes+comments+clicks+shares;
-    const engRate=impressions>0?(totalEng/impressions*100):((rows1[0]||rows2[0]||{}).account_analytics_engagement||0)*100;
-    const lbl='Live · Jan 1 – May 20, 2026';
+    const prev=_prevPeriod(dateFrom,dateTo);
+    const[m,pm]=await Promise.all([_fetchWindsor(dateFrom,dateTo),_fetchWindsor(prev.from,prev.to)]);
+    if(!m.hasData){_toast('No data returned for this period.');return;}
+    const _fmtLbl=s=>new Date(s+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    document.getElementById('date-label').textContent=_fmtLbl(dateFrom)+' – '+_fmtLbl(dateTo);
+    const cf=document.getElementById('custom-from'),ct=document.getElementById('custom-to');
+    if(cf)cf.value=dateFrom;if(ct)ct.value=dateTo;
+    _kpi('imp',m.impressions,pm.hasData?pm.impressions:null,true);
+    _kpi('reach',m.uniqueImp,pm.hasData?pm.uniqueImp:null,false);
+    _kpi('clicks',m.clicks,pm.hasData?pm.clicks:null,false);
     var e;
-    // KPI: Impressions
-    e=document.getElementById('kpi-imp-val');if(e)e.textContent=_fmtNum(impressions);
-    e=document.getElementById('kpi-imp-delta');if(e){e.textContent='';e.className='stat-delta';}
-    e=document.getElementById('kpi-imp-compare');if(e)e.textContent=lbl;
-    // KPI: Reach (unique impressions)
-    e=document.getElementById('kpi-reach-val');if(e)e.textContent=_fmtNum(uniqueImp);
-    e=document.getElementById('kpi-reach-delta');if(e){e.textContent='';e.className='stat-delta';}
-    e=document.getElementById('kpi-reach-compare');if(e)e.textContent=lbl;
-    // KPI: Engagement rate
-    e=document.getElementById('kpi-engrate-val');if(e)e.textContent=engRate.toFixed(1)+'%';
-    e=document.getElementById('kpi-engrate-delta');if(e){e.textContent='';e.className='stat-delta';}
-    e=document.getElementById('kpi-engrate-compare');if(e)e.textContent=lbl;
-    // Update donut chart
-    ['donut-val','donut-val-2'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=engRate.toFixed(1)+'%';});
-    e=document.getElementById('donut-prev');if(e)e.textContent='—';
-    e=document.getElementById('donut-delta');if(e)e.textContent='';
-    if(typeof engChart!=='undefined'&&engChart){engChart.data.datasets[0].data=[engRate,Math.max(0,100-engRate)];engChart.update('active');}
-    // KPI: Clicks
-    e=document.getElementById('kpi-clicks-val');if(e)e.textContent=_fmtNum(clicks);
-    e=document.getElementById('kpi-clicks-delta');if(e){e.textContent='';e.className='stat-delta';}
-    e=document.getElementById('kpi-clicks-compare');if(e)e.textContent=lbl;
-    // KPI: Followers (total count from API)
-    e=document.getElementById('kpi-followers-val');if(e)e.textContent=_fmtNum(followers);
+    e=document.getElementById('kpi-engrate-val');if(e)e.textContent=m.engRate.toFixed(1)+'%';
+    if(pm.hasData){
+      const pp=(m.engRate-pm.engRate).toFixed(1),up=m.engRate>=pm.engRate;
+      e=document.getElementById('kpi-engrate-delta');if(e){e.textContent=(up?'↑ +':'↓ ')+Math.abs(pp)+'pp';e.className='stat-delta '+(up?'delta-up':'delta-down');}
+      e=document.getElementById('kpi-engrate-compare');if(e)e.textContent='vs '+pm.engRate.toFixed(1)+'% prev period';
+    }else{
+      e=document.getElementById('kpi-engrate-delta');if(e){e.textContent='';e.className='stat-delta';}
+      e=document.getElementById('kpi-engrate-compare');if(e)e.textContent='';
+    }
+    _donut(m.engRate,pm.hasData?pm.engRate:null,false);
+    e=document.getElementById('kpi-followers-val');if(e)e.textContent=_fmtNum(m.followers);
     e=document.getElementById('kpi-followers-delta');if(e){e.textContent='';e.className='stat-delta';}
     e=document.getElementById('kpi-followers-compare');if(e)e.textContent='Total · Live';
-    // Engagement breakdown
-    e=document.getElementById('eng-reactions');if(e)e.textContent=_fmtNum(likes);
-    e=document.getElementById('eng-reactions-d');if(e)e.textContent='';
-    e=document.getElementById('eng-comments');if(e)e.textContent=_fmtNum(comments);
-    e=document.getElementById('eng-comments-d');if(e)e.textContent='';
-    e=document.getElementById('eng-shares');if(e)e.textContent=_fmtNum(shares);
-    e=document.getElementById('eng-shares-d');if(e)e.textContent='';
-    e=document.getElementById('eng-clicks');if(e)e.textContent=_fmtNum(clicks);
-    e=document.getElementById('eng-clicks-d');if(e)e.textContent='';
-    // Show live banner
+    const engMap={reactions:m.likes,comments:m.comments,shares:m.shares,clicks:m.clicks};
+    const prevMap={reactions:pm.likes,comments:pm.comments,shares:pm.shares,clicks:pm.clicks};
+    ['reactions','comments','shares','clicks'].forEach(function(k){
+      e=document.getElementById('eng-'+k);if(e)e.textContent=_fmtNum(engMap[k]);
+      const de=document.getElementById('eng-'+k+'-d');
+      if(de){if(pm.hasData&&engMap[k]&&prevMap[k]){const d=_delta(engMap[k],prevMap[k]);if(d){de.textContent=(d.dir==='up'?'↑ +':'↓ ')+d.pct;de.className='engage-delta'+(d.dir==='up'?'':' down');}else de.textContent='';}else de.textContent='';}
+    });
+    ['saves','profile'].forEach(function(k){e=document.getElementById('eng-'+k);if(e)e.textContent='—';const de=document.getElementById('eng-'+k+'-d');if(de)de.textContent='';});
     var banner=document.getElementById('live-banner');
     if(banner){
       var now=new Date();
       var timeStr=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-      var dateStr=now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
       var bt=document.getElementById('live-banner-text');
-      if(bt)bt.textContent='Live data synced · Jan 1 – May 20, 2026 · as of '+dateStr+', '+timeStr;
+      if(bt)bt.textContent='Live data · '+_fmtLbl(dateFrom)+' – '+_fmtLbl(dateTo)+' · as of '+timeStr;
       banner.style.display='flex';
     }
-    _toast('Live data synced.');
   }catch(err){
     console.error('[Windsor] fetch error',err);
     _toast('Failed to fetch live data.');
@@ -715,6 +568,32 @@ async function _fetchWindsorLive(){
     if(btn){btn.disabled=false;btn.innerHTML=SYNC_SVG+' Sync live';}
   }
 }
+
+function setRange(r){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.range==r));
+  const today=new Date();
+  const dateTo=_isoDate(today);
+  const dateFrom=_isoDate(new Date(today.getFullYear(),today.getMonth(),today.getDate()-(+r)));
+  _loadRange(dateFrom,dateTo);
+}
+document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>setRange(btn.dataset.range)));
+['custom-from','custom-to'].forEach(function(id){document.getElementById(id).addEventListener('change',function(){
+  const from=document.getElementById('custom-from').value,to=document.getElementById('custom-to').value;
+  if(from&&to){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));_loadRange(from,to);}
+});});
+
+function _fmtNum(v){if(v===undefined||v===null||v==='')return '—';const n=parseFloat(String(v).replace(/,/g,''));if(isNaN(n))return '—';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString();}
+function _delta(c,p){const cv=parseFloat(String(c).replace(/[^0-9.]/g,'')),pv=parseFloat(String(p).replace(/[^0-9.]/g,''));if(isNaN(cv)||isNaN(pv)||pv===0)return null;return{pct:Math.abs(((cv-pv)/Math.abs(pv)*100)).toFixed(1)+'%',dir:cv>=pv?'up':'down'};}
+function _kpi(dom,val,prev,featured){const v=document.getElementById('kpi-'+dom+'-val');if(v)v.textContent=_fmtNum(val);const e=document.getElementById('kpi-'+dom+'-delta');const c=document.getElementById('kpi-'+dom+'-compare');const d=prev!=null?_delta(val,prev):null;if(d&&prev){if(e){e.textContent=(d.dir==='up'?'↑ +':'↓ ')+d.pct;e.className='stat-delta '+(featured?(d.dir==='up'?'delta-up-white':'delta-down-white'):(d.dir==='up'?'delta-up':'delta-down'));}if(c)c.textContent='vs '+_fmtNum(prev)+' prev period';}else{if(e){e.textContent='';e.className='stat-delta';}if(c)c.textContent='';}}
+function _donut(curr,prev,invert){const c=parseFloat(curr);if(isNaN(c))return;['donut-val','donut-val-2'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=c.toFixed(1)+'%';});if(prev!=null){const p=parseFloat(prev);if(!isNaN(p)){const pp=Math.abs(c-p).toFixed(1),ok=invert?(c<p):(c>=p);const pe=document.getElementById('donut-prev');if(pe)pe.textContent=p.toFixed(1)+'%';const de=document.getElementById('donut-delta');if(de){de.textContent=(ok?'↑ +':'↓ ')+pp+'pp';de.style.background=ok?'rgba(27,154,106,0.1)':'rgba(209,64,64,0.1)';de.style.color=ok?'var(--green)':'var(--red)';}}}else{const pe=document.getElementById('donut-prev');if(pe)pe.textContent='—';const de=document.getElementById('donut-delta');if(de)de.textContent='';}if(typeof engChart!=='undefined'&&engChart){engChart.data.datasets[0].data=[c,Math.max(0,100-c)];engChart.update('active');}}
+function _toast(msg){let t=document.getElementById('_toast');if(!t){t=document.createElement('div');t.id='_toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#403F4C;color:white;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.25s;pointer-events:none';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';clearTimeout(t._timer);t._timer=setTimeout(()=>{t.style.opacity='0';},2500);}
+window._onAuthReady=function(session){_updateSidebarUser(session);
+  if((window._userRole||localStorage.getItem('sb-role')||'viewer')!=='admin'){
+    document.querySelectorAll('a[href="upload.html"],button[onclick*="upload.html"]').forEach(function(el){
+      el.style.display='none';
+    });
+  }setRange(localStorage.getItem('sb-default-period')||'30');};
+function _fetchWindsorLive(){if(_currentFrom&&_currentTo)_loadRange(_currentFrom,_currentTo);}
 
 function _updateSidebarUser(session){
   var u=session&&session.user;
