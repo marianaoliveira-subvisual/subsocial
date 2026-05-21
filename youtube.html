@@ -143,6 +143,8 @@
   .video-table td{padding:12px 0;border-bottom:1px solid var(--border-light);vertical-align:middle}
   .video-table td:not(:first-child){text-align:right;font-family:'Playfair Display',serif;color:var(--indigo);font-size:14px;font-weight:600}
   .video-table tr:last-child td{border-bottom:none}
+  .btn-show-more{display:block;width:100%;margin-top:14px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-weight:500;color:var(--ink-light);cursor:pointer;font-family:inherit;transition:background 0.15s,color 0.15s,border-color 0.15s}
+  .btn-show-more:hover{background:rgba(209,64,64,0.05);border-color:var(--platform);color:var(--platform)}
   .video-title{font-size:13px;font-weight:500;color:var(--ink);max-width:360px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .video-table tbody tr:hover td{background:rgba(209,64,64,0.03)}
   @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -316,6 +318,7 @@
           <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--ink-faint);font-size:12px">Loading...</td></tr>
         </tbody>
       </table>
+      <button id="video-show-more" class="btn-show-more" style="display:none"></button>
     </div>
   </div>
 </div>
@@ -368,24 +371,52 @@ function _prevPeriod(fromStr,toStr){
 
 function _escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+function _videoRow(v){
+  return '<tr>'+
+    '<td><div class="video-title">'+_escHtml(v.name)+'</div></td>'+
+    '<td>'+_fmtNum(v.views)+'</td>'+
+    '<td>'+_fmtNum(v.likes)+'</td>'+
+    '<td>'+_fmtNum(v.comments)+'</td>'+
+    '<td>'+_fmtNum(v.shares)+'</td>'+
+    '<td>'+_fmtNum(v.dislikes)+'</td>'+
+    '<td>'+(v.engRate>0?v.engRate.toFixed(2)+'%':'—')+'</td>'+
+  '</tr>';
+}
 function _renderVideos(videos){
   const tbody=document.getElementById('video-tbody');
+  const btn=document.getElementById('video-show-more');
   if(!tbody)return;
   if(!videos||!videos.length){
     tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--ink-faint);font-size:12px">No video data available</td></tr>';
+    if(btn)btn.style.display='none';
     return;
   }
-  tbody.innerHTML=videos.map(function(v){
-    return '<tr>'+
-      '<td><div class="video-title">'+_escHtml(v.name)+'</div></td>'+
-      '<td>'+_fmtNum(v.views)+'</td>'+
-      '<td>'+_fmtNum(v.likes)+'</td>'+
-      '<td>'+_fmtNum(v.comments)+'</td>'+
-      '<td>'+_fmtNum(v.shares)+'</td>'+
-      '<td>'+_fmtNum(v.dislikes)+'</td>'+
-      '<td>'+(v.engRate>0?v.engRate.toFixed(2)+'%':'—')+'</td>'+
-    '</tr>';
-  }).join('');
+  const PAGE=10;
+  tbody.innerHTML=videos.slice(0,PAGE).map(_videoRow).join('');
+  if(btn){
+    if(videos.length>PAGE){
+      const rem=videos.length-PAGE;
+      btn.textContent='Show '+rem+' more video'+(rem===1?'':'s');
+      btn.style.display='';
+      btn.onclick=function(){
+        const frag=videos.slice(PAGE).map(function(v,i){
+          return '<tr style="animation:fadeUp 0.2s ease both;animation-delay:'+(i*0.03)+'s">'+
+            '<td><div class="video-title">'+_escHtml(v.name)+'</div></td>'+
+            '<td>'+_fmtNum(v.views)+'</td>'+
+            '<td>'+_fmtNum(v.likes)+'</td>'+
+            '<td>'+_fmtNum(v.comments)+'</td>'+
+            '<td>'+_fmtNum(v.shares)+'</td>'+
+            '<td>'+_fmtNum(v.dislikes)+'</td>'+
+            '<td>'+(v.engRate>0?v.engRate.toFixed(2)+'%':'—')+'</td>'+
+          '</tr>';
+        }).join('');
+        tbody.innerHTML+=frag;
+        btn.style.display='none';
+      };
+    }else{
+      btn.style.display='none';
+    }
+  }
 }
 
 let _currentFrom=null,_currentTo=null;
