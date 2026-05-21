@@ -326,7 +326,7 @@
     <!-- Live data banner -->
     <div id="live-banner" class="live-banner">
       <div class="live-dot-pulse"></div>
-      <span id="live-banner-text">Live data synced · Last 1 day</span>
+      <span id="live-banner-text">Live data synced · Jan 1 – May 20, 2026</span>
       <button onclick="document.getElementById('live-banner').style.display='none'" style="margin-left:auto;background:none;border:none;cursor:pointer;color:inherit;font-size:16px;line-height:1;padding:0 2px;opacity:0.6">×</button>
     </div>
 
@@ -621,7 +621,7 @@ async function _fetchWindsorLive(){
   if(btn){btn.disabled=true;btn.innerHTML=SYNC_SVG+' Syncing…';}
   try{
     // Fetch both endpoints in parallel
-    const BASE='https://connectors.windsor.ai/linkedin_organic?api_key=a477ac1cdd0416e8c8835c6691dd8eb05673&date_preset=last_1d&fields=';
+    const BASE='https://connectors.windsor.ai/linkedin_organic?api_key=a477ac1cdd0416e8c8835c6691dd8eb05673&date_from=2026-01-01&date_to=2026-05-20&fields=';
     const [r1,r2]=await Promise.all([
       fetch(BASE+'account_analytics_impression_count,account_analytics_engagement,account_analytics_click_count,account_analytics_like_count,account_analytics_comment_count,organization_follower_count,account_analytics_unique_impressions_count'),
       fetch(BASE+'account_analytics_click_count,account_analytics_comment_count,account_analytics_engagement,account_analytics_impression_count,account_analytics_like_count,account_analytics_share_count,account_analytics_unique_impressions_count')
@@ -646,7 +646,7 @@ async function _fetchWindsorLive(){
     // Engagement rate: total interactions / total impressions × 100
     const totalEng=likes+comments+clicks+shares;
     const engRate=impressions>0?(totalEng/impressions*100):((rows1[0]||rows2[0]||{}).account_analytics_engagement||0)*100;
-    const lbl='Live · Last 1 day';
+    const lbl='Live · Jan 1 – May 20, 2026';
     var e;
     // KPI: Impressions
     e=document.getElementById('kpi-imp-val');if(e)e.textContent=_fmtNum(impressions);
@@ -689,7 +689,7 @@ async function _fetchWindsorLive(){
       var timeStr=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
       var dateStr=now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
       var bt=document.getElementById('live-banner-text');
-      if(bt)bt.textContent='Live data synced · Last 1 day · as of '+dateStr+', '+timeStr;
+      if(bt)bt.textContent='Live data synced · Jan 1 – May 20, 2026 · as of '+dateStr+', '+timeStr;
       banner.style.display='flex';
     }
     _toast('Live data synced.');
