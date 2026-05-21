@@ -147,6 +147,17 @@
   .btn-show-more:hover{background:rgba(209,64,64,0.05);border-color:var(--platform);color:var(--platform)}
   .video-title{font-size:13px;font-weight:500;color:var(--ink);max-width:360px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .video-table tbody tr:hover td{background:rgba(209,64,64,0.03)}
+  .video-controls{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .video-sort-group{display:flex;gap:4px;flex-wrap:wrap}
+  .video-sort-btn{padding:4px 10px;border-radius:100px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border-md);background:var(--surface);color:var(--ink-light);font-family:inherit;transition:all 0.15s;white-space:nowrap}
+  .video-sort-btn:hover{border-color:var(--platform);color:var(--platform)}
+  .video-sort-btn.active{background:rgba(209,64,64,0.08);border-color:rgba(209,64,64,0.3);color:var(--platform)}
+  .video-pagination{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:14px}
+  .video-page-btn{min-width:32px;height:32px;padding:0 8px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--ink-light);font-family:inherit;transition:all 0.15s}
+  .video-page-btn:hover:not(.disabled):not(.active){border-color:var(--platform);color:var(--platform)}
+  .video-page-btn.active{background:var(--platform);border-color:var(--platform);color:white}
+  .video-page-btn.disabled{opacity:0.4;cursor:default;pointer-events:none}
+  .video-page-ellipsis{color:var(--ink-faint);font-size:12px;padding:0 4px;line-height:32px}
   @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
   .history-del-btn{background:none;border:none;cursor:pointer;padding:3px 4px;margin-left:4px;color:var(--ink-faint);border-radius:4px;transition:color .15s,background .15s;line-height:0;flex-shrink:0;}
@@ -302,6 +313,17 @@
           <div class="chart-subtitle">Performance by video for the selected period</div>
         </div>
       </div>
+      <div class="video-controls">
+        <span style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;color:var(--ink-faint);flex-shrink:0">Sort by</span>
+        <div class="video-sort-group">
+          <button class="video-sort-btn active" data-field="views" data-label="Views">Views ▾</button>
+          <button class="video-sort-btn" data-field="likes" data-label="Likes">Likes</button>
+          <button class="video-sort-btn" data-field="comments" data-label="Comments">Comments</button>
+          <button class="video-sort-btn" data-field="shares" data-label="Shares">Shares</button>
+          <button class="video-sort-btn" data-field="dislikes" data-label="Dislikes">Dislikes</button>
+          <button class="video-sort-btn" data-field="engRate" data-label="Eng. rate">Eng. rate</button>
+        </div>
+      </div>
       <table class="video-table">
         <thead>
           <tr>
@@ -318,7 +340,7 @@
           <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--ink-faint);font-size:12px">Loading...</td></tr>
         </tbody>
       </table>
-      <button id="video-show-more" class="btn-show-more" style="display:none"></button>
+      <div id="video-pagination" class="video-pagination"></div>
     </div>
   </div>
 </div>
@@ -382,42 +404,78 @@ function _videoRow(v){
     '<td>'+(v.engRate>0?v.engRate.toFixed(2)+'%':'—')+'</td>'+
   '</tr>';
 }
-function _renderVideos(videos){
+
+let _allVideos=[],_videoPage=1,_videoSort={field:'views',dir:'desc'};
+const VIDEO_PAGE_SIZE=10;
+
+function _sortedVideos(){
+  return[..._allVideos].sort(function(a,b){
+    const av=a[_videoSort.field]||0,bv=b[_videoSort.field]||0;
+    return _videoSort.dir==='desc'?bv-av:av-bv;
+  });
+}
+
+function _renderVideoPage(page){
+  const sorted=_sortedVideos();
+  const pages=Math.max(1,Math.ceil(sorted.length/VIDEO_PAGE_SIZE));
+  _videoPage=Math.max(1,Math.min(page,pages));
+  const slice=sorted.slice((_videoPage-1)*VIDEO_PAGE_SIZE,_videoPage*VIDEO_PAGE_SIZE);
   const tbody=document.getElementById('video-tbody');
-  const btn=document.getElementById('video-show-more');
-  if(!tbody)return;
-  if(!videos||!videos.length){
-    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--ink-faint);font-size:12px">No video data available</td></tr>';
-    if(btn)btn.style.display='none';
-    return;
-  }
-  const PAGE=10;
-  tbody.innerHTML=videos.slice(0,PAGE).map(_videoRow).join('');
-  if(btn){
-    if(videos.length>PAGE){
-      const rem=videos.length-PAGE;
-      btn.textContent='Show '+rem+' more video'+(rem===1?'':'s');
-      btn.style.display='';
-      btn.onclick=function(){
-        const frag=videos.slice(PAGE).map(function(v,i){
-          return '<tr style="animation:fadeUp 0.2s ease both;animation-delay:'+(i*0.03)+'s">'+
-            '<td><div class="video-title">'+_escHtml(v.name)+'</div></td>'+
-            '<td>'+_fmtNum(v.views)+'</td>'+
-            '<td>'+_fmtNum(v.likes)+'</td>'+
-            '<td>'+_fmtNum(v.comments)+'</td>'+
-            '<td>'+_fmtNum(v.shares)+'</td>'+
-            '<td>'+_fmtNum(v.dislikes)+'</td>'+
-            '<td>'+(v.engRate>0?v.engRate.toFixed(2)+'%':'—')+'</td>'+
-          '</tr>';
-        }).join('');
-        tbody.innerHTML+=frag;
-        btn.style.display='none';
-      };
-    }else{
-      btn.style.display='none';
+  if(tbody)tbody.innerHTML=slice.map(_videoRow).join('');
+  _renderVideoPagination(pages);
+}
+
+function _renderVideoPagination(pages){
+  const el=document.getElementById('video-pagination');
+  if(!el)return;
+  if(pages<=1){el.innerHTML='';return;}
+  const p=_videoPage;
+  const prev='<button class="video-page-btn'+(p===1?' disabled':'')+'" onclick="_renderVideoPage('+(p-1)+')">&#8592;</button>';
+  const next='<button class="video-page-btn'+(p===pages?' disabled':'')+'" onclick="_renderVideoPage('+(p+1)+')">&#8594;</button>';
+  let nums='';
+  for(let i=1;i<=pages;i++){
+    if(i===1||i===pages||Math.abs(i-p)<=1){
+      nums+='<button class="video-page-btn'+(i===p?' active':'')+'" onclick="_renderVideoPage('+i+')">'+i+'</button>';
+    }else if(nums.slice(-3)!=='...'){
+      nums+='<span class="video-page-ellipsis">…</span>';
     }
   }
+  el.innerHTML=prev+nums+next;
 }
+
+function _updateSortBtns(){
+  document.querySelectorAll('.video-sort-btn').forEach(function(b){
+    const active=b.dataset.field===_videoSort.field;
+    b.classList.toggle('active',active);
+    b.textContent=b.dataset.label+(active?(' '+(_videoSort.dir==='desc'?'▾':'▴')):'');
+  });
+}
+
+function _renderVideos(videos){
+  _allVideos=videos||[];
+  _videoPage=1;
+  const tbody=document.getElementById('video-tbody');
+  if(!_allVideos.length){
+    if(tbody)tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--ink-faint);font-size:12px">No video data available</td></tr>';
+    const pg=document.getElementById('video-pagination');if(pg)pg.innerHTML='';
+    return;
+  }
+  document.querySelectorAll('.video-sort-btn').forEach(function(btn){
+    btn.onclick=function(){
+      if(_videoSort.field===btn.dataset.field){
+        _videoSort.dir=_videoSort.dir==='desc'?'asc':'desc';
+      }else{
+        _videoSort.field=btn.dataset.field;
+        _videoSort.dir='desc';
+      }
+      _updateSortBtns();
+      _renderVideoPage(1);
+    };
+  });
+  _updateSortBtns();
+  _renderVideoPage(1);
+}
+
 
 let _currentFrom=null,_currentTo=null;
 async function _loadRange(dateFrom,dateTo){
