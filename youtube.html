@@ -137,6 +137,14 @@
   .btn-live{display:flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(27,154,106,0.07);color:var(--green);border:1px solid rgba(27,154,106,0.22);border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s;}
   .btn-live:hover{background:rgba(27,154,106,0.14);border-color:rgba(27,154,106,0.4);}
   .btn-live:disabled{opacity:0.5;cursor:default;}
+  .video-table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:20px;animation:fadeUp 0.4s ease both;animation-delay:0.35s}
+  .video-table{width:100%;border-collapse:collapse;font-size:13px}
+  .video-table th{text-align:left;font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:var(--ink-faint);padding:0 0 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+  .video-table td{padding:12px 0;border-bottom:1px solid var(--border-light);vertical-align:middle}
+  .video-table td:not(:first-child){text-align:right;font-family:'Playfair Display',serif;color:var(--indigo);font-size:14px;font-weight:600}
+  .video-table tr:last-child td{border-bottom:none}
+  .video-title{font-size:13px;font-weight:500;color:var(--ink);max-width:360px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .video-table tbody tr:hover td{background:rgba(209,64,64,0.03)}
   @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
   .history-del-btn{background:none;border:none;cursor:pointer;padding:3px 4px;margin-left:4px;color:var(--ink-faint);border-radius:4px;transition:color .15s,background .15s;line-height:0;flex-shrink:0;}
@@ -285,12 +293,29 @@
         </div>
       </div>
 
-    <div class="chart-card" style="margin-bottom:20px">
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:8px;text-align:center">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="20" height="22" rx="2"/><path d="M9 9h10M9 14h10M9 19h6"/></svg>
-        <div style="font-size:13px;font-weight:500;color:var(--ink)">Post-level data isn't available yet</div>
-        <div style="font-size:12px;color:var(--ink-faint);max-width:340px">This section will populate when individual post tracking is added.</div>
+    <div class="video-table-card">
+      <div class="section-header">
+        <div>
+          <div class="chart-title">Video breakdown</div>
+          <div class="chart-subtitle">Performance by video for the selected period</div>
+        </div>
       </div>
+      <table class="video-table">
+        <thead>
+          <tr>
+            <th>Video</th>
+            <th style="text-align:right">Views</th>
+            <th style="text-align:right">Likes</th>
+            <th style="text-align:right">Comments</th>
+            <th style="text-align:right">Shares</th>
+            <th style="text-align:right">Dislikes</th>
+            <th style="text-align:right">Eng. rate</th>
+          </tr>
+        </thead>
+        <tbody id="video-tbody">
+          <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--ink-faint);font-size:12px">Loading...</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -305,8 +330,16 @@ async function _fetchWindsorYT(dateFrom,dateTo){
   const res=await fetch(URL);
   const json=await res.json();
   const rows=(json.data||[]).filter(r=>r&&typeof r==='object');
+  const vmap={};
   let views=0,likes=0,comments=0,shares=0,dislikes=0,subscriberCount=0;
   rows.forEach(function(r){
+    const name=r.video||'Unknown';
+    if(!vmap[name])vmap[name]={name,views:0,likes:0,comments:0,shares:0,dislikes:0};
+    vmap[name].views+=+(r.views||0);
+    vmap[name].likes+=+(r.likes||0);
+    vmap[name].comments+=+(r.comments||0);
+    vmap[name].shares+=+(r.shares||0);
+    vmap[name].dislikes+=+(r.dislikes||0);
     views+=+(r.views||0);
     likes+=+(r.likes||0);
     comments+=+(r.comments||0);
@@ -315,8 +348,12 @@ async function _fetchWindsorYT(dateFrom,dateTo){
     const sc=+(r.subscriber_count||0);
     if(sc>subscriberCount)subscriberCount=sc;
   });
+  const videos=Object.values(vmap).map(function(v){
+    v.engRate=v.views>0?((v.likes+v.comments+v.shares)/v.views*100):0;
+    return v;
+  }).sort(function(a,b){return b.views-a.views;});
   const engRate=views>0?((likes+comments+shares)/views*100):0;
-  return{views,likes,comments,shares,dislikes,subscriberCount,engRate,hasData:rows.length>0};
+  return{views,likes,comments,shares,dislikes,subscriberCount,engRate,videos,hasData:rows.length>0};
 }
 
 function _isoDate(d){return d.toISOString().slice(0,10);}
@@ -329,13 +366,35 @@ function _prevPeriod(fromStr,toStr){
   return{from:_isoDate(prevFrom),to:_isoDate(prevTo)};
 }
 
+function _escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function _renderVideos(videos){
+  const tbody=document.getElementById('video-tbody');
+  if(!tbody)return;
+  if(!videos||!videos.length){
+    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--ink-faint);font-size:12px">No video data available</td></tr>';
+    return;
+  }
+  tbody.innerHTML=videos.map(function(v){
+    return '<tr>'+
+      '<td><div class="video-title">'+_escHtml(v.name)+'</div></td>'+
+      '<td>'+_fmtNum(v.views)+'</td>'+
+      '<td>'+_fmtNum(v.likes)+'</td>'+
+      '<td>'+_fmtNum(v.comments)+'</td>'+
+      '<td>'+_fmtNum(v.shares)+'</td>'+
+      '<td>'+_fmtNum(v.dislikes)+'</td>'+
+      '<td>'+(v.engRate>0?v.engRate.toFixed(2)+'%':'—')+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
 let _currentFrom=null,_currentTo=null;
 async function _loadRange(dateFrom,dateTo){
   _currentFrom=dateFrom;_currentTo=dateTo;
   try{
     const prev=_prevPeriod(dateFrom,dateTo);
     const[m,pm]=await Promise.all([_fetchWindsorYT(dateFrom,dateTo),_fetchWindsorYT(prev.from,prev.to)]);
-    if(!m.hasData){_toast('No data returned for this period.');return;}
+    if(!m.hasData){_toast('No data returned for this period.');_renderVideos([]);return;}
     const _fmtLbl=s=>new Date(s+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
     document.getElementById('date-label').textContent=_fmtLbl(dateFrom)+' – '+_fmtLbl(dateTo);
     const cf=document.getElementById('custom-from'),ct=document.getElementById('custom-to');
@@ -359,6 +418,7 @@ async function _loadRange(dateFrom,dateTo){
     _eng('impressions',null,null);
     _eng('unique',null,null);
     _donut(m.engRate,pm.hasData?pm.engRate:null);
+    _renderVideos(m.videos);
   }catch(err){
     console.error('[Windsor YT] fetch error',err);
     _toast('Failed to fetch live data.');
