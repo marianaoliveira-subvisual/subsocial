@@ -326,14 +326,14 @@ const chartDefaults={responsive:true,maintainAspectRatio:false,interaction:{mode
 let engChart=new Chart(document.getElementById('engRateChart').getContext('2d'),{type:'doughnut',data:{labels:['This period','Remaining'],datasets:[{data:[0,100],backgroundColor:['#D14040','rgba(209,64,64,0.08)'],borderWidth:0,hoverOffset:2}]},options:{cutout:'78%',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{enabled:false}}}});
 
 async function _fetchWindsorYT(dateFrom,dateTo){
-  const URL='https://connectors.windsor.ai/youtube?api_key=a477ac1cdd0416e8c8835c6691dd8eb05673&date_from='+dateFrom+'&date_to='+dateTo+'&fields=video,views,comments,dislikes,likes,shares,subscriber_count,view_count';
+  const URL='https://connectors.windsor.ai/youtube?api_key=a477ac1cdd0416e8c8835c6691dd8eb05673&date_from='+dateFrom+'&date_to='+dateTo+'&fields=video,video_title,views,comments,dislikes,likes,shares,subscriber_count,view_count';
   const res=await fetch(URL);
   const json=await res.json();
   const rows=(json.data||[]).filter(r=>r&&typeof r==='object');
   const vmap={};
   let views=0,likes=0,comments=0,shares=0,dislikes=0,subscriberCount=0;
   rows.forEach(function(r){
-    const name=r.video||'Unknown';
+    const name=r.video_title||r.video||'Unknown';
     if(!vmap[name])vmap[name]={name,views:0,likes:0,comments:0,shares:0,dislikes:0};
     vmap[name].views+=+(r.views||0);
     vmap[name].likes+=+(r.likes||0);
