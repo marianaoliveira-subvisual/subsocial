@@ -134,6 +134,9 @@
   .engage-value{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--indigo)}
   .engage-delta{font-size:11px;color:var(--green);margin-top:2px}
   .engage-delta.down{color:var(--red)}
+  .btn-live{display:flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(27,154,106,0.07);color:var(--green);border:1px solid rgba(27,154,106,0.22);border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s;}
+  .btn-live:hover{background:rgba(27,154,106,0.14);border-color:rgba(27,154,106,0.4);}
+  .btn-live:disabled{opacity:0.5;cursor:default;}
   @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
   .history-del-btn{background:none;border:none;cursor:pointer;padding:3px 4px;margin-left:4px;color:var(--ink-faint);border-radius:4px;transition:color .15s,background .15s;line-height:0;flex-shrink:0;}
@@ -206,6 +209,10 @@
         <span style="color:var(--ink-faint);font-size:12px">–</span>
         <input type="date" id="custom-to" class="date-input" value="2026-03-24">
       </div>
+      <button id="btn-sync-live" class="btn-live" onclick="if(_currentFrom&&_currentTo)_loadRange(_currentFrom,_currentTo)">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 2v3h-3"/><path d="M1.5 10V7h3"/><path d="M1.85 4.5a4.5 4.5 0 0 1 7.8-.5"/><path d="M10.15 7.5a4.5 4.5 0 0 1-7.8.5"/></svg>
+        Sync live
+      </button>
       <button class="btn-ghost"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 5l3 3 3-3" stroke-linecap="round"/><path d="M1 10h10" stroke-linecap="round"/></svg>Export</button>
       <button class="btn-primary" onclick="location.href='upload.html'">Upload report</button>
     </div>
@@ -226,7 +233,7 @@
         <div class="stat-compare" id="kpi-watchtime-compare"></div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Subscribers gained</div>
+        <div class="stat-label">Subscribers</div>
         <div class="stat-value" id="kpi-subs-val">—</div>
         <span class="stat-delta delta-up" id="kpi-subs-delta"></span>
         <div class="stat-compare" id="kpi-subs-compare"></div>
@@ -259,7 +266,7 @@
       </div>
 
     <div class="chart-card" style="display:flex;flex-direction:column">
-        <div class="chart-title">Click-through rate</div>
+        <div class="chart-title">Engagement rate</div>
         <div class="chart-subtitle" style="margin-bottom:16px">vs previous period</div>
         <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:28px">
           <div style="position:relative;width:120px;height:120px;flex-shrink:0">
@@ -291,97 +298,91 @@
 <script>
 const chartDefaults={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#2421AB',bodyColor:'#403F4C',borderColor:'rgba(209,64,64,0.15)',borderWidth:1,padding:10,boxPadding:4,titleFont:{family:"'Playfair Display',serif",size:12},bodyFont:{family:"'DM Sans',sans-serif",size:11}}},scales:{x:{grid:{display:false},border:{display:false},ticks:{color:'#9E9DA8',font:{size:10},maxTicksLimit:6,maxRotation:0}},y:{grid:{color:'rgba(209,64,64,0.06)'},border:{display:false,dash:[4,4]},ticks:{color:'#9E9DA8',font:{size:10},maxTicksLimit:5,callback:v=>v>=1000?(v/1000).toFixed(1)+'K':v}}}};
 
-let impChart = null;
-let folChart = null;
-let engChart=new Chart(document.getElementById('engRateChart').getContext('2d'),{type:'doughnut',data:{labels:['This period','Remaining'],datasets:[{data:[6.8,93.2],backgroundColor:['#D14040','rgba(209,64,64,0.08)'],borderWidth:0,hoverOffset:2}]},options:{cutout:'78%',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{enabled:false}}}});
+let engChart=new Chart(document.getElementById('engRateChart').getContext('2d'),{type:'doughnut',data:{labels:['This period','Remaining'],datasets:[{data:[0,100],backgroundColor:['#D14040','rgba(209,64,64,0.08)'],borderWidth:0,hoverOffset:2}]},options:{cutout:'78%',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{enabled:false}}}});
 
+async function _fetchWindsorYT(dateFrom,dateTo){
+  const URL='https://connectors.windsor.ai/youtube?api_key=a477ac1cdd0416e8c8835c6691dd8eb05673&date_from='+dateFrom+'&date_to='+dateTo+'&fields=video,views,comments,dislikes,likes,shares,subscriber_count,view_count';
+  const res=await fetch(URL);
+  const json=await res.json();
+  const rows=(json.data||[]).filter(r=>r&&typeof r==='object');
+  let views=0,likes=0,comments=0,shares=0,dislikes=0,subscriberCount=0;
+  rows.forEach(function(r){
+    views+=+(r.views||0);
+    likes+=+(r.likes||0);
+    comments+=+(r.comments||0);
+    shares+=+(r.shares||0);
+    dislikes+=+(r.dislikes||0);
+    const sc=+(r.subscriber_count||0);
+    if(sc>subscriberCount)subscriberCount=sc;
+  });
+  const engRate=views>0?((likes+comments+shares)/views*100):0;
+  return{views,likes,comments,shares,dislikes,subscriberCount,engRate,hasData:rows.length>0};
+}
 
-async function setRange(r){
+function _isoDate(d){return d.toISOString().slice(0,10);}
+
+function _prevPeriod(fromStr,toStr){
+  const f=new Date(fromStr+'T00:00:00'),t=new Date(toStr+'T00:00:00');
+  const days=Math.round((t-f)/86400000);
+  const prevTo=new Date(f);prevTo.setDate(prevTo.getDate()-1);
+  const prevFrom=new Date(prevTo);prevFrom.setDate(prevFrom.getDate()-days);
+  return{from:_isoDate(prevFrom),to:_isoDate(prevTo)};
+}
+
+let _currentFrom=null,_currentTo=null;
+async function _loadRange(dateFrom,dateTo){
+  _currentFrom=dateFrom;_currentTo=dateTo;
+  try{
+    const prev=_prevPeriod(dateFrom,dateTo);
+    const[m,pm]=await Promise.all([_fetchWindsorYT(dateFrom,dateTo),_fetchWindsorYT(prev.from,prev.to)]);
+    if(!m.hasData){_toast('No data returned for this period.');return;}
+    const _fmtLbl=s=>new Date(s+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    document.getElementById('date-label').textContent=_fmtLbl(dateFrom)+' – '+_fmtLbl(dateTo);
+    const cf=document.getElementById('custom-from'),ct=document.getElementById('custom-to');
+    if(cf)cf.value=dateFrom;if(ct)ct.value=dateTo;
+    _kpi('views',m.views,pm.hasData?pm.views:null,true);
+    var e;
+    e=document.getElementById('kpi-watchtime-val');if(e)e.textContent='—';
+    e=document.getElementById('kpi-watchtime-delta');if(e){e.textContent='';e.className='stat-delta';}
+    e=document.getElementById('kpi-watchtime-compare');if(e)e.textContent='';
+    _kpi('subs',m.subscriberCount,pm.hasData?pm.subscriberCount:null,false);
+    e=document.getElementById('kpi-duration-val');if(e)e.textContent='—';
+    e=document.getElementById('kpi-duration-delta');if(e){e.textContent='';e.className='stat-delta';}
+    e=document.getElementById('kpi-duration-compare');if(e)e.textContent='';
+    var ctrVal=m.engRate>0?m.engRate.toFixed(2):null;
+    var ctrPrev=pm.hasData&&pm.engRate>0?pm.engRate.toFixed(2):null;
+    _kpi('ctr',ctrVal,ctrPrev,false);
+    _eng('likes',m.likes,pm.hasData?pm.likes:null);
+    _eng('comments',m.comments,pm.hasData?pm.comments:null);
+    _eng('shares',m.shares,pm.hasData?pm.shares:null);
+    _eng('saves',null,null);
+    _eng('impressions',null,null);
+    _eng('unique',null,null);
+    _donut(m.engRate,pm.hasData?pm.engRate:null);
+  }catch(err){
+    console.error('[Windsor YT] fetch error',err);
+    _toast('Failed to fetch live data.');
+  }
+}
+
+function setRange(r){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.range==r));
-
-  let _res;try{_res=await _fetchPeriod('youtube',+r,null,null);}catch(e){console.error(e);}
-  if(!_res||!_res.curr){_showNotice();return;}_hideNotice();
-  const{rs,curr,prev,m,pm}=_res;
-  const _fmt=d=>new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  document.getElementById('date-label').textContent=_fmt(curr.period_start)+' – '+_fmt(curr.period_end);
-  const _cf=document.getElementById('custom-from'),_ct=document.getElementById('custom-to');if(_cf)_cf.value=curr.period_start;if(_ct)_ct.value=curr.period_end;
-  _kpi('views',m.views,pm.views,true);
-  if(m.watchtime){const v=document.getElementById('kpi-watchtime-val');if(v)v.textContent=_fmtNum(m.watchtime)+'h';const d=_delta(m.watchtime,pm.watchtime);if(d&&pm.watchtime){const e=document.getElementById('kpi-watchtime-delta');if(e){e.textContent=(d.dir==='up'?'↑ +':'↓ ')+d.pct;e.className='stat-delta '+(d.dir==='up'?'delta-up':'delta-down');}const c=document.getElementById('kpi-watchtime-compare');if(c)c.textContent='vs '+_fmtNum(pm.watchtime)+'h prev period';}}
-  if(m.subscribers){const v=document.getElementById('kpi-subs-val');if(v)v.textContent='+'+_fmtNum(m.subscribers);const d=_delta(m.subscribers,pm.subscribers);if(d&&pm.subscribers){const e=document.getElementById('kpi-subs-delta');if(e){e.textContent=(d.dir==='up'?'↑ +':'↓ ')+d.pct;e.className='stat-delta '+(d.dir==='up'?'delta-up':'delta-down');}const c=document.getElementById('kpi-subs-compare');if(c)c.textContent='vs +'+_fmtNum(pm.subscribers)+' prev period';}}
-  if(m.duration){const v=document.getElementById('kpi-duration-val');if(v)v.textContent=m.duration;}
-  _kpi('ctr',m.ctr,pm.ctr,false);
-  _eng(['likes','comments','shares','saves','impressions','unique'],m,pm);
-  if(m.ctr)_donut(m.ctr,pm.ctr,false);
-  const _fp3=document.getElementById('follower-period');if(_fp3&&m.subscribers)_fp3.textContent='+'+_fmtNum(m.subscribers);
-  _history(rs,'#D14040');
+  const today=new Date();
+  const dateTo=_isoDate(today);
+  const dateFrom=_isoDate(new Date(today.getFullYear(),today.getMonth(),today.getDate()-(+r)));
+  _loadRange(dateFrom,dateTo);
 }
 document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>setRange(btn.dataset.range)));
-['custom-from','custom-to'].forEach(id=>document.getElementById(id).addEventListener('change',async()=>{
+['custom-from','custom-to'].forEach(function(id){document.getElementById(id).addEventListener('change',function(){
   const from=document.getElementById('custom-from').value,to=document.getElementById('custom-to').value;
-  if(from&&to){
-    let _res;try{_res=await _fetchPeriod('youtube',null,from,to);}catch(e){console.error(e);}
-    if(!_res||!_res.curr){_showNotice();return;}_hideNotice();
-    const{rs,curr,prev,m,pm}=_res;
-    const _fmt=d=>new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-    document.getElementById('date-label').textContent=_fmt(from)+' – '+_fmt(to);
-    _kpi('views',m.views,pm.views,true);
-  if(m.watchtime){const v=document.getElementById('kpi-watchtime-val');if(v)v.textContent=_fmtNum(m.watchtime)+'h';const d=_delta(m.watchtime,pm.watchtime);if(d&&pm.watchtime){const e=document.getElementById('kpi-watchtime-delta');if(e){e.textContent=(d.dir==='up'?'↑ +':'↓ ')+d.pct;e.className='stat-delta '+(d.dir==='up'?'delta-up':'delta-down');}const c=document.getElementById('kpi-watchtime-compare');if(c)c.textContent='vs '+_fmtNum(pm.watchtime)+'h prev period';}}
-  if(m.subscribers){const v=document.getElementById('kpi-subs-val');if(v)v.textContent='+'+_fmtNum(m.subscribers);const d=_delta(m.subscribers,pm.subscribers);if(d&&pm.subscribers){const e=document.getElementById('kpi-subs-delta');if(e){e.textContent=(d.dir==='up'?'↑ +':'↓ ')+d.pct;e.className='stat-delta '+(d.dir==='up'?'delta-up':'delta-down');}const c=document.getElementById('kpi-subs-compare');if(c)c.textContent='vs +'+_fmtNum(pm.subscribers)+' prev period';}}
-  if(m.duration){const v=document.getElementById('kpi-duration-val');if(v)v.textContent=m.duration;}
-  _kpi('ctr',m.ctr,pm.ctr,false);
-  _eng(['likes','comments','shares','saves','impressions','unique'],m,pm);
-  if(m.ctr)_donut(m.ctr,pm.ctr,false);
-  const _fp3=document.getElementById('follower-period');if(_fp3&&m.subscribers)_fp3.textContent='+'+_fmtNum(m.subscribers);
-  _history(rs,'#D14040');
-  }
-}));
+  if(from&&to){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));_loadRange(from,to);}
+});});
 
-function _fmtNum(v){if(v===undefined||v===null||v==='')return '—';const n=parseFloat(String(v).replace(/,/g,''));if(isNaN(n))return '—';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString();}
+function _fmtNum(v){if(v===undefined||v===null||v==='')return'—';const n=parseFloat(String(v).replace(/,/g,''));if(isNaN(n))return'—';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString();}
 function _delta(c,p){const cv=parseFloat(String(c).replace(/[^0-9.]/g,'')),pv=parseFloat(String(p).replace(/[^0-9.]/g,''));if(isNaN(cv)||isNaN(pv)||pv===0)return null;return{pct:Math.abs(((cv-pv)/Math.abs(pv)*100)).toFixed(1)+'%',dir:cv>=pv?'up':'down'};}
-function _kpi(dom,val,prev,featured){const v=document.getElementById('kpi-'+dom+'-val');if(v)v.textContent=_fmtNum(val);const e=document.getElementById('kpi-'+dom+'-delta');const c=document.getElementById('kpi-'+dom+'-compare');const d=_delta(val,prev);if(d&&prev){if(e){e.textContent=(d.dir==='up'?'↑ +':'↓ ')+d.pct;e.className='stat-delta '+(featured?(d.dir==='up'?'delta-up-white':'delta-down-white'):(d.dir==='up'?'delta-up':'delta-down'));}if(c)c.textContent='vs '+_fmtNum(prev)+' prev period';}else{if(e){e.textContent='';e.className='stat-delta';}if(c)c.textContent='';}}
-function _eng(keys,m,pm){keys.forEach(k=>{const e=document.getElementById('eng-'+k);if(e)e.textContent=m[k]?_fmtNum(m[k]):'—';const de=document.getElementById('eng-'+k+'-d');if(de){if(m[k]&&pm[k]){const d=_delta(m[k],pm[k]);if(d){de.textContent=(d.dir==='up'?'↑ +':'↓ ')+d.pct;de.className='engage-delta'+(d.dir==='up'?'':' down');}else de.textContent='';}else de.textContent='';}});}
-function _donut(curr,prev,invert){const c=parseFloat(curr),p=parseFloat(prev||0);if(isNaN(c))return;const pp=Math.abs(c-p).toFixed(1),ok=invert?(c<p):(c>=p);['donut-val','donut-val-2'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=c.toFixed(1)+'%';});const pe=document.getElementById('donut-prev');if(pe)pe.textContent=p.toFixed(1)+'%';const de=document.getElementById('donut-delta');if(de){de.textContent=(ok?'↑ +':'↓ ')+pp+'pp';de.style.background=ok?'rgba(27,154,106,0.1)':'rgba(209,64,64,0.1)';de.style.color=ok?'var(--green)':'var(--red)';}if(typeof engChart!=='undefined'){engChart.data.datasets[0].data=[c,100-c];engChart.update('active');}}
-function _history(rs,col){const hl=document.querySelector('.history-list');if(!hl)return;const f=d=>new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});const age=d=>{const diff=Math.floor((Date.now()-new Date(d))/86400000);return diff===0?'Uploaded today':diff===1?'Yesterday':f(d);};hl.innerHTML=rs.map((r,i)=>'<div class="history-item '+(i===0?'active-report':'')+'"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="'+(i===0?col:'var(--ink-faint)')+'" stroke-width="1.5"><rect x="2" y="1" width="10" height="12" rx="1.5"/><path d="M4.5 5h5M4.5 7.5h5M4.5 10h3"/></svg><span class="history-period">'+f(r.period_start)+' – '+f(r.period_end)+'</span><span class="history-impressions">'+(r.source==='manual'?'Manual':'CSV')+'</span><span class="history-date">'+age(r.created_at)+'</span><span class="history-arrow" style="color:'+(i===0?'var(--ink-faint)':'var(--blue)')+';">'+(i===0?'Viewing →':'View →')+'</span><button class="history-del-btn" data-rid="'+r.id+'" onclick="_deleteReport(this.dataset.rid,this)" title="Delete report"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3h8M4.5 3V1.5h3V3M3 3l.5 7.5h5L9 3"/><path d="M5 5.5v3M7 5.5v3"/></svg></button></div>').join('');}
-function _empty(){document.querySelector('.content').innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;gap:16px;text-align:center;padding:40px"><svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"><rect x="8" y="6" width="32" height="36" rx="3"/><path d="M16 18h16M16 24h16M16 30h10"/></svg><div style="font-family:"Playfair Display",serif;font-size:20px;font-weight:600;color:var(--indigo)">No reports yet</div><div style="font-size:13px;color:var(--ink-faint);max-width:300px">Upload your first report to see real data here.</div><a href="upload.html" style="display:inline-flex;align-items:center;gap:6px;padding:9px 20px;background:var(--blue);color:white;border-radius:var(--radius-sm);font-size:13px;font-weight:500;text-decoration:none">Upload report →</a></div>';}
-
-async function _fetchPeriod(slug,days,fromDate,toDate){
-  const{data:pl}=await window._sb.from('platforms').select('id').eq('slug',slug).single();
-  if(!pl)return null;
-  const{data:rs}=await window._sb.from('reports')
-    .select('id,period_start,period_end,source,created_at')
-    .eq('platform_id',pl.id).order('period_end',{ascending:false}).limit(20);
-  if(!rs||!rs.length)return null;
-  let curr,prev;
-  if(fromDate&&toDate){
-    const f=new Date(fromDate),t=new Date(toDate);
-    curr=rs.find(r=>new Date(r.period_start)<=t&&new Date(r.period_end)>=f)||rs[0];
-    const i=rs.indexOf(curr);prev=rs[i+1]||null;
-  }else{
-    const score=r=>Math.abs((new Date(r.period_end)-new Date(r.period_start))/86400000-days);
-    curr=[...rs].sort((a,b)=>score(a)-score(b))[0]||null;
-    if(curr)prev=[...rs].filter(r=>r.id!==curr.id).sort((a,b)=>score(a)-score(b))[0]||null;
-  }
-  if(!curr)return{rs,curr:null,m:{},pm:{}};
-  const[{data:cm},{data:pm2}]=await Promise.all([
-    window._sb.from('metrics').select('key,value').eq('report_id',curr.id),
-    prev?window._sb.from('metrics').select('key,value').eq('report_id',prev.id):Promise.resolve({data:[]})
-  ]);
-  const m=Object.fromEntries((cm||[]).map(r=>[r.key,r.value]));
-  const pm=Object.fromEntries((pm2||[]).map(r=>[r.key,r.value]));
-  return{rs,curr,prev,m,pm};
-}
-function _showNotice(){
-  let e=document.getElementById('_pnotice');
-  if(!e){e=document.createElement('div');e.id='_pnotice';
-    e.innerHTML='No report found for this period. <a href="upload.html" style="color:var(--blue);font-weight:500;text-decoration:none;margin-left:2px">Upload one →</a>';
-    e.style.cssText='margin-bottom:16px;padding:10px 16px;background:rgba(4,92,252,0.05);border:1px solid rgba(4,92,252,0.12);border-radius:8px;font-size:12px;color:var(--ink-light);display:flex;align-items:center;gap:6px';
-    document.querySelector('.content').prepend(e);}
-  e.style.display='flex';
-}
-function _hideNotice(){const e=document.getElementById('_pnotice');if(e)e.style.display='none';}
-
-async function _deleteReport(id,btn){if(!confirm('Delete this report? This cannot be undone.'))return;btn.disabled=true;const{data,error}=await window._sb.from('reports').delete().eq('id',id).select();if(error){console.error('[SubSocial] Delete failed',{code:error.code,msg:error.message,hint:error.hint,details:error.details});_toast('Delete failed: '+(error.message||error.code||'RLS policy may be blocking deletes'));btn.disabled=false;return;}
-console.log('[SubSocial] Deleted report',id,'rows returned:',data&&data.length);const item=btn.closest('.history-item');if(item)item.remove();_toast('Report deleted.');setRange('30');}
+function _kpi(dom,val,prev,featured){const v=document.getElementById('kpi-'+dom+'-val');if(v)v.textContent=_fmtNum(val);const e=document.getElementById('kpi-'+dom+'-delta');const c=document.getElementById('kpi-'+dom+'-compare');const d=prev!=null?_delta(val,prev):null;if(d&&prev){if(e){e.textContent=(d.dir==='up'?'↑ +':'↓ ')+d.pct;e.className='stat-delta '+(featured?(d.dir==='up'?'delta-up-white':'delta-down-white'):(d.dir==='up'?'delta-up':'delta-down'));}if(c)c.textContent='vs '+_fmtNum(prev)+' prev period';}else{if(e){e.textContent='';e.className='stat-delta';}if(c)c.textContent='';}}
+function _eng(key,val,prev){const e=document.getElementById('eng-'+key);if(e)e.textContent=val!=null?_fmtNum(val):'—';const de=document.getElementById('eng-'+key+'-d');if(de){if(val!=null&&prev!=null){const d=_delta(val,prev);if(d){de.textContent=(d.dir==='up'?'↑ +':'↓ ')+d.pct;de.className='engage-delta'+(d.dir==='up'?'':' down');}else de.textContent='';}else de.textContent='';}}
+function _donut(curr,prev){const c=parseFloat(curr);if(isNaN(c))return;const p=parseFloat(prev||0);const pp=Math.abs(c-p).toFixed(1);const ok=(c>=p);['donut-val','donut-val-2'].forEach(function(id){const e=document.getElementById(id);if(e)e.textContent=c.toFixed(2)+'%';});const pe=document.getElementById('donut-prev');if(pe)pe.textContent=p>0?p.toFixed(2)+'%':'—';const de=document.getElementById('donut-delta');if(de){de.textContent=(ok?'↑ +':'↓ ')+pp+'pp';de.style.background=ok?'rgba(27,154,106,0.1)':'rgba(209,64,64,0.1)';de.style.color=ok?'var(--green)':'var(--red)';}if(typeof engChart!=='undefined'){engChart.data.datasets[0].data=[c,Math.max(0,100-c)];engChart.update('active');}}
 function _toast(msg){let t=document.getElementById('_toast');if(!t){t=document.createElement('div');t.id='_toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#403F4C;color:white;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.25s;pointer-events:none';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';clearTimeout(t._timer);t._timer=setTimeout(()=>{t.style.opacity='0';},2500);}
 window._onAuthReady=function(session){_updateSidebarUser(session);setRange(localStorage.getItem('sb-default-period')||'30');};
 
@@ -400,3 +401,5 @@ function _updateSidebarUser(session){
   if(bd)bd.style.display=(email==='mariana.oliveira@subvisual.co')?'':'none';
 }
 </script>
+</body>
+</html>
