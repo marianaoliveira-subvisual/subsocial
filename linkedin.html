@@ -198,6 +198,14 @@
   .history-del-btn{background:none;border:none;cursor:pointer;padding:3px 4px;margin-left:4px;color:var(--ink-faint);border-radius:4px;transition:color .15s,background .15s;line-height:0;flex-shrink:0;}
   .history-del-btn:hover{color:var(--red);background:rgba(209,64,64,0.08);}
   .history-del-btn:disabled{opacity:0.4;cursor:default;}
+
+  /* ── Live sync button ── */
+  .btn-live{display:flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(27,154,106,0.07);color:var(--green);border:1px solid rgba(27,154,106,0.22);border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s;}
+  .btn-live:hover{background:rgba(27,154,106,0.14);border-color:rgba(27,154,106,0.4);}
+  .btn-live:disabled{opacity:0.5;cursor:default;}
+  .live-banner{display:none;align-items:center;gap:8px;padding:9px 16px;background:rgba(27,154,106,0.06);border:1px solid rgba(27,154,106,0.18);border-radius:var(--radius-sm);font-size:12px;color:var(--green);margin-bottom:16px;}
+  .live-dot-pulse{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;animation:livePulse 2s ease-in-out infinite;}
+  @keyframes livePulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.45;transform:scale(0.8);}}
 </style>
   
 <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -298,6 +306,10 @@
         <span style="color:var(--ink-faint);font-size:12px">–</span>
         <input type="date" id="custom-to" class="date-input" value="2026-03-24">
       </div>
+      <button id="btn-sync-live" class="btn-live" onclick="_fetchWindsorLive()">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 2v3h-3"/><path d="M1.5 10V7h3"/><path d="M1.85 4.5a4.5 4.5 0 0 1 7.8-.5"/><path d="M10.15 7.5a4.5 4.5 0 0 1-7.8.5"/></svg>
+        Sync live
+      </button>
       <button class="btn-ghost">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 5l3 3 3-3" stroke-linecap="round"/><path d="M1 10h10" stroke-linecap="round"/></svg>
         Export
@@ -310,6 +322,13 @@
   </header>
 
   <div class="content">
+
+    <!-- Live data banner -->
+    <div id="live-banner" class="live-banner">
+      <div class="live-dot-pulse"></div>
+      <span id="live-banner-text">Live data synced · Last 1 day</span>
+      <button onclick="document.getElementById('live-banner').style.display='none'" style="margin-left:auto;background:none;border:none;cursor:pointer;color:inherit;font-size:16px;line-height:1;padding:0 2px;opacity:0.6">×</button>
+    </div>
 
     <!-- KPI stats -->
     <div class="stats-grid-wide">
@@ -588,20 +607,116 @@ function _hideNotice(){const e=document.getElementById('_pnotice');if(e)e.style.
 async function _deleteReport(id,btn){if(!confirm('Delete this report? This cannot be undone.'))return;btn.disabled=true;const{data,error}=await window._sb.from('reports').delete().eq('id',id).select();if(error){console.error('[SubSocial] Delete failed',{code:error.code,msg:error.message,hint:error.hint,details:error.details});_toast('Delete failed: '+(error.message||error.code||'RLS policy may be blocking deletes'));btn.disabled=false;return;}
 console.log('[SubSocial] Deleted report',id,'rows returned:',data&&data.length);const item=btn.closest('.history-item');if(item)item.remove();_toast('Report deleted.');setRange('30');}
 function _toast(msg){let t=document.getElementById('_toast');if(!t){t=document.createElement('div');t.id='_toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#403F4C;color:white;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.25s;pointer-events:none';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';clearTimeout(t._timer);t._timer=setTimeout(()=>{t.style.opacity='0';},2500);}
-window._onAuthReady=function(session){_updateSidebarUser(session);setRange(localStorage.getItem('sb-default-period')||'30');};
+window._onAuthReady=function(session){_updateSidebarUser(session);
+  // Hide upload entry-points for viewers
+  if((window._userRole||localStorage.getItem('sb-role')||'viewer')!=='admin'){
+    document.querySelectorAll('a[href="upload.html"],button[onclick*="upload.html"]').forEach(function(el){
+      el.style.display='none';
+    });
+  }setRange(localStorage.getItem('sb-default-period')||'30');};
+
+async function _fetchWindsorLive(){
+  const btn=document.getElementById('btn-sync-live');
+  const SYNC_SVG='<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 2v3h-3"/><path d="M1.5 10V7h3"/><path d="M1.85 4.5a4.5 4.5 0 0 1 7.8-.5"/><path d="M10.15 7.5a4.5 4.5 0 0 1-7.8.5"/></svg>';
+  if(btn){btn.disabled=true;btn.innerHTML=SYNC_SVG+' Syncing…';}
+  try{
+    // Fetch both endpoints in parallel
+    const BASE='https://connectors.windsor.ai/linkedin_organic?api_key=a477ac1cdd0416e8c8835c6691dd8eb05673&date_preset=last_1d&fields=';
+    const [r1,r2]=await Promise.all([
+      fetch(BASE+'account_analytics_impression_count,account_analytics_engagement,account_analytics_click_count,account_analytics_like_count,account_analytics_comment_count,organization_follower_count,account_analytics_unique_impressions_count'),
+      fetch(BASE+'account_analytics_click_count,account_analytics_comment_count,account_analytics_engagement,account_analytics_impression_count,account_analytics_like_count,account_analytics_share_count,account_analytics_unique_impressions_count')
+    ]);
+    const [j1,j2]=await Promise.all([r1.json(),r2.json()]);
+    const rows1=(j1.data||[]).filter(r=>r&&typeof r==='object');
+    const rows2=(j2.data||[]).filter(r=>r&&typeof r==='object');
+    if(!rows1.length&&!rows2.length){_toast('No live data returned.');return;}
+    // Aggregate from endpoint 1 (has followers)
+    let impressions=0,clicks=0,likes=0,comments=0,followers=0,uniqueImp=0;
+    rows1.forEach(function(r){
+      impressions+=+(r.account_analytics_impression_count||0);
+      clicks+=+(r.account_analytics_click_count||0);
+      likes+=+(r.account_analytics_like_count||0);
+      comments+=+(r.account_analytics_comment_count||0);
+      followers=Math.max(followers,+(r.organization_follower_count||0));
+      uniqueImp+=+(r.account_analytics_unique_impressions_count||0);
+    });
+    // Aggregate shares from endpoint 2
+    let shares=0;
+    rows2.forEach(function(r){shares+=+(r.account_analytics_share_count||0);});
+    // Engagement rate: total interactions / total impressions × 100
+    const totalEng=likes+comments+clicks+shares;
+    const engRate=impressions>0?(totalEng/impressions*100):((rows1[0]||rows2[0]||{}).account_analytics_engagement||0)*100;
+    const lbl='Live · Last 1 day';
+    var e;
+    // KPI: Impressions
+    e=document.getElementById('kpi-imp-val');if(e)e.textContent=_fmtNum(impressions);
+    e=document.getElementById('kpi-imp-delta');if(e){e.textContent='';e.className='stat-delta';}
+    e=document.getElementById('kpi-imp-compare');if(e)e.textContent=lbl;
+    // KPI: Reach (unique impressions)
+    e=document.getElementById('kpi-reach-val');if(e)e.textContent=_fmtNum(uniqueImp);
+    e=document.getElementById('kpi-reach-delta');if(e){e.textContent='';e.className='stat-delta';}
+    e=document.getElementById('kpi-reach-compare');if(e)e.textContent=lbl;
+    // KPI: Engagement rate
+    e=document.getElementById('kpi-engrate-val');if(e)e.textContent=engRate.toFixed(1)+'%';
+    e=document.getElementById('kpi-engrate-delta');if(e){e.textContent='';e.className='stat-delta';}
+    e=document.getElementById('kpi-engrate-compare');if(e)e.textContent=lbl;
+    // Update donut chart
+    ['donut-val','donut-val-2'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=engRate.toFixed(1)+'%';});
+    e=document.getElementById('donut-prev');if(e)e.textContent='—';
+    e=document.getElementById('donut-delta');if(e)e.textContent='';
+    if(typeof engChart!=='undefined'&&engChart){engChart.data.datasets[0].data=[engRate,Math.max(0,100-engRate)];engChart.update('active');}
+    // KPI: Clicks
+    e=document.getElementById('kpi-clicks-val');if(e)e.textContent=_fmtNum(clicks);
+    e=document.getElementById('kpi-clicks-delta');if(e){e.textContent='';e.className='stat-delta';}
+    e=document.getElementById('kpi-clicks-compare');if(e)e.textContent=lbl;
+    // KPI: Followers (total count from API)
+    e=document.getElementById('kpi-followers-val');if(e)e.textContent=_fmtNum(followers);
+    e=document.getElementById('kpi-followers-delta');if(e){e.textContent='';e.className='stat-delta';}
+    e=document.getElementById('kpi-followers-compare');if(e)e.textContent='Total · Live';
+    // Engagement breakdown
+    e=document.getElementById('eng-reactions');if(e)e.textContent=_fmtNum(likes);
+    e=document.getElementById('eng-reactions-d');if(e)e.textContent='';
+    e=document.getElementById('eng-comments');if(e)e.textContent=_fmtNum(comments);
+    e=document.getElementById('eng-comments-d');if(e)e.textContent='';
+    e=document.getElementById('eng-shares');if(e)e.textContent=_fmtNum(shares);
+    e=document.getElementById('eng-shares-d');if(e)e.textContent='';
+    e=document.getElementById('eng-clicks');if(e)e.textContent=_fmtNum(clicks);
+    e=document.getElementById('eng-clicks-d');if(e)e.textContent='';
+    // Show live banner
+    var banner=document.getElementById('live-banner');
+    if(banner){
+      var now=new Date();
+      var timeStr=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+      var dateStr=now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+      var bt=document.getElementById('live-banner-text');
+      if(bt)bt.textContent='Live data synced · Last 1 day · as of '+dateStr+', '+timeStr;
+      banner.style.display='flex';
+    }
+    _toast('Live data synced.');
+  }catch(err){
+    console.error('[Windsor] fetch error',err);
+    _toast('Failed to fetch live data.');
+  }finally{
+    if(btn){btn.disabled=false;btn.innerHTML=SYNC_SVG+' Sync live';}
+  }
+}
 
 function _updateSidebarUser(session){
   var u=session&&session.user;
   if(!u)return;
   var email=u.email||'';
   var initial=email.charAt(0).toUpperCase()||'?';
+  var isMariana=email==='mariana.oliveira@subvisual.co';
+  var role=isMariana?'admin':((u.app_metadata&&u.app_metadata.role==='admin')?'admin':'viewer');
+  window._userRole=role;
+  localStorage.setItem('sb-role',role);
   var av=document.querySelector('.user-avatar');
   var nm=document.querySelector('.user-name');
   var rl=document.querySelector('.user-role');
   var bd=document.getElementById('sb-badge');
   if(av)av.textContent=initial;
   if(nm)nm.textContent=email;
-  if(rl)rl.textContent='Team member';
-  if(bd)bd.style.display=(email==='mariana.oliveira@subvisual.co')?'':'none';
+  if(rl)rl.textContent=(role==='admin')?'Admin':'Viewer';
+  if(bd)bd.style.display=isMariana?'':'none';
 }
 </script>
